@@ -1,0 +1,10 @@
+{
+  "name": "Race Team Maintenance",
+  "short_name": "Race Maint",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#101216",
+  "theme_color": "#111318",
+  "description": "Local prototype for race-car maintenance and inventory tracking.",
+  "icons": [{"src":"icon.svg","sizes":"any","type":"image/svg+xml","purpose":"any maskable"}]
+}
