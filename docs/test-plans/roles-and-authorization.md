@@ -28,6 +28,8 @@ A person who is not signed in is refused for every write and every read of team 
 | ROLE-M06 | Add or change an event plan | Allow | Refuse |
 | ROLE-M07 | Complete a checklist item | TBD | Allow |
 | ROLE-M08 | Record laps or engine hours | TBD | Allow |
+| ROLE-M20 | Edit a lap or engine-hour session | TBD | Allow |
+| ROLE-M21 | Delete a lap or engine-hour session | TBD | Allow |
 | ROLE-M09 | Report a defect | TBD | Allow |
 | ROLE-M10 | Change forecast settings | Allow | Refuse |
 | ROLE-M11 | Change stock outside a finished job (receive, count, reserve, scrap) | Allow | Refuse |
@@ -44,7 +46,8 @@ Basis, in short:
 
 - Allow on Admin rows ROLE-M01 through ROLE-M04, ROLE-M06, ROLE-M10, and ROLE-M11 follows the handoff list of what Admin manages.
 - Allow on Race-day rows ROLE-M05 and ROLE-M07 through ROLE-M09 and ROLE-M12 follows the handoff list of race-day work. Changing a limit, a rule, or an interval is not part of that work.
-- ROLE-M12 for the Race-day user is the only way a stud job consumes stock in this plan. The consume and the baseline move happen inside that save, or not at all (AT-01 and AT-25).
+- ROLE-M12 for the Race-day user is a way a job consumes stock in this plan. The consume and the baseline move happen inside that save, or not at all (AT-01 and AT-25). The server chooses the signer. See ROLE-08 and ROLE-09.
+- ROLE-M20 and ROLE-M21 let the Race-day user correct a session log. That is separate from component history (ROLE-M14). The usage plan says how the audit and the totals behave. Admin stays TBD under AQ-ROLE-7.
 - ROLE-M18 is Refuse for both roles because demo data must stay separated from the car. Who may open a clearly labeled training copy is AQ-BR-4, not a right to relabel records.
 - Every TBD cell is an open question, collected below.
 
@@ -166,6 +169,46 @@ Forecasts, when they are shown, are labeled as estimates. That check lives in [u
 3. Look for any control that saves a new interval, a new rule, a catalog part, a user, or a backup restore.
 
 **Expected result:** Those controls are absent for the Race-day user. If any one of them is present, ROLE-01 still has to pass; a visible control that the server refuses is a P1 fail, and a control the server accepts is a P0 fail.
+
+## ROLE-08 — A crew user cannot name another signer
+
+- **Priority:** P0
+- **Mode:** Automatable
+- **Why it matters:** The sign-off is who stood behind the job. A phone request must not be able to put an admin, or anyone else, on that line.
+
+**Preconditions:** Standard garage. The Race-day user is signed in. A valid replacement is ready to submit, the same shape as AT-01. The tester knows the Admin account's user id, and the user id of a second crew account if one exists.
+
+**Steps**
+
+1. Submit that job with the body naming the Admin as signer and as technician.
+2. Repeat the request naming any other user id.
+3. Submit a defect report that names the Admin as the author.
+4. Send these as direct server requests.
+5. Read the signer, the technician, the shelf, the history, the baseline, the defect list, and the log.
+
+**Expected result**
+
+- The server refuses each request. Nothing is saved.
+- The garage is unchanged. No set is consumed. No baseline moves.
+- The Admin is not stored as signer, technician, or defect author. Neither is the other user id.
+- No defect is opened under the Admin's name.
+- Each attempt has the audit entry in AUD-09.
+
+## ROLE-09 — The server writes the logged-in user
+
+- **Priority:** P0
+- **Mode:** Automatable
+
+**Preconditions:** Standard garage. The Race-day user is signed in. The request does not name a different user.
+
+**Steps**
+
+1. Submit a valid AT-01 job.
+2. Read the signer and the technician on the stored job, and who is on the log.
+
+**Expected result:** Signer, technician, and log who are all the Race-day account that submitted. The server chose them. They match even if the body left those fields blank.
+
+**Open question AQ-SIGN-1.** The owner rule also allows an admin-verified signer that the server attaches. The handoff does not say which Admin action verifies someone, beyond the logged-in account. Until that is written down, the only passing signer is the logged-in user. A request that merely contains a verified person's user id is still ROLE-08: refused and audited.
 
 ## ROLE-07 — Admin race-day work stays unanswered on purpose
 
