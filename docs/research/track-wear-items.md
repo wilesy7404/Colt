@@ -4,7 +4,7 @@ Research date: 2026-10-25. On that date every URL in the source table was reques
 
 This note covers hubs and wheel bearings, lug nuts, brake pads and rotors, and fluids (brake fluid, engine oil, differential, transmission). It uses the same rules as `wheel-studs.md`.
 
-**team policy (community research), v1, not a factory or official interval.**
+**proposed team practice (community research), v1, not a factory or official interval.**
 
 An item is included only where a fetched source says something about it. If a life in laps, engine hours, or events was not published, that life is **unknown**. Street mileage intervals from Nissan are street intervals. They are not converted into laps or hours.
 
@@ -240,9 +240,9 @@ The same page lists Enthusiast and Touring **automatic** rows as “maintenance 
 
 ## Proposed team starting points
 
-**team policy (community research), v1, not a factory or official interval.**
+**proposed team practice (community research), v1, not a factory or official interval.**
 
-Lug-nut torque is the approved stud rule in `wheel-studs.md`. Front-hub life, brake-fluid life, engine-oil life, differential-oil life, and transmission-oil life are **PROPOSED - not approved**. Each of those policy values is **BLANK** until Colton decides. The research above is unchanged. Leave lap and hour fields blank.
+**Colton decision, 2026-10-25 (relayed by Sarg):** the 80 ft-lb lug-nut value in the lug-nut section below, and the stud-set rules in `wheel-studs.md`. Front-hub life, brake-fluid life, engine-oil life, differential-oil life, and transmission-oil life are **PROPOSED - not approved**. Each of those policy values is **BLANK** until Colton decides. Lug-nut replacement rules, and the pad and rotor gate below, are **PROPOSED - not approved**. The research above is unchanged. Leave lap and hour fields blank.
 
 ### Hubs and wheel bearings
 
@@ -252,16 +252,16 @@ NASA CCR 2026.3 section 11.4.3 and the SCCA Time Trials safety rules say bearing
 
 ### Lug nuts
 
-- No mile, lap, or hour life. Unknown.
-- At every wheel change, the nut must match the wheel seat. Do not put Z1’s 60 degree open nuts on a factory shank-style wheel. Z1 says they are not compatible.
-- Replace a nut that is galled, rounded, cross-threaded, or that was used to draw a stud into the hub. Core4’s galling note and the my350z thread damage are the reasons.
-- Lug-nut torque is the stud policy in `wheel-studs.md`: 80 ft-lb (108 N·m), admin-editable. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. Forum figures of 90–100 ft-lb and “20 over” are not adopted. The same manual page says retighten after 600 miles (1,000 km), keep the threads dry, and use the 1–5 sequence.
+- **PROPOSED - not approved.** No mile, lap, or hour life. Unknown.
+- **PROPOSED - not approved.** At every wheel change, the nut must match the wheel seat. Do not put Z1’s 60 degree open nuts on a factory shank-style wheel. Z1 says they are not compatible.
+- **PROPOSED - not approved.** Replace a nut that is galled, rounded, cross-threaded, or that was used to draw a stud into the hub. Core4’s galling note and the my350z thread damage are the reasons.
+- **Colton decision, 2026-10-25 (relayed by Sarg).** Lug-nut torque is the stud value in `wheel-studs.md`: 80 ft-lb (108 N·m), admin-editable. It stays the owner's manual p. 6-6 value, approved by Colton. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. Forum figures of 90–100 ft-lb and “20 over” are not adopted. The same manual page says retighten after 600 miles (1,000 km), keep the threads dry, and use the 1–5 sequence.
 
 ### Brake pads and rotors
 
-- Nissan’s published action is inspection, at the mileages above, and replacement “when necessary.” v1 does not convert 7,500 miles into a track interval.
-- For an event, use the SCCA Time Trials wear wording as the starting gate, including at NASA events: pads not more than 50 percent worn at the start, not more than 85 percent worn during the event, rotors not cracked. “Discoloration” is in the SCCA sentence and is undefined there. v1 treats a crack, a missing chunk, or a rotor that has been cut below a thickness written on the rotor hat as a fail. If the hat is not marked, thickness limit is unknown and the rotor is failed only for a crack, a missing chunk, or a pedal or vibration problem found in inspection. Do not invent a minimum thickness.
-- No lap life. Record sessions on the pad set so a later rule can have a number.
+- **PROPOSED - not approved.** Nissan’s published action is inspection, at the mileages above, and replacement “when necessary.” This practice does not convert 7,500 miles into a track interval.
+- **PROPOSED - not approved.** For an event, use the SCCA Time Trials wear wording as the starting gate, including at NASA events: pads not more than 50 percent worn at the start, not more than 85 percent worn during the event, rotors not cracked. “Discoloration” is in the SCCA sentence and is undefined there. This practice treats a crack, a missing chunk, or a rotor that has been cut below a thickness written on the rotor hat as a fail. If the hat is not marked, thickness limit is unknown and the rotor is failed only for a crack, a missing chunk, or a pedal or vibration problem found in inspection. Do not invent a minimum thickness.
+- **PROPOSED - not approved.** No lap life. Record sessions on the pad set so a later rule can have a number.
 
 ### Brake fluid
 

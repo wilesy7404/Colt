@@ -2,7 +2,7 @@
 
 Research date: 2026-10-25. On that date every URL in the source table was requested again. A plain client got HTTP 403 from `members.drivenasa.com` (the CCR PDF), `www.arp-bolts.com`, `community.drivenasa.com`, `carmanualsonline.info`, and `z1motorsports.com`. Each of those pages was then read from a successful page fetch the same day. The CCR file header is **2026.3 EDITION** (`https://members.drivenasa.com/rules/ccr.pdf`), and sections 11.4.2, 11.4.3, 15.18, and 16.3 were read in that file. Every other source-table URL returned HTTP 200. The old 2025.4 S3 URL (`https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf`) returned HTTP 403 on this pass and is not cited.
 
-This note is background for a team maintenance rule. It is **team policy (community research), v1, not a factory or official interval.** Nissan’s public 2004 350Z schedule does not list wheel studs. No fetched NASA or SCCA rule sets a stud-replacement life for this car. Numbers that appear below stay attached to the source that printed them. Where sources disagree, the disagreement is stated. Where no source gave a number, the item is marked unknown.
+This note is background for a team maintenance rule. It is **proposed team practice (community research), v1, not a factory or official interval.** Nissan’s public 2004 350Z schedule does not list wheel studs. No fetched NASA or SCCA rule sets a stud-replacement life for this car. Numbers that appear below stay attached to the source that printed them. Where sources disagree, the disagreement is stated. Where no source gave a number, the item is marked unknown.
 
 The proposed starting policy is only in [Proposed team starting point](#proposed-team-starting-point). Nothing in the source sections is a team interval.
 
@@ -213,33 +213,32 @@ No fetched SCCA page sets a stud replacement interval in miles, hours, events, o
 
 ## Proposed team starting point
 
-**team policy (community research), v1, not a factory or official interval.**
+**proposed team practice (community research), v1, not a factory or official interval.**
 
 This is a starting rule so the car is not managed as if studs last the life of the hub. It will be rewritten when the failure log has real dates, laps, and hours. It does not certify the car. The driver still has to meet the NASA or SCCA rules for the event actually entered.
 
-v1 summary: lug-nut torque is 80 ft-lb (108 N·m), admin-editable. Stud calendar life is blank. Replace by inspection and by failure data. The NASA Spec3 two-year sentence is not part of this policy.
+Two items below are **Colton decision, 2026-10-25 (relayed by Sarg)**: the 80 ft-lb lug-nut value, and the stud-set rules (a full sealed set of five per hub, never mix sets, replace the whole set, removed studs always scrapped, no calendar, lap, or hour life, replacement by inspection plus failure data). Every other rule in this section is **PROPOSED - not approved**.
 
 ### Hardware
 
-- Track studs as sealed sets of five. One kit identity per corner. Do not mix studs from two kits on the same hub.
-- If one stud on a corner is broken, necked, cross-threaded, galled, corroded, or was used as the nut that drew a new stud into the hub, remove that corner’s set and install a new five-stud kit. Do not put a single new stud into a used set. Owners on my350z often changed only the broken stud. v1 does not follow that practice, because the other four studs on that hub saw the same nuts, wheels, and torque method.
-- The other three corners stay in service if their inspection is clean. Replacing all four corners after one failure is an allowed stricter choice. It is not required by any source found here.
-- Extended studs require open-end nuts. Match the nut seat to the wheel. Z1’s 60 degree open nuts are, by Z1’s own text, the wrong nut for a factory shank-style Nissan wheel.
-- Before buying, match the ARP part number to ARP’s current catalog application line and to a trial fit on each corner. Do not assume 100-7716 is correct for both axles because a forum DIY or a retailer title says so. Z1’s “may not fit aftermarket hubs” note applies if the hub is not the stock forging.
-- Record spacer thickness and part number with the stud kit. Sources disagree on whether spacers are acceptable. v1 does not ban them. It does require the nut to be the type that seats on that wheel, and it requires the engagement to be enough that the nut is fully on the threads. No fetched 350Z or current NASA/SCCA rule gives a minimum exposed-thread count. Do not use 4.5 threads. That figure is from the April 1, 2009 joke post.
+- **Colton decision, 2026-10-25 (relayed by Sarg).** Track studs as a full sealed set of five per hub. One kit identity per hub. Never mix sets.
+- **Colton decision, 2026-10-25 (relayed by Sarg).** If one stud on a hub is broken, necked, cross-threaded, galled, corroded, or was used as the nut that drew a new stud into the hub, replace the whole set and install a new five-stud kit. Do not put a single new stud into a used set. Removed studs are always scrapped. Owners on my350z often changed only the broken stud. This practice does not follow that.
+- **PROPOSED - not approved.** The other three hubs stay in service if their inspection is clean. Replacing all four hubs after one failure is an allowed stricter choice. It is not required by any source found here.
+- **PROPOSED - not approved.** Extended studs require open-end nuts. Match the nut seat to the wheel. Z1’s 60 degree open nuts are, by Z1’s own text, the wrong nut for a factory shank-style Nissan wheel.
+- **PROPOSED - not approved.** Before buying, match the ARP part number to ARP’s current catalog application line and to a trial fit on each corner. Do not assume 100-7716 is correct for both axles because a forum DIY or a retailer title says so. Z1’s “may not fit aftermarket hubs” note applies if the hub is not the stock forging.
+- **PROPOSED - not approved.** Record spacer thickness and part number with the stud kit. Sources disagree on whether spacers are acceptable. This practice does not ban them. It does require the nut to be the type that seats on that wheel, and it requires the engagement to be enough that the nut is fully on the threads. No fetched 350Z or current NASA/SCCA rule gives a minimum exposed-thread count. Do not use 4.5 threads. That figure is from the April 1, 2009 joke post.
 
 ### Torque method
 
-- Lug-nut torque: **80 ft-lb (108 N·m)**. Admin-editable. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. The same page says retighten after 600 miles (1,000 km), keep the threads dry (no oil or grease on the studs or nuts), and use the illustrated 1–5 sequence.
-- Forum figures are **not adopted**: 90–100 ft-lb, and “20 over” / “20 ft-lb or more over OEM.”
-- Clamp the wheel with a torque wrench. Do not use an impact gun for the torque that holds the wheel on.
-- Pull a new press-in stud in until the head is seated, using washers and a nut that will be thrown away. Do not reuse that nut on the car. Do not treat 90–100 ft-lb as the specification for that pull. That seating figure is one of the forum numbers above and is **not adopted**.
-- Set lug torque cold, before the session. After a session, recheck only once the corner has cooled, and write down that the check was cold. Do not add torque on a hot stud as the way to “make sure.”
-- After a new stud, nut, wheel, rotor, spacer, or hub, check torque again after 30–60 minutes of running. That check is Core4’s vendor guidance for embedment. It does not change the torque value.
+- **Colton decision, 2026-10-25 (relayed by Sarg).** Lug-nut torque: **80 ft-lb (108 N·m)**. Admin-editable. It stays the owner's manual p. 6-6 value, approved by Colton. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. The same page says retighten after 600 miles (1,000 km), keep the threads dry (no oil or grease on the studs or nuts), and use the illustrated 1–5 sequence. Forum figures are **not adopted**: 90–100 ft-lb, and “20 over” / “20 ft-lb or more over OEM.”
+- **PROPOSED - not approved.** Clamp the wheel with a torque wrench. Do not use an impact gun for the torque that holds the wheel on.
+- **PROPOSED - not approved.** Pull a new press-in stud in until the head is seated, using washers and a nut that will be thrown away. Do not reuse that nut on the car. Do not treat 90–100 ft-lb as the specification for that pull. That seating figure is one of the forum numbers above and is **not adopted**.
+- **PROPOSED - not approved.** Set lug torque cold, before the session. After a session, recheck only once the corner has cooled, and write down that the check was cold. Do not add torque on a hot stud as the way to “make sure.” No source is cited for the cooled-corner recheck.
+- **PROPOSED - not approved.** After a new stud, nut, wheel, rotor, spacer, or hub, check torque again after 30–60 minutes of running. That 30–60 minute check is Core4’s vendor guidance for embedment. It does not change the torque value, and it is not a source for the cooled-corner recheck above.
 
 ### Inspection
 
-Before the first session of an event, and any time the wheel is off:
+**PROPOSED - not approved.** Before the first session of an event, and any time the wheel is off, the inspection gate is:
 
 - Five nuts present, seated, and matching the wheel (NASA CCR 11.4.2; SCCA Time Trials safety rules).
 - No cracked wheel (same rules).
@@ -248,17 +247,13 @@ Before the first session of an event, and any time the wheel is off:
 - Hub face that carries the studs is intact. On this chassis, owners have had that ring separate from the hub. See `track-wear-items.md`.
 - Bearings play-free (NASA CCR 11.4.3; SCCA Time Trials).
 
-A stud that fails any of those checks comes off with the rest of its five-stud kit.
+**Colton decision, 2026-10-25 (relayed by Sarg).** Replacement is by inspection plus failure data. A stud that fails inspection comes off with the rest of its five-stud set. Removed studs are always scrapped.
 
 ### Life limit
 
-Stud calendar life: **none**. Leave the calendar field blank. Do not enter a lap or hour interval. No fetched source gives a 350Z stud life in laps, engine hours, events, or years that this team is adopting.
+**Colton decision, 2026-10-25 (relayed by Sarg).** Stud calendar life: **none**. Leave the calendar field blank. Do not enter a lap or hour life. No fetched source gives a 350Z stud life in laps, engine hours, events, or years that this practice is adopting. If inspection fails, or a stud fails, replace that hub’s five-stud set. A clean inspection does not get a date cap.
 
-Replacement is by inspection plus failure data. If inspection fails, or a stud fails, replace that corner’s five-stud kit under the hardware rule above. A clean inspection does not get a date cap.
-
-The NASA Spec3 recommendation to replace threaded wheel studs every two years is a cited reference only (BMW E36 class, not a 350Z). It is not team policy. See the Spec3 section above.
-
-v1 uses the whole-corner replacement rule, lug-nut torque of 80 ft-lb (108 N·m) as admin-editable, a blank stud calendar life, and cold torque-wrench installation.
+The NASA Spec3 recommendation to replace threaded wheel studs every two years is a cited reference only (BMW E36 class, not a 350Z). It is not part of this practice. See the Spec3 section above.
 
 ## What to record on each stud failure
 
@@ -276,7 +271,7 @@ Record these before the broken parts are discarded. Missing fields stay blank. A
 | Photos | Stud, nut, wheel seat, and hub face, before cleanup if that is safe. |
 | Notes | How it was found (noise, loose wheel, snapped while removing a nut, found at inspection), and whether the other studs on that corner looked damaged. |
 
-Also keep the removed kit identity in the history. Do not reuse those five studs as a new kit.
+Also keep the removed kit identity in the history. **Colton decision, 2026-10-25 (relayed by Sarg):** do not reuse those five studs as a new kit. Removed studs are always scrapped.
 
 ## Sources
 
