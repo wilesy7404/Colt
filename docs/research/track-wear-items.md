@@ -1,6 +1,6 @@
 # Track wear items on a 2004 Nissan 350Z
 
-Research date: 2026-10-25. Every URL below was fetched on that date and returned the text cited here.
+Research date: 2026-10-25. On that date every URL in the source table was requested again. A plain client got HTTP 403 from `members.drivenasa.com` (the CCR PDF) and `z1motorsports.com`. Both were then read from a successful page fetch the same day. The CCR file header is **2026.3 EDITION** (`https://members.drivenasa.com/rules/ccr.pdf`), and sections 11.4.2, 11.4.3, 11.4.5, 15.18, and 16.3 were read in that file. Nissan schedule pages are cited on `maintenance-schedules.nissanusa.com`, which returned HTTP 200. Every other source-table URL returned HTTP 200. The old 2025.4 S3 URL (`https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf`) returned HTTP 403 on this pass and is not cited.
 
 This note covers hubs and wheel bearings, lug nuts, brake pads and rotors, and fluids (brake fluid, engine oil, differential, transmission). It uses the same rules as `wheel-studs.md`.
 
@@ -25,9 +25,9 @@ Nissan’s public pages do not define “severe” or “premium” driving in t
 
 ### What sources say
 
-NASA CCR 2025.4, section 11.4.3: front and rear wheel bearings should be tight and play-free. There should be very little or no play in the suspension and steering.
+NASA CCR 2026.3, section 11.4.3: front and rear wheel bearings should be tight and play-free. There should be very little or no play in the suspension and steering.
 
-- Sanctioning-body rule: [2025.4 NASA CCR](https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf)
+- Sanctioning-body rule: [2026.3 NASA CCR](https://members.drivenasa.com/rules/ccr.pdf)
 
 SCCA Time Trials safety rules: wheel bearings must not have play.
 
@@ -79,7 +79,7 @@ Stud life, torque conflicts, and the open-nut rule that is not a rule are in `wh
 
 NASA CCR 11.4.2: all lug nuts must be present and must tightly hold the wheel.
 
-- Sanctioning-body rule: [2025.4 NASA CCR](https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf)
+- Sanctioning-body rule: [2026.3 NASA CCR](https://members.drivenasa.com/rules/ccr.pdf)
 
 SCCA Time Trials: all lug nuts, wheel bolts, or wheel nuts present and torqued to spec. “Spec” is not defined on that page.
 
@@ -109,7 +109,7 @@ Nissan’s 2004 350Z brake pads and rotors line:
 
 The page says calipers, pads, and rotors should be inspected regularly and replaced when necessary. It does not give a pad thickness, a rotor minimum thickness, or a lap count.
 
-- Manufacturer spec: [2004 350Z brake pads and rotors](https://www.nissanusa.com/maintenance-schedules/2004/350z/components/brake-pads-rotors/?LocaleID=en_US&RegionID=1)
+- Manufacturer spec: [2004 350Z brake pads and rotors](https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/brake-pads-rotors/?LocaleID=en_US&RegionID=1)
 
 SCCA Time Trials safety rules:
 
@@ -123,7 +123,7 @@ The page does not define how to measure “50 percent worn” or “discoloratio
 
 NASA CCR 11.4.5: brakes should work and stop the car in a reasonable distance, pedal pressure should be adequate, fluid must be above the manufacturer’s minimum, and brake lines must be in good condition. No pad or rotor measurement is given.
 
-- Sanctioning-body rule: [2025.4 NASA CCR](https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf)
+- Sanctioning-body rule: [2026.3 NASA CCR](https://members.drivenasa.com/rules/ccr.pdf)
 
 SCCA Race Experience: brakes shall be pedal-operated, work on each wheel, and be in good working order. No thickness is given.
 
@@ -149,8 +149,6 @@ Nissan’s 2004 350Z brake-fluid page, as fetched:
 The explanatory paragraph says fluid absorbs moisture, that water can boil into a compressible gas, and that fluid should be replaced “as specified.” The interval table on that page does not specify a replacement. That is a gap inside one Nissan page, not a second source.
 
 - Manufacturer spec: [2004 350Z brake fluid](https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/brake-fluid/?LocaleID=en_US&RegionID=1)
-
-The www.nissanusa.com copy of that same path returned “Access Denied” on this pass. The maintenance-schedules host above is the one that loaded.
 
 SCCA Time Trials: brake fluid must be clean and full. DOT 4 is recommended. No leaks.
 
@@ -190,7 +188,7 @@ Nissan’s 2004 350Z engine oil and filter line:
 
 The page says oil loses lubrication and cooling ability and that the filter can clog. It does not mention track days, laps, or engine hours.
 
-- Manufacturer spec: [2004 350Z engine oil and filter](https://www.nissanusa.com/maintenance-schedules/2004/350z/components/engine-oil-and-filter/?LocaleID=en_US&RegionID=1)
+- Manufacturer spec: [2004 350Z engine oil and filter](https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/engine-oil-and-filter/?LocaleID=en_US&RegionID=1)
 
 ### Unknown for engine oil
 
@@ -212,7 +210,7 @@ Nissan’s 2004 350Z differential-oil page:
 
 The page says heat and contamination reduce the oil’s lubricating properties, and to change it at the specified intervals. It does not give a viscosity, a capacity, or a track-hour interval.
 
-- Manufacturer spec: [2004 350Z differential oil](https://www.nissanusa.com/maintenance-schedules/2004/350z/components/differential-oil/?LocaleID=en_US&RegionID=1)
+- Manufacturer spec: [2004 350Z differential oil](https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/differential-oil/?LocaleID=en_US&RegionID=1)
 
 ### Unknown for differential oil
 
@@ -232,7 +230,7 @@ Nissan’s 2004 350Z manual-transmission-oil page, for the manual-transmission r
 
 The same page lists Enthusiast and Touring **automatic** rows as “maintenance not required” under the conditions it displays. This car’s gearbox has to be identified before either row is used. The page does not give an oil grade, a capacity, or an hour interval.
 
-- Manufacturer spec: [2004 350Z manual transmission oil](https://www.nissanusa.com/maintenance-schedules/2004/350z/components/manual-transmission-oil/?LocaleID=en_US&RegionID=1)
+- Manufacturer spec: [2004 350Z manual transmission oil](https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/manual-transmission-oil/?LocaleID=en_US&RegionID=1)
 
 ### Unknown for transmission oil
 
@@ -244,24 +242,20 @@ The same page lists Enthusiast and Touring **automatic** rows as “maintenance 
 
 **team policy (community research), v1, not a factory or official interval.**
 
-These are starting choices so the car has a written rule while failure data is still empty. They are not Nissan intervals and they are not sanctioning-body intervals, except where a rule is quoted as the inspection standard. Put the source name on the maintenance-system rule. Leave lap and hour fields blank wherever this note says unknown.
+Lug-nut torque is the approved stud rule in `wheel-studs.md`. Front-hub life, brake-fluid life, engine-oil life, differential-oil life, and transmission-oil life are **PROPOSED - not approved**. Each of those policy values is **BLANK** until Colton decides. The research above is unchanged. Leave lap and hour fields blank.
 
 ### Hubs and wheel bearings
 
-- Before each event, check for play at each wheel. Play fails the car for that session. That check is NASA CCR 11.4.3 and the SCCA Time Trials safety rule.
-- Any time a wheel is off, look at the hub face that carries the studs. A crack or a separated stud ring removes that hub. The 2012 my350z reports are the reason. They are anecdotes, not a measured life.
-- If a hub or bearing is replaced for play, noise, or a crack, replace that axle as a pair. That pair rule is Z1’s recommendation for the Hayaku front bearing, used here as the starting practice for both axles because the underlying idea (the other side has the same life) is the reason Z1 gives. Z1 stated it for the front part they sell. Applying it to the rear is a team extension, not a second Z1 quote.
-- Life options:
-  - **Option A — inspection only.** No weekend cap. This follows the sanctioning-body “no play” rule and does not invent a life the factories did not publish.
-  - **Option B — inspection plus a front-hub cap of 12 track weekends. This is the v1 starting choice for the fronts.** Twelve is the low end of the 12-to-18 range one 350Z/370Z racer wrote in 2012, chosen because another owner’s hub also failed and because the failure mode is the wheel leaving the hub. The same thread includes a hub that lasted 67 track days, so 12 weekends may be early. Record weekends on each hub and move the cap when the log supports it. Crack testing, if the team later has it done by someone equipped to do it, can replace the calendar cap. v1 does not pretend the team already has that process.
-  - Rear hub life stays unknown. Inspect rears to the same “no play, no cracked flange” standard. Do not copy the 12-weekend number onto the rear until a rear source exists.
+**PROPOSED - not approved.** Policy value: **BLANK** until Colton decides.
+
+NASA CCR 2026.3 section 11.4.3 and the SCCA Time Trials safety rules say bearings must be play-free. That is a sanctioning-body inspection rule, not a team life interval. Z1’s pair recommendation and the 12-to-18 track-weekend anecdote, including the hub that lasted 67 track days, stay in the research section. No weekend cap, pair rule, or rear-hub life is entered.
 
 ### Lug nuts
 
 - No mile, lap, or hour life. Unknown.
 - At every wheel change, the nut must match the wheel seat. Do not put Z1’s 60 degree open nuts on a factory shank-style wheel. Z1 says they are not compatible.
 - Replace a nut that is galled, rounded, cross-threaded, or that was used to draw a stud into the hub. Core4’s galling note and the my350z thread damage are the reasons.
-- Lug-nut torque is the stud policy in `wheel-studs.md`: 80 ft-lb (108 N·m), admin-editable. Source label, exact: '2004 Nissan 350Z factory service manual (third-party copy, cited), approved by Colton Wiles on 2026-10-25'. Forum figures of 90–100 ft-lb and “20 over” are not adopted.
+- Lug-nut torque is the stud policy in `wheel-studs.md`: 80 ft-lb (108 N·m), admin-editable. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. Forum figures of 90–100 ft-lb and “20 over” are not adopted. The same manual page says retighten after 600 miles (1,000 km), keep the threads dry, and use the 1–5 sequence.
 
 ### Brake pads and rotors
 
@@ -271,28 +265,27 @@ These are starting choices so the car has a written rule while failure data is s
 
 ### Brake fluid
 
-Nissan’s fetched table does not require a change under standard or severe service, and its premium column is inspect-only. Motul’s two RBF 600 sheets disagree.
+**PROPOSED - not approved.** Policy value: **BLANK** until Colton decides.
 
-- **Option A — inspect only.** Level at or above the reservoir minimum (NASA CCR 11.4.5), fluid clean and full (SCCA Time Trials), no leaks. Change when the fluid is no longer clean. This follows the sanctioning-body inspection words and Nissan’s lack of a replace mileage. It does not set a time cap.
-- **Option B — if the car is filled with Motul RBF 600, also change it at every second race weekend or at four weeks, whichever comes first. This is the v1 starting choice when that fluid is in the car.** The interval is the German Motul sheet dated 06/21. The newer English sheet does not use those words. It says follow the vehicle maker and tune the interval to use. v1 uses the shorter Motul instruction as a cap because the Nissan street table is not a racing-fluid instruction, and because the English sheet still says the wet boiling point represents fluid after moisture uptake. Label the rule with both Motul sheets and with the disagreement. Do not apply this cap to an unnamed fluid.
-- A lap or hour change interval is unknown. Do not add one.
+Nissan’s table and both Motul drain sentences stay in the research section. No inspect-only rule and no “every second race / four weeks” cap is adopted.
 
 ### Engine oil
 
-- v1 backstop: replace oil and filter at **3,750 miles or 3 months**, which is Nissan’s severe and premium figure, whichever comes first. Record miles and the date. This is a street figure used as a ceiling, not a finding that racing equals Nissan’s “severe” category. The page never says that.
-- Engine-hour and lap intervals are unknown. Leave them blank. Do not divide 3,750 miles by a guessed lap length.
+**PROPOSED - not approved.** Policy value: **BLANK** until Colton decides.
+
+Nissan’s 7,500-mile / 6-month and 3,750-mile / 3-month figures stay in the research section. No mile, month, lap, or hour interval is adopted.
 
 ### Differential
 
-- v1 backstop, using the severe column because it is the column that actually states a replacement: inspect at the event if a leak is suspected, and replace at **15,000 miles or 12 months**. That is Nissan’s severe-service replace point, used here as a ceiling. It is not a track-hour interval.
-- Premium action is unknown until the live table is re-read. Do not enter 3,750 miles as a differential change.
-- Grade, capacity, lap life, and hour life are unknown.
+**PROPOSED - not approved.** Policy value: **BLANK** until Colton decides.
+
+Nissan’s 15,000-mile / 12-month inspect and replace figures stay in the research section. No interval is adopted. Grade, capacity, lap life, and hour life remain unknown.
 
 ### Transmission
 
-- Identify the gearbox first. Nissan’s fetched page says automatic rows shown there are “maintenance not required,” and manual rows are not.
-- For a manual gearbox, v1 backstop is the severe-column replacement: **15,000 miles or 12 months**, with a leak inspection when the car is serviced. Premium on that page also shows a replace action at 7,500 miles or 6 months. v1 does not use 7,500 miles yet, because the page does not say a race weekend is “premium.”
-- Grade, capacity, lap life, and hour life are unknown.
+**PROPOSED - not approved.** Policy value: **BLANK** until Colton decides.
+
+Nissan’s manual-transmission figures, and the automatic rows marked maintenance not required, stay in the research section. No 15,000-mile or 7,500-mile interval is adopted. Grade, capacity, lap life, and hour life remain unknown.
 
 ## What to record
 
@@ -300,20 +293,20 @@ Stud failures have their own sheet in `wheel-studs.md`. For the parts in this no
 
 ## Sources
 
-All fetched 2026-10-25.
+Re-fetched 2026-10-25. See the note under the title for which hosts returned HTTP 200.
 
 | Source | Label | URL |
 | --- | --- | --- |
-| NASA CCR 2025.4 | Sanctioning-body rule | https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf |
+| NASA CCR 2026.3 | Sanctioning-body rule | https://members.drivenasa.com/rules/ccr.pdf |
 | SCCA Time Trials safety rules | Sanctioning-body rule | https://timetrials.scca.com/pages/full-safety-rules |
 | SCCA GCR, February 2026 | Sanctioning-body rule | https://cdn.connectsites.net/user_files/scca/downloads/000/078/671/FEB-26.pdf?1771351149= |
 | SCCA Race Experience vehicle requirements | Sanctioning-body rule | https://www.scca.com/pages/race-experience-vehicle-requirements |
 | Nissan axle and suspension parts | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/axle-suspension-parts/?LocaleID=en_US&RegionID=1 |
-| Nissan brake pads and rotors | Manufacturer spec | https://www.nissanusa.com/maintenance-schedules/2004/350z/components/brake-pads-rotors/?LocaleID=en_US&RegionID=1 |
+| Nissan brake pads and rotors | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/brake-pads-rotors/?LocaleID=en_US&RegionID=1 |
 | Nissan brake fluid | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/brake-fluid/?LocaleID=en_US&RegionID=1 |
-| Nissan engine oil and filter | Manufacturer spec | https://www.nissanusa.com/maintenance-schedules/2004/350z/components/engine-oil-and-filter/?LocaleID=en_US&RegionID=1 |
-| Nissan differential oil | Manufacturer spec | https://www.nissanusa.com/maintenance-schedules/2004/350z/components/differential-oil/?LocaleID=en_US&RegionID=1 |
-| Nissan manual transmission oil | Manufacturer spec | https://www.nissanusa.com/maintenance-schedules/2004/350z/components/manual-transmission-oil/?LocaleID=en_US&RegionID=1 |
+| Nissan engine oil and filter | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/engine-oil-and-filter/?LocaleID=en_US&RegionID=1 |
+| Nissan differential oil | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/differential-oil/?LocaleID=en_US&RegionID=1 |
+| Nissan manual transmission oil | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/manual-transmission-oil/?LocaleID=en_US&RegionID=1 |
 | Z1 Hayaku front bearing | Vendor guidance | https://www.z1motorsports.com/front-hub-and-spindle/hayaku-automotive/hayaku-350z-g35-front-wheel-bearing-p-22758.html |
 | Z1 open-end lug nuts | Vendor guidance | https://www.z1motorsports.com/z1-products/z1-motorsports/z1-splined-open-end-lug-nut-kit-chrome-p-33852.html |
 | Timken hub damage guide LV7 | Manufacturer spec | https://www.timken.com/wp-content/uploads/2017/08/LV7-Wheel-Hub-Damage-Analysis-Guide.pdf |

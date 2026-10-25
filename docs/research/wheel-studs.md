@@ -1,6 +1,6 @@
 # Wheel studs on a 2004 Nissan 350Z
 
-Research date: 2026-10-25. Every URL below was fetched on that date and returned the text cited here.
+Research date: 2026-10-25. On that date every URL in the source table was requested again. A plain client got HTTP 403 from `members.drivenasa.com` (the CCR PDF), `www.arp-bolts.com`, `community.drivenasa.com`, `carmanualsonline.info`, and `z1motorsports.com`. Each of those pages was then read from a successful page fetch the same day. The CCR file header is **2026.3 EDITION** (`https://members.drivenasa.com/rules/ccr.pdf`), and sections 11.4.2, 11.4.3, 15.18, and 16.3 were read in that file. Every other source-table URL returned HTTP 200. The old 2025.4 S3 URL (`https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf`) returned HTTP 403 on this pass and is not cited.
 
 This note is background for a team maintenance rule. It is **team policy (community research), v1, not a factory or official interval.** Nissan’s public 2004 350Z schedule does not list wheel studs. No fetched NASA or SCCA rule sets a stud-replacement life for this car. Numbers that appear below stay attached to the source that printed them. Where sources disagree, the disagreement is stated. Where no source gave a number, the item is marked unknown.
 
@@ -13,7 +13,7 @@ The proposed starting policy is only in [Proposed team starting point](#proposed
 | Manufacturer spec | Page published by the part or fluid maker, or by Nissan on nissanusa.com / Nissan’s maintenance-schedule host. |
 | Sanctioning-body rule | NASA or SCCA rule text. |
 | Vendor guidance | Retailer or specialty-shop page (Z1, Core4, and similar). |
-| Anecdotal | Forum post, product review, or a blog. A third-party copy of an owner’s manual is labeled anecdotal, because it is not a Nissan-hosted page. |
+| Anecdotal | Forum post, product review, or a blog. The 80 ft-lb figure is from the 2004 owner's manual, page 6-6, on a third-party site. It is not a verified factory service-manual spec. Team label: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. |
 
 ## What sources say
 
@@ -37,9 +37,9 @@ A third-party site reproduces a page from a 2004 Z33 owner’s manual, “In cas
 - Keep the nuts at that specification. The reproduction also says it is recommended to tighten them to specification at each lubrication interval.
 - The procedure on that page is: clean the wheel-to-hub face, start the nuts finger tight, tighten alternately in the illustrated 1–5 sequence, lower until the tire touches, then tighten securely in that sequence.
 
-- Anecdotal (third-party reproduction, not a Nissan-hosted page): [carmanualsonline.info, 2004 Z33, wheel-torque search](https://www.carmanualsonline.info/nissan-350z-2004-z33-owners-manual/?srch=wheel+torque)
+- Anecdotal. Team label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. Page: [carmanualsonline.info, 2004 Z33, wheel-torque search](https://www.carmanualsonline.info/nissan-350z-2004-z33-owners-manual/?srch=wheel+torque). The site's copy is PDF page 175 of 262; the manual's own footer on that page is **6-6**.
 
-This research pass did not find a Nissan-hosted PDF of that page. Treat 80 ft-lb (108 N·m) as a lead to confirm in the car’s own manual, not as a verified manufacturer spec.
+This is an owner's-manual value Colton Wiles approved for team use on 2026-10-25. It is not a verified factory service-manual spec. No Nissan-hosted PDF of the page was found. The same page says retighten the wheel nuts after 600 miles (1,000 km), do not use oil or grease on the studs or nuts, and tighten in the illustrated 1–5 sequence.
 
 Other torque figures found in this pass are not Nissan figures and do not agree with each other:
 
@@ -135,9 +135,9 @@ No fetched source states a minimum number of exposed threads for a 350Z. That nu
 
 ### Sanctioning-body rules
 
-#### NASA Club Codes and Regulations, 2025.4 edition
+#### NASA Club Codes and Regulations, 2026.3 edition
 
-Fetched PDF: [2025.4 NASA CCR](https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf). Sanctioning-body rule.
+Fetched PDF: [2026.3 NASA CCR](https://members.drivenasa.com/rules/ccr.pdf). Sanctioning-body rule. The file header reads **2026.3 EDITION**. Re-fetched 2026-10-25. A plain client got HTTP 403; the page fetch returned the PDF, and sections 11.4.2, 11.4.3, 15.18, and 16.3 were read in that file.
 
 HPDE vehicle rules, section 11.4.2, Wheels and Tires: the tire and rim must be in good condition, the wheel must not be cracked or otherwise damaged, the tire must not show cords, bubbles, or other visible damage, and **all lug nuts must be present and tightly hold the wheel to the hub.**
 
@@ -147,11 +147,9 @@ Section 15 is the racing safety-equipment chapter. In this edition, section 15.1
 
 Section 16.3 says drivers are responsible for inspecting their own cars for each event. It also says on-track mechanical failures of parts or systems that are the competitor’s responsibility, as defined by the Annual Race Car Technical Form, draw a fine. That is a competitor-responsibility rule, not a stud interval.
 
-A 2026 CCR file was not retrieved. NASA Spec3’s 2026 rules say competitors follow the CCR in effect on the date of the event. Re-download the current CCR before relying on a section number.
-
 #### The “4.5 threads / double-nut” post is not a current CCR rule
 
-On April 1, 2009, a post in NASA’s American Iron forum quoted a supposed new CCR 15.18 requiring open lug nuts, enough exposed thread to double-nut, a minimum of 4.5 threads, with aircraft lock nuts waiving the double nut. Replies called it an April Fools joke. The author wrote “Dang. Thought I would at least fool some of you,” and a later reply says “FYI - It’s a joke.” The current 2025.4 CCR text above does not contain that rule.
+On April 1, 2009, a post in NASA’s American Iron forum quoted a supposed new CCR 15.18 requiring open lug nuts, enough exposed thread to double-nut, a minimum of 4.5 threads, with aircraft lock nuts waiving the double nut. Replies called it an April Fools joke. The author wrote “Dang. Thought I would at least fool some of you,” and a later reply says “FYI - It’s a joke.” The 2026.3 CCR text above does not contain that rule.
 
 - Anecdotal: [NASA forum, April 1, 2009](https://community.drivenasa.com/topic/22557-important-note-lug-and-stud-issues/)
 
@@ -232,7 +230,7 @@ v1 summary: lug-nut torque is 80 ft-lb (108 N·m), admin-editable. Stud calendar
 
 ### Torque method
 
-- Lug-nut torque: **80 ft-lb (108 N·m)**. Source label, exact: '2004 Nissan 350Z factory service manual (third-party copy, cited), approved by Colton Wiles on 2026-10-25'. This value is admin-editable.
+- Lug-nut torque: **80 ft-lb (108 N·m)**. Admin-editable. Source label, exact: '2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25'. This is an owner's-manual value approved for team use, not a verified factory service-manual spec. The same page says retighten after 600 miles (1,000 km), keep the threads dry (no oil or grease on the studs or nuts), and use the illustrated 1–5 sequence.
 - Forum figures are **not adopted**: 90–100 ft-lb, and “20 over” / “20 ft-lb or more over OEM.”
 - Clamp the wheel with a torque wrench. Do not use an impact gun for the torque that holds the wheel on.
 - Pull a new press-in stud in until the head is seated, using washers and a nut that will be thrown away. Do not reuse that nut on the car. Do not treat 90–100 ft-lb as the specification for that pull. That seating figure is one of the forum numbers above and is **not adopted**.
@@ -282,12 +280,12 @@ Also keep the removed kit identity in the history. Do not reuse those five studs
 
 ## Sources
 
-All fetched 2026-10-25.
+Re-fetched 2026-10-25. See the note under the title for which hosts returned HTTP 200.
 
 | Source | Label | URL |
 | --- | --- | --- |
 | Nissan 2004 350Z component list | Manufacturer spec | https://maintenance-schedules.nissanusa.com/maintenance-schedules/2004/350z/components/?LocaleID=en_US&RegionID=1 |
-| Third-party copy of 2004 Z33 owner’s manual wheel-nut page | Anecdotal | https://www.carmanualsonline.info/nissan-350z-2004-z33-owners-manual/?srch=wheel+torque |
+| 2004 Nissan 350Z owner's manual p. 6-6 (third-party copy on carmanualsonline.info, not Nissan-hosted), 80 ft-lb (108 N·m); value approved by Colton Wiles on 2026-10-25 | Anecdotal | https://www.carmanualsonline.info/nissan-350z-2004-z33-owners-manual/?srch=wheel+torque |
 | ARP fastener installation FAQ | Manufacturer spec | https://www.arp-bolts.com/tech/fastener-installation-faq |
 | ARP 2026 catalog, page 131 | Manufacturer spec | https://arpcatalog.com/131/ |
 | Z1 ARP extended wheel studs | Vendor guidance | https://www.z1motorsports.com/wheel-spacers-and-studs/arp/arp-extended-wheel-studs-p-5410.html |
@@ -297,7 +295,7 @@ All fetched 2026-10-25.
 | my350z rear ARP install, May 2009 | Anecdotal | https://my350z.com/forum/body-interior-exterior-and-lighting-diy/436581-diy-rear-arp-wheel-stud-instilation.html |
 | my350z hub separation, September 2012 | Anecdotal | https://my350z.com/forum/autocross-road/384454-mid-ohio-crash-4.html |
 | RallyWays lug-torque article | Anecdotal | https://rallyways.com/806/lug-nut-torque-of-100-ft-lbs-arp-extended-wheel-studs/ |
-| NASA CCR 2025.4 | Sanctioning-body rule | https://nasa-assets.s3.amazonaws.com/document/document/282/2025.4_NASACCR.pdf |
+| NASA CCR 2026.3 | Sanctioning-body rule | https://members.drivenasa.com/rules/ccr.pdf |
 | NASA forum, April 1, 2009 | Anecdotal | https://community.drivenasa.com/topic/22557-important-note-lug-and-stud-issues/ |
 | NASA Spec3 2026 rules | Sanctioning-body rule | https://nasa-assets.s3.amazonaws.com/document/document/24109/2026_Spec3_Rules.pdf |
 | SCCA GCR, February 2026 | Sanctioning-body rule | https://cdn.connectsites.net/user_files/scca/downloads/000/078/671/FEB-26.pdf?1771351149= |
