@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Defects — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <header class="appbar">
+    <a class="back" href="index.html">All</a>
+    <div>
+      <p class="eyebrow">Race day · defects</p>
+      <h1>Defects</h1>
+    </div>
+  </header>
+  <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+  <main>
+    <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> An unresolved critical defect blocks a ready status on event prep. Closing a defect here is not approval to race.</p>
+    <p class="note">Flow: report, then triage, then resolve. Resolve needs a linked work record or an inspection record. This mockup does not save a defect.</p>
+
+    <section class="card">
+      <h2>Open examples</h2>
+      <article>
+        <div class="row-top">
+          <h3>Critical</h3>
+          <span class="pill overdue">Unresolved</span>
+        </div>
+        <p class="example-tag">Example data</p>
+        <p>Where: EXAMPLE wheel. Observed detail: — not set —. Not a record of a real failure. Linked work: — not set —. Linked inspection: — not set —.</p>
+      </article>
+      <article>
+        <div class="row-top">
+          <h3>Needs review</h3>
+          <span class="pill neutral">Open</span>
+        </div>
+        <p class="example-tag">Example data</p>
+        <p>Where: — not set —. Observed detail: — not set —.</p>
+      </article>
+    </section>
+
+    <div class="switch thirds" role="group" aria-label="Defect flow">
+      <button type="button" class="is-on" data-switch="1" data-group="flow" data-show="report" aria-pressed="true">1 Report</button>
+      <button type="button" data-switch="1" data-group="flow" data-show="triage" aria-pressed="false">2 Triage</button>
+      <button type="button" data-switch="1" data-group="flow" data-show="resolve" aria-pressed="false">3 Resolve</button>
+    </div>
+
+    <section data-panel="report" data-group="flow">
+      <section class="card">
+        <h2>Report</h2>
+        <p class="small muted">Describe only what was observed. Do not invent a cause.</p>
+        <label class="field">
+          <span>Component / position</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+        </label>
+        <fieldset>
+          <legend>Severity</legend>
+          <label class="radio"><input type="radio" name="severity" checked> Needs review</label>
+          <label class="radio"><input type="radio" name="severity"> Critical — stays unresolved until a linked record exists</label>
+        </fieldset>
+        <label class="field">
+          <span>Observed issue</span>
+          <textarea placeholder="— not set —"></textarea>
+        </label>
+        <label class="field">
+          <span>Evidence</span>
+          <input type="text" value="— not set —" readonly>
+          <span class="hint">No file is attached. This draft has no evidence store.</span>
+        </label>
+        <button type="button" class="btn primary" data-show="triage" data-group="flow">Show triage</button>
+        <p class="hint">Showing the next step does not file a defect.</p>
+      </section>
+    </section>
+
+    <section data-panel="triage" data-group="flow" hidden>
+      <section class="card">
+        <h2>Triage</h2>
+        <p class="example-tag">Example data</p>
+        <p>Example defect under triage. Not a reported incident. Detail: — not set —.</p>
+        <dl class="kv">
+          <div><dt>Where</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Severity as reported</dt><dd>EXAMPLE critical</dd></div>
+          <div><dt>Safety criticality on the rule</dt><dd>— not set —</dd></div>
+          <div><dt>Linked work</dt><dd>none</dd></div>
+          <div><dt>Linked inspection</dt><dd>none</dd></div>
+        </dl>
+        <fieldset>
+          <legend>Confirm severity</legend>
+          <label class="radio"><input type="radio" name="triage-sev"> Needs review</label>
+          <label class="radio"><input type="radio" name="triage-sev" checked> Keep critical</label>
+        </fieldset>
+        <p class="hint">Critical severity is enough to block a ready status. Safety criticality on a service rule is a separate admin field and is not set here. Race-day users cannot change that rule.</p>
+        <p class="note">Triage is not resolution. With no linked work or inspection, the defect stays open. Nothing was saved.</p>
+        <button type="button" class="btn primary" data-show="resolve" data-group="flow">Show resolve</button>
+      </section>
+    </section>
+
+    <section data-panel="resolve" data-group="flow" hidden>
+      <section class="card">
+        <h2>Resolve</h2>
+        <p>A defect resolves only with a linked work record or a linked inspection record. Both empty means it stays unresolved.</p>
+        <div class="switch thirds" role="group" aria-label="Example link">
+          <button type="button" class="is-on" data-switch="1" data-group="link" data-show="none" aria-pressed="true">No link</button>
+          <button type="button" data-switch="1" data-group="link" data-show="work" aria-pressed="false">Work</button>
+          <button type="button" data-switch="1" data-group="link" data-show="inspect" aria-pressed="false">Inspection</button>
+        </div>
+
+        <div data-panel="none" data-group="link">
+          <div class="block-banner" role="alert">
+            <strong>Not resolved</strong>
+            <p>No work record and no inspection record. Validation failed. The defect stays open. Nothing was saved.</p>
+          </div>
+          <dl class="kv">
+            <div><dt>Linked work</dt><dd>— not set —</dd></div>
+            <div><dt>Linked inspection</dt><dd>— not set —</dd></div>
+            <div><dt>Technician</dt><dd>— not set —</dd></div>
+            <div><dt>Resolution note</dt><dd>— not set —</dd></div>
+          </dl>
+        </div>
+
+        <div data-panel="work" data-group="link" hidden>
+          <div class="review-banner" role="status">
+            <strong>Example link only</strong>
+            <p>Work record token: EXAMPLE. This mockup did not resolve the defect, did not write a work record, and did not change stock or an interval.</p>
+          </div>
+          <p class="example-tag">Example data</p>
+          <dl class="kv">
+            <div><dt>Linked work</dt><dd>EXAMPLE</dd></div>
+            <div><dt>Linked inspection</dt><dd>— not set —</dd></div>
+            <div><dt>Technician</dt><dd>EXAMPLE</dd></div>
+            <div><dt>Note</dt><dd>EXAMPLE</dd></div>
+          </dl>
+          <p class="hint">In the product, the defect would stay open until that work record commits. Opening this panel is not a commit.</p>
+        </div>
+
+        <div data-panel="inspect" data-group="link" hidden>
+          <div class="review-banner" role="status">
+            <strong>Example link only</strong>
+            <p>Inspection token: EXAMPLE. Inspections without replacement do not reset an interval. This mockup did not write an inspection or resolve the defect.</p>
+          </div>
+          <p class="example-tag">Example data</p>
+          <dl class="kv">
+            <div><dt>Linked work</dt><dd>— not set —</dd></div>
+            <div><dt>Linked inspection</dt><dd>EXAMPLE</dd></div>
+            <div><dt>Result</dt><dd>— not set —</dd></div>
+            <div><dt>Limit</dt><dd>TBD (admin rule required)</dd></div>
+            <div><dt>Technician</dt><dd>EXAMPLE</dd></div>
+          </dl>
+        </div>
+      </section>
+    </section>
+
+    <nav class="more" aria-label="Related drafts">
+      <a href="replacement.html">Replacement sign-off</a>
+      <a href="event-prep.html">Event prep</a>
+      <a href="component-life.html">Component life</a>
+    </nav>
+    <footer class="fineprint">
+      <p><strong>The software does not certify vehicle safety.</strong></p>
+      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+    </footer>
+  </main>
+  <script src="js/draft.js"></script>
+</body>
+</html>

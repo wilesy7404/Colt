@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheel studs — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <header class="appbar">
+    <a class="back" href="index.html">All</a>
+    <div>
+      <p class="eyebrow">Race day · sets of five</p>
+      <h1>Wheel studs</h1>
+    </div>
+  </header>
+  <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+  <main>
+    <a class="btn alarm" href="stud-break.html">Log a wheel stud break</a>
+    <p class="hint">Failure tracking comes before intervals. A few taps. Nothing is saved.</p>
+    <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> Stud life stays unknown without history. Interval numbers are not filled in.</p>
+    <section class="card">
+      <h2>Wheel stud rule</h2>
+      <div class="rule-src">
+        <p class="k">Source</p>
+        <p class="src-label">Team policy (community research) v1</p>
+        <p class="k">Revision</p>
+        <p class="src-label">v1</p>
+        <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+      </div>
+      <dl class="kv">
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Calendar interval</dt><dd>TBD (admin rule required)</dd></div>
+      </dl>
+      <p class="hint">Lap and engine-hour intervals are independent and are not converted. No interval number is shown.</p>
+    </section>
+    <p>Studs are tracked as sealed sets of five. Each set has its own kit / stock ID. Individual stud IDs and wheel positions appear only where the team tracks them. Untracked slots stay — not set —.</p>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>Sealed set</h2>
+        <span class="pill neutral">Sealed</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <div class="plate kit">
+        <p class="k">Kit / stock ID</p>
+        <p class="v">EXAMPLE-KIT-SEALED</p>
+        <p class="d">Identity of this sealed set. Not a catalog part number and not a stud ID.</p>
+      </div>
+      <div class="plate catalog">
+        <p class="k">Catalog part number</p>
+        <p class="v">— not set —</p>
+        <p class="d">No approved part number. Not a real part number.</p>
+      </div>
+      <ol class="five" aria-label="Five studs, still sealed">
+        <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>
+      </ol>
+      <dl class="kv">
+        <div><dt>Opened / used</dt><dd>No — still sealed</dd></div>
+        <div><dt>Per-stud IDs</dt><dd>— not set —</dd></div>
+        <div><dt>Wheel positions</dt><dd>— not set —</dd></div>
+        <div><dt>Storage</dt><dd>— not set —</dd></div>
+        <div><dt>Rule source</dt><dd>Team policy (community research) v1</dd></div>
+        <div><dt>Revision</dt><dd>v1</dd></div>
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+      </dl>
+      <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>Opened set</h2>
+        <span class="pill neutral">Opened / used</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <div class="plate kit">
+        <p class="k">Kit / stock ID</p>
+        <p class="v">EXAMPLE-KIT-OPEN</p>
+        <p class="d">This set was marked opened. That mark is example layout, not stock history.</p>
+      </div>
+      <div class="plate catalog">
+        <p class="k">Catalog part number</p>
+        <p class="v">EXAMPLE</p>
+        <p class="d">Not a real part number.</p>
+      </div>
+      <ol class="five" aria-label="Five stud positions">
+        <li>1</li><li>2</li><li>3</li><li>4</li><li>5</li>
+      </ol>
+      <dl class="kv">
+        <div><dt>Stud 1 ID</dt><dd>EXAMPLE-STUD-1</dd></div>
+        <div><dt>Stud 1 wheel position</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Stud 2 ID</dt><dd>EXAMPLE-STUD-2</dd></div>
+        <div><dt>Stud 2 wheel position</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Stud 3 ID</dt><dd>EXAMPLE-STUD-3</dd></div>
+        <div><dt>Stud 3 wheel position</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Stud 4 ID</dt><dd>EXAMPLE-STUD-4</dd></div>
+        <div><dt>Stud 4 wheel position</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Stud 5 ID</dt><dd>EXAMPLE-STUD-5</dd></div>
+        <div><dt>Stud 5 wheel position</dt><dd>EXAMPLE</dd></div>
+      </dl>
+      <p class="hint">Example positions are the same token on purpose, so the set still reads as one set. A blank position would stay — not set —, not assumed.</p>
+    </article>
+
+    <section class="card">
+      <h2>Mixing sets</h2>
+      <div class="block-banner" role="alert">
+        <strong>Mixing blocked</strong>
+        <p>Example attempt: put EXAMPLE-STUD-1 from kit EXAMPLE-KIT-OTHER onto a wheel that already uses EXAMPLE-KIT-OPEN. Studs from different sets cannot be mixed. No stud was moved. No set was changed. Stock was not consumed.</p>
+      </div>
+      <dl class="kv">
+        <div><dt>Set already on the wheel</dt><dd>EXAMPLE-KIT-OPEN</dd></div>
+        <div><dt>Stud that was refused</dt><dd>EXAMPLE-STUD-1</dd></div>
+        <div><dt>That stud’s kit</dt><dd>EXAMPLE-KIT-OTHER</dd></div>
+      </dl>
+    </section>
+
+    <section class="card">
+      <h2>Removal</h2>
+      <p>Removal reason and failure evidence are required when a stud comes off for a failure. This draft records neither. No failure is on file.</p>
+      <dl class="kv">
+        <div><dt>Removal reason</dt><dd>— not set —</dd></div>
+        <div><dt>Failure evidence</dt><dd>— not set —</dd></div>
+        <div><dt>Evidence file</dt><dd>— not set —</dd></div>
+        <div><dt>Disposition</dt><dd>— not set —</dd></div>
+        <div><dt>Lap reading</dt><dd>UNKNOWN</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>UNKNOWN</dd></div>
+      </dl>
+      <p class="hint">Lap and hour readings stay independent. A blank reading is not a pass. Use the break log while the failure is in front of you.</p>
+      <a class="btn alarm" href="stud-break.html">Log a wheel stud break</a>
+    </section>
+
+    <section class="card">
+      <h2>Early reorder</h2>
+      <div class="warn-banner" role="status">
+        <strong>Early reorder warning</strong>
+        <p>Example warning state. Sealed sets on hand: — not set —. Reorder threshold: TBD (admin rule required). Desired stock: — not set —. This is not a real shortage and not a purchase order.</p>
+      </div>
+      <p class="hint">Count sealed sets. An opened set is not silently treated as a spare sealed set. Supplier and lead time: — not set —.</p>
+    </section>
+
+    <nav class="more" aria-label="Related drafts">
+      <a href="component-life.html">Component life</a>
+      <a href="component-detail.html">Component detail</a>
+      <a href="event-prep.html">Event prep</a>
+    </nav>
+    <footer class="fineprint">
+      <p><strong>The software does not certify vehicle safety.</strong></p>
+      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+    </footer>
+  </main>
+</body>
+</html>

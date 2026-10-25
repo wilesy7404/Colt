@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component life — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <header class="appbar">
+    <a class="back" href="index.html">All</a>
+    <div>
+      <p class="eyebrow">Race day · life and status</p>
+      <h1>Component life</h1>
+    </div>
+  </header>
+  <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+  <main>
+    <p>Status chips below are example labels so each state can be told apart. They are not calculated. No interval is approved. Lap readings and engine-hour readings are separate, and a missing reading is unknown, not healthy.</p>
+    <section class="card" aria-label="Status legend">
+      <h2>Six statuses</h2>
+      <p><span class="pill not-due">Not due</span></p>
+      <p class="small">Neutral label. Not a healthy mark and not a ready mark.</p>
+      <p><span class="pill approaching">Approaching</span></p>
+      <p class="small">Inside the warning threshold. Threshold: — not set —.</p>
+      <p><span class="pill due">Due</span></p>
+      <p class="small">At the interval. Interval: TBD (admin rule required).</p>
+      <p><span class="pill overdue">Overdue</span></p>
+      <p class="small">Past the interval. Not calculated on this draft.</p>
+      <p><span class="pill failed">Failed inspection</span></p>
+      <p class="small">Inspection did not pass. Distinct from a life interval.</p>
+      <p><span class="pill unknown">Unknown</span></p>
+      <p class="small">Missing history or readings. Hatched and dashed. Not a healthy status, and not green.</p>
+    </section>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>EXAMPLE component</h2>
+        <span class="pill not-due">Not due</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Sample of this chip only. It was not computed. If history were actually missing, the chip would be unknown, not this one.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Not a real part number</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Lap reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Source</dt><dd>— not set —</dd></div>
+        <div><dt>Revision</dt><dd>— not set —</dd></div>
+      </dl>
+      <p class="hint">Example readings are not a life total. The intervals are independent, are not converted, and are not set — so the chip is not a result. This is not the wheel-stud rule.</p>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>EXAMPLE component</h2>
+        <span class="pill approaching">Approaching</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Sample of this chip only. Warning threshold: — not set —. Critical threshold: — not set —. Not computed from the tokens below.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Lap reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Lap side</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Hour side</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Source</dt><dd>— not set —</dd></div>
+        <div><dt>Revision</dt><dd>— not set —</dd></div>
+      </dl>
+      <p class="hint">One side being close does not set the other side. They are not converted.</p>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>EXAMPLE component</h2>
+        <span class="pill due">Due</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Sample of this chip only. Due is not overdue and not a failed inspection. Not computed from the tokens below.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Lap reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Source</dt><dd>— not set —</dd></div>
+        <div><dt>Revision</dt><dd>— not set —</dd></div>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>EXAMPLE component</h2>
+        <span class="pill overdue">Overdue</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Sample of this chip only. Not calculated from laps or hours on this car.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Lap reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Source</dt><dd>— not set —</dd></div>
+        <div><dt>Revision</dt><dd>— not set —</dd></div>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>EXAMPLE component</h2>
+        <span class="pill failed">Failed inspection</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Example failed label. No inspection record is stored. A failed inspection is not the same chip as overdue.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Inspection limit</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Measurement</dt><dd>— not set —</dd></div>
+        <div><dt>Source</dt><dd>— not set —</dd></div>
+        <div><dt>Revision</dt><dd>— not set —</dd></div>
+      </dl>
+    </article>
+
+    <article class="card">
+      <div class="row-top">
+        <h2>Wheel stud set</h2>
+        <span class="pill unknown">Unknown</span>
+      </div>
+      <p class="example-tag">Example data</p>
+      <p>Missing history or readings. This chip is hatched and dashed. It is never drawn as not-due, and it is never a healthy status. A lap figure, if one existed, would not cover a missing hour figure.</p>
+      <dl class="kv">
+        <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
+        <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
+        <div><dt>Kit / stock ID</dt><dd>EXAMPLE-KIT</dd></div>
+        <div><dt>Lap reading</dt><dd>— not set —</dd></div>
+        <div><dt>Engine-hour reading</dt><dd>— not set —</dd></div>
+        <div><dt>Why unknown</dt><dd>No history</dd></div>
+        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
+        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
+      </dl>
+      <div class="rule-src">
+        <p class="k">Source</p>
+        <p class="src-label">Team policy (community research) v1</p>
+        <p class="k">Revision</p>
+        <p class="src-label">v1</p>
+        <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+      </div>
+      <p><a href="wheel-studs.html">Open the wheel-stud draft</a></p>
+      <p><a href="stud-break.html">Log a wheel stud break</a></p>
+    </article>
+
+    <p class="note">Race-day screens do not change service rules. <a href="service-rules.html">Rules are admin-only</a>.</p>
+    <nav class="more" aria-label="Related drafts">
+      <a href="component-detail.html">Component detail</a>
+      <a href="event-prep.html">Event prep</a>
+      <a href="replacement.html">Replacement sign-off</a>
+    </nav>
+    <footer class="fineprint">
+      <p><strong>The software does not certify vehicle safety.</strong></p>
+      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+    </footer>
+  </main>
+</body>
+</html>

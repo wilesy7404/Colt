@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Service rules — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="admin">
+  <div class="admin-wrap">
+    <header class="appbar">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <p class="eyebrow">Admin · phone and desktop</p>
+        <h1>Service rules</h1>
+      </div>
+    </header>
+    <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+    <main>
+      <p class="disclaimer"><strong>Admin only.</strong> Rule edits are audited. Race-day users cannot change rules. Interval fields are placeholders, not numbers. No torque value and no procedure text are filled in. <strong>The software does not certify vehicle safety.</strong></p>
+      <div class="switch" role="group" aria-label="Who is looking">
+        <button type="button" class="is-on" data-switch="1" data-group="role" data-show="admin" aria-pressed="true">Admin editor</button>
+        <button type="button" data-switch="1" data-group="role" data-show="locked" aria-pressed="false">Race-day, locked</button>
+      </div>
+
+      <div class="split rule">
+        <div>
+          <section class="card" data-panel="admin" data-group="role">
+            <h2>Wheel stud rule</h2>
+            <p class="small muted">This editor is showing the wheel stud rule. Intervals stay placeholders. Saving is not available. An edit on a real system would be admin-only and would append an audit row.</p>
+            <div class="rule-src">
+              <p class="k">Source</p>
+              <p class="src-label">Team policy (community research) v1</p>
+              <p class="k">Revision</p>
+              <p class="src-label">v1</p>
+              <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+            </div>
+            <label class="field">
+              <span>Component / category</span>
+              <input type="text" value="Wheel studs" readonly>
+            </label>
+            <label class="field">
+              <span>Action</span>
+              <input type="text" placeholder="— not set —" autocomplete="off">
+            </label>
+
+            <h3>Intervals</h3>
+            <div class="indep" aria-label="Three intervals, not converted">
+              <div class="box">Laps</div>
+              <div class="gap">Not converted</div>
+              <div class="box">Engine hours</div>
+              <div class="gap">Not converted</div>
+              <div class="box">Calendar</div>
+            </div>
+            <p>Lap, engine-hour, and calendar intervals are independent. This screen does not convert one into another. There is no approved conversion.</p>
+            <label class="field">
+              <span>Lap interval</span>
+              <input type="text" value="TBD (admin rule required)" readonly>
+              <span class="hint">Placeholder. Not a number. Independent metric. Not derived from engine hours.</span>
+            </label>
+            <label class="field">
+              <span>Engine-hour interval</span>
+              <input type="text" value="TBD (admin rule required)" readonly>
+              <span class="hint">Placeholder. Not a number. Independent metric. Not derived from laps.</span>
+            </label>
+            <label class="field">
+              <span>Calendar interval</span>
+              <input type="text" value="TBD (admin rule required)" readonly>
+              <span class="hint">Placeholder. Not a number. Independent of laps and engine hours.</span>
+            </label>
+            <label class="field">
+              <span>Warning threshold</span>
+              <input type="text" placeholder="— not set —" autocomplete="off">
+              <span class="hint">No default percentage is supplied.</span>
+            </label>
+            <label class="field">
+              <span>Critical threshold</span>
+              <input type="text" placeholder="— not set —" autocomplete="off">
+              <span class="hint">No default percentage is supplied.</span>
+            </label>
+            <label class="field">
+              <span>Inspection limits</span>
+              <textarea placeholder="TBD (admin rule required)"></textarea>
+            </label>
+            <label class="field">
+              <span>Required measurements</span>
+              <textarea placeholder="— not set —"></textarea>
+            </label>
+            <label class="field">
+              <span>Required sign-offs</span>
+              <textarea placeholder="— not set —"></textarea>
+            </label>
+            <fieldset>
+              <legend>Safety criticality</legend>
+              <label class="radio"><input type="radio" name="criticality" checked> — not set —</label>
+              <label class="radio"><input type="radio" name="criticality"> Not marked safety critical</label>
+              <label class="radio"><input type="radio" name="criticality"> EXAMPLE: safety critical</label>
+              <p class="hint">A selection is not saved and is not an approved classification.</p>
+            </fieldset>
+            <label class="field">
+              <span>Approved procedure</span>
+              <textarea placeholder="— not set —"></textarea>
+            </label>
+            <label class="field">
+              <span>Source</span>
+              <input type="text" value="Team policy (community research) v1" readonly>
+            </label>
+            <label class="field">
+              <span>Revision</span>
+              <input type="text" value="v1" readonly>
+              <span class="hint">Same revision as in the source label. Not a factory document.</span>
+            </label>
+            <button type="button" class="btn primary" data-show="unsaved" data-group="save">Show unsaved example</button>
+            <div data-panel="unsaved" data-group="save" hidden>
+              <p class="warn-banner"><strong>Not saved</strong> No rule changed. No audit row was written. Race-day sessions cannot send a rule edit. Sync: not implemented.</p>
+            </div>
+          </section>
+
+          <section class="card" data-panel="locked" data-group="role" hidden>
+            <h2>Race-day view</h2>
+            <div class="block-banner" role="alert">
+              <strong>Rules are locked</strong>
+              <p>Race-day access. These controls are disabled. You cannot change service rules, intervals, limits, or the approved procedure.</p>
+            </div>
+            <div class="indep" aria-label="Three intervals, not converted">
+              <div class="box">Laps</div>
+              <div class="gap">Not converted</div>
+              <div class="box">Engine hours</div>
+              <div class="gap">Not converted</div>
+              <div class="box">Calendar</div>
+            </div>
+            <div class="rule-src">
+              <p class="k">Source</p>
+              <p class="src-label">Team policy (community research) v1</p>
+              <p class="k">Revision</p>
+              <p class="src-label">v1</p>
+              <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+            </div>
+            <fieldset disabled>
+              <label class="field">
+                <span>Component / category</span>
+                <input type="text" value="Wheel studs" readonly>
+              </label>
+              <label class="field">
+                <span>Action</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Lap interval</span>
+                <input type="text" value="TBD (admin rule required)" readonly>
+              </label>
+              <label class="field">
+                <span>Engine-hour interval</span>
+                <input type="text" value="TBD (admin rule required)" readonly>
+              </label>
+              <label class="field">
+                <span>Calendar interval</span>
+                <input type="text" value="TBD (admin rule required)" readonly>
+              </label>
+              <label class="field">
+                <span>Warning threshold</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Critical threshold</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Inspection limits</span>
+                <input type="text" value="TBD (admin rule required)" readonly>
+              </label>
+              <label class="field">
+                <span>Required measurements</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Required sign-offs</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Safety criticality</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Approved procedure</span>
+                <input type="text" value="— not set —" readonly>
+              </label>
+              <label class="field">
+                <span>Source</span>
+                <input type="text" value="Team policy (community research) v1" readonly>
+              </label>
+              <label class="field">
+                <span>Revision</span>
+                <input type="text" value="v1" readonly>
+              </label>
+              <button type="button" class="btn" disabled>Cannot change rules</button>
+            </fieldset>
+            <p class="hint">Lap, engine-hour, and calendar values stay independent here too. Nothing is converted.</p>
+          </section>
+        </div>
+
+        <aside class="sticky">
+          <section class="card">
+            <h2>Audit</h2>
+            <p>Rule edits are admin-only and audited. This mockup has no audit log and cannot record an editor.</p>
+            <p class="example-tag">Field shape only</p>
+            <dl class="kv">
+              <div><dt>Editor</dt><dd>— not set —</dd></div>
+              <div><dt>When</dt><dd>— not set —</dd></div>
+              <div><dt>What changed</dt><dd>— not set —</dd></div>
+              <div><dt>Source revision</dt><dd>— not set —</dd></div>
+            </dl>
+            <p class="hint">That list is the shape of an audit entry. It is not an audit record and not a history of edits.</p>
+          </section>
+          <section class="card">
+            <h2>Who can edit</h2>
+            <p>Admin: may open the editor. A real change still has to be checked and stored on the server, then audited.</p>
+            <p>Race day: read-only. The locked state on this page is the intended race-day screen. Hiding a button is not the same as a server check; the product still has to refuse a rule change from that role.</p>
+          </section>
+        </aside>
+      </div>
+
+      <nav class="more" aria-label="Related drafts">
+        <a href="component-detail.html">Component detail</a>
+        <a href="component-life.html">How statuses look on race day</a>
+        <a href="replacement.html">Sign-off that uses a rule</a>
+      </nav>
+      <footer class="fineprint">
+        <p><strong>The software does not certify vehicle safety.</strong></p>
+        <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+      </footer>
+    </main>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>

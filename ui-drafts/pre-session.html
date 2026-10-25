@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pre-session — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <header class="appbar">
+    <a class="back" href="index.html">All</a>
+    <div>
+      <p class="eyebrow">Race day · before the outing</p>
+      <h1>Pre-session</h1>
+    </div>
+  </header>
+  <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+  <main>
+    <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> A checked line is not a certification. Nothing on this page is saved.</p>
+
+    <section class="card">
+      <h2>Checklist</h2>
+      <p class="small muted">Example prompts, not an approved procedure. Tap to mark a line for this view only.</p>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>EXAMPLE: wheels and visible wheel hardware</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>EXAMPLE: brakes, fluid, and leaks</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>EXAMPLE: steering and suspension</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>EXAMPLE: battery restraint and electrical connections</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>EXAMPLE: open defects and overdue items reviewed</span>
+      </button>
+      <p class="note">Marks stay on this page only. Checking every line does not create a ready status and does not write a record.</p>
+    </section>
+
+    <section class="card">
+      <h2>Usage</h2>
+      <p>Two independent metrics. This screen does not add them together and does not convert one into the other.</p>
+      <div class="meter-pair" aria-label="Car totals, unset">
+        <div class="meter">
+          <span>Laps on car</span>
+          <strong>— not set —</strong>
+        </div>
+        <div class="meter">
+          <span>Engine hours</span>
+          <strong>— not set —</strong>
+        </div>
+      </div>
+      <p class="hint">No baseline is invented here. A blank reading stays unknown, not zero and not healthy.</p>
+      <label class="field">
+        <span>Session label <span class="hint">(optional)</span></span>
+        <input type="text" placeholder="— not set —" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Laps this session</span>
+        <input type="text" inputmode="numeric" placeholder="— not set —" autocomplete="off" aria-describedby="lap-hint">
+        <span class="hint" id="lap-hint">Independent metric. Not converted to engine hours.</span>
+      </label>
+      <label class="field">
+        <span>Engine hours this session</span>
+        <input type="text" inputmode="decimal" placeholder="— not set —" autocomplete="off" aria-describedby="hour-hint">
+        <span class="hint" id="hour-hint">Independent metric. Not converted to laps.</span>
+      </label>
+      <button type="button" class="btn primary" data-show="preview" data-group="usage">Show what would be captured</button>
+      <div data-panel="preview" data-group="usage" hidden>
+        <p class="warn-banner"><strong>Not recorded</strong> Laps and engine hours stay separate fields. They were not added together and were not converted. This mockup did not store a session.</p>
+      </div>
+    </section>
+
+    <nav class="more" aria-label="Related drafts">
+      <a href="event-prep.html">Event prep</a>
+      <a href="defects.html">Report a defect</a>
+      <a href="component-life.html">Component life</a>
+    </nav>
+    <footer class="fineprint">
+      <p><strong>The software does not certify vehicle safety.</strong></p>
+      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+    </footer>
+  </main>
+  <script src="js/draft.js"></script>
+</body>
+</html>

@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component detail — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="admin">
+  <div class="admin-wrap">
+    <header class="appbar">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <p class="eyebrow">Admin · phone and desktop</p>
+        <h1>Component detail</h1>
+      </div>
+    </header>
+    <p class="draft-flag">DRAFT MOCKUP · not a working app · EXAMPLE DATA · Sync: not implemented</p>
+    <main>
+      <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> History on this page is a blank shape, not work done on the car. Removed components stay forever. Race-day users cannot change service rules from here.</p>
+      <div class="split two">
+        <div>
+          <section class="card">
+            <h2>Three different identities</h2>
+            <div class="plate catalog">
+              <p class="k">Catalog part number</p>
+              <p class="v">EXAMPLE</p>
+              <p class="d">Type of part. Not a specific component. Not a real part number. A blank approved number stays — not set —.</p>
+            </div>
+            <div class="plate component">
+              <p class="k">Component ID</p>
+              <p class="v">EXAMPLE-COMP-OLD</p>
+              <p class="d">This physical component. The stripe marks identity, not health and not a status.</p>
+            </div>
+            <div class="plate kit">
+              <p class="k">Kit / stock ID</p>
+              <p class="v">EXAMPLE-KIT</p>
+              <p class="d">Sealed kit or stock unit it was issued from. Not the same as the component ID.</p>
+            </div>
+          </section>
+
+          <div class="switch" role="group" aria-label="Example installation state">
+            <button type="button" class="is-on" data-switch="1" data-group="fit" data-show="on" aria-pressed="true">On car</button>
+            <button type="button" data-switch="1" data-group="fit" data-show="off" aria-pressed="false">Removed</button>
+          </div>
+
+          <section class="card" data-panel="on" data-group="fit">
+            <h2>Current installation</h2>
+            <p class="example-tag">Example data</p>
+            <p>Example shape of a component on the car. Not a real mount.</p>
+            <dl class="kv">
+              <div><dt>Vehicle</dt><dd>2004 Nissan 350Z</dd></div>
+              <div><dt>Position</dt><dd>EXAMPLE</dd></div>
+              <div><dt>Installed</dt><dd>— not set —</dd></div>
+              <div><dt>Laps at install</dt><dd>— not set —</dd></div>
+              <div><dt>Engine hours at install</dt><dd>— not set —</dd></div>
+            </dl>
+            <p><span class="pill unknown">Unknown</span></p>
+            <p class="hint">Missing history and readings. This chip is not a healthy status. Lap and hour figures are independent and are not converted.</p>
+          </section>
+
+          <section class="card" data-panel="off" data-group="fit" hidden>
+            <h2>Not installed</h2>
+            <p class="example-tag">Example data</p>
+            <p>Example of a removed component. The row is not deleted. The history column stays. Nothing was removed on the real car.</p>
+            <dl class="kv">
+              <div><dt>Current position</dt><dd>— not set —</dd></div>
+              <div><dt>Disposition</dt><dd>— not set —</dd></div>
+              <div><dt>Record kept</dt><dd>Yes — permanent</dd></div>
+            </dl>
+          </section>
+        </div>
+
+        <div>
+          <section class="card">
+            <h2>Permanent history</h2>
+            <p>Installation and removal rows are kept forever, including after the component leaves the car. The rows below show the fields. They are not maintenance history.</p>
+            <ol class="tl">
+              <li>
+                <h3>Installation shape</h3>
+                <p class="example-tag">Example data</p>
+                <dl class="kv">
+                  <div><dt>When</dt><dd>— not set —</dd></div>
+                  <div><dt>Component ID</dt><dd>EXAMPLE-COMP-OLD</dd></div>
+                  <div><dt>Catalog part number</dt><dd>EXAMPLE</dd></div>
+                  <div><dt>Kit / stock ID</dt><dd>EXAMPLE-KIT</dd></div>
+                  <div><dt>Position</dt><dd>EXAMPLE</dd></div>
+                  <div><dt>Laps</dt><dd>EXAMPLE</dd></div>
+                  <div><dt>Engine hours</dt><dd>EXAMPLE</dd></div>
+                  <div><dt>Technician</dt><dd>EXAMPLE</dd></div>
+                  <div><dt>Procedure / source revision</dt><dd>— not set —</dd></div>
+                </dl>
+              </li>
+              <li>
+                <h3>Removal shape</h3>
+                <p class="example-tag">Example data</p>
+                <dl class="kv">
+                  <div><dt>When</dt><dd>— not set —</dd></div>
+                  <div><dt>Component ID</dt><dd>EXAMPLE-COMP-OLD</dd></div>
+                  <div><dt>Removal reason</dt><dd>— not set —</dd></div>
+                  <div><dt>Disposition</dt><dd>— not set —</dd></div>
+                  <div><dt>Laps</dt><dd>— not set —</dd></div>
+                  <div><dt>Engine hours</dt><dd>— not set —</dd></div>
+                  <div><dt>Measurements</dt><dd>TBD (admin rule required)</dd></div>
+                  <div><dt>Inspection</dt><dd>— not set —</dd></div>
+                  <div><dt>Notes</dt><dd>— not set —</dd></div>
+                  <div><dt>Still listed after removal</dt><dd>Yes</dd></div>
+                </dl>
+              </li>
+            </ol>
+            <p class="note">A newer component, EXAMPLE-COMP-NEW, would get its own history. It would not reuse or erase EXAMPLE-COMP-OLD. No such install is stored.</p>
+          </section>
+        </div>
+      </div>
+
+      <nav class="more" aria-label="Related drafts">
+        <a href="service-rules.html">Service rules</a>
+        <a href="replacement.html">Replacement sign-off</a>
+        <a href="wheel-studs.html">Wheel studs</a>
+        <a href="component-life.html">Component life</a>
+      </nav>
+      <footer class="fineprint">
+        <p><strong>The software does not certify vehicle safety.</strong></p>
+        <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
+      </footer>
+    </main>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>
