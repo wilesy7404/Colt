@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Service rules — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="admin">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Service rules</h1>
+        <p class="sub">Wheel studs</p>
+      </div>
+    </header>
+    <p><span class="chip unknown">Unknown</span></p>
+    <p class="ex">Example data</p>
+
+    <div class="switch" role="group" aria-label="Role">
+      <button type="button" class="is-on" data-switch="1" data-group="role" data-show="admin" aria-pressed="true">Admin</button>
+      <button type="button" data-switch="1" data-group="role" data-show="locked" aria-pressed="false">Race day</button>
+    </div>
+
+    <div class="split">
+      <div>
+        <div data-panel="admin" data-group="role">
+          <section>
+            <h2>Lug nut torque</h2>
+            <label class="field">
+              <span>Value</span>
+              <input type="text" value="80 ft-lb" autocomplete="off">
+            </label>
+            <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+            <p class="quiet">(2004 350Z owner's manual, third-party copy)</p>
+          </section>
+
+          <section>
+            <h2>Life</h2>
+            <p class="lead">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+            <dl class="rows">
+              <div><dt>Source</dt><dd>Colton decision 2026-10-25 (relayed by Sarg)</dd></div>
+            </dl>
+          </section>
+
+          <label class="field">
+            <span>Action</span>
+            <input type="text" placeholder="— not set —" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Warning threshold</span>
+            <input type="text" placeholder="— not set —" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Critical threshold</span>
+            <input type="text" placeholder="— not set —" autocomplete="off">
+          </label>
+          <label class="field">
+            <span>Inspection limits</span>
+            <textarea placeholder="Proposed - not approved"></textarea>
+          </label>
+          <p class="quiet">Proposed - not approved. Lap, hour, and calendar stay separate. No number is entered.</p>
+          <fieldset>
+            <legend>Measurement</legend>
+            <label class="radio"><input type="radio" name="meas-admin" checked> Not stated</label>
+            <label class="radio"><input type="radio" name="meas-admin"> None required</label>
+            <label class="radio"><input type="radio" name="meas-admin"> Entered · EXAMPLE</label>
+          </fieldset>
+          <label class="field">
+            <span>Sign-offs</span>
+            <textarea placeholder="— not set —"></textarea>
+          </label>
+          <fieldset>
+            <legend>Safety</legend>
+            <label class="radio"><input type="radio" name="criticality" checked> — not set —</label>
+            <label class="radio"><input type="radio" name="criticality"> Not safety critical</label>
+            <label class="radio"><input type="radio" name="criticality"> EXAMPLE safety critical</label>
+          </fieldset>
+          <label class="field">
+            <span>Procedure</span>
+            <textarea placeholder="— not set —"></textarea>
+          </label>
+          <button type="button" class="btn primary" data-show="unsaved" data-group="save">Save</button>
+          <p class="msg" data-panel="unsaved" data-group="save" hidden>Not saved.</p>
+        </div>
+
+        <div data-panel="locked" data-group="role" hidden>
+          <p class="msg">Rules are locked.</p>
+          <section>
+            <h2>Lug nut torque</h2>
+            <p class="lead">80 ft-lb</p>
+            <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+            <p class="quiet">(2004 350Z owner's manual, third-party copy)</p>
+          </section>
+          <p class="lead">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+          <p class="quiet">Colton decision 2026-10-25 (relayed by Sarg)</p>
+          <fieldset disabled>
+            <label class="field">
+              <span>Action</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Warning threshold</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Critical threshold</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Inspection limits</span>
+              <input type="text" value="Proposed - not approved" readonly>
+            </label>
+            <label class="field">
+              <span>Measurement</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Sign-offs</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Safety</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Procedure</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <label class="field">
+              <span>Source</span>
+              <input type="text" value="Colton decision 2026-10-25 (relayed by Sarg)" readonly>
+            </label>
+            <label class="field">
+              <span>Revision</span>
+              <input type="text" value="— not set —" readonly>
+            </label>
+            <button type="button" class="btn" disabled>Save</button>
+          </fieldset>
+        </div>
+      </div>
+
+      <aside>
+        <section>
+          <h2>Audit</h2>
+          <dl class="rows">
+            <div><dt>Editor</dt><dd>— not set —</dd></div>
+            <div><dt>When</dt><dd>— not set —</dd></div>
+            <div><dt>Change</dt><dd>— not set —</dd></div>
+            <div><dt>Revision</dt><dd>— not set —</dd></div>
+          </dl>
+        </section>
+        <p class="quiet">Race day is read-only.</p>
+      </aside>
+    </div>
+  </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a href="event-prep.html">Prep</a>
+    <a href="session-log.html">Session</a>
+    <a href="defects.html">Defects</a>
+    <a href="log-maintenance.html">Log</a>
+  </nav>
+  <script src="js/draft.js"></script>
+</body>
+</html>

@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Defects — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Defects</h1>
+      </div>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+    <p class="lead">Critical defect open.</p>
+
+    <section>
+      <h2>Open</h2>
+      <dl class="rows">
+        <div><dt>Critical</dt><dd>EXAMPLE brakes · — not set —</dd></div>
+        <div><dt>Needs review</dt><dd>— not set —</dd></div>
+      </dl>
+    </section>
+
+    <div class="switch thirds" role="group" aria-label="Flow">
+      <button type="button" class="is-on" data-switch="1" data-group="flow" data-show="report" aria-pressed="true">Report</button>
+      <button type="button" data-switch="1" data-group="flow" data-show="triage" aria-pressed="false">Triage</button>
+      <button type="button" data-switch="1" data-group="flow" data-show="resolve" aria-pressed="false">Resolve</button>
+    </div>
+
+    <section data-panel="report" data-group="flow">
+      <label class="field">
+        <span>Where</span>
+        <input type="text" placeholder="— not set —" autocomplete="off">
+      </label>
+      <fieldset>
+        <legend>Severity</legend>
+        <label class="radio"><input type="radio" name="severity" checked> Needs review</label>
+        <label class="radio"><input type="radio" name="severity"> Critical</label>
+      </fieldset>
+      <label class="field">
+        <span>Observed</span>
+        <textarea placeholder="— not set —"></textarea>
+      </label>
+      <button type="button" class="btn primary" data-show="triage" data-group="flow">Triage</button>
+    </section>
+
+    <section data-panel="triage" data-group="flow" hidden>
+      <dl class="rows">
+        <div><dt>Where</dt><dd>EXAMPLE</dd></div>
+        <div><dt>Severity</dt><dd>Critical</dd></div>
+        <div><dt>Work</dt><dd>None</dd></div>
+        <div><dt>Inspection</dt><dd>None</dd></div>
+      </dl>
+      <fieldset>
+        <legend>Confirm</legend>
+        <label class="radio"><input type="radio" name="triage-sev"> Needs review</label>
+        <label class="radio"><input type="radio" name="triage-sev" checked> Critical</label>
+      </fieldset>
+      <button type="button" class="btn primary" data-show="resolve" data-group="flow">Resolve</button>
+    </section>
+
+    <section data-panel="resolve" data-group="flow" hidden>
+      <div class="switch" role="group" aria-label="Who closes">
+        <button type="button" class="is-on" data-switch="1" data-group="who" data-show="raceday" aria-pressed="true">Race day</button>
+        <button type="button" data-switch="1" data-group="who" data-show="admin" aria-pressed="false">Admin</button>
+      </div>
+      <div data-panel="raceday" data-group="who">
+        <p class="msg">Only an admin can close a critical defect.</p>
+        <button type="button" class="btn" disabled>Close</button>
+      </div>
+      <div data-panel="admin" data-group="who" hidden>
+        <button type="button" class="btn primary" data-show="closed" data-group="closed">Close</button>
+        <p class="msg" data-panel="closed" data-group="closed" hidden>Not saved.</p>
+      </div>
+
+      <div class="switch thirds" role="group" aria-label="Link">
+        <button type="button" class="is-on" data-switch="1" data-group="link" data-show="none" aria-pressed="true">No link</button>
+        <button type="button" data-switch="1" data-group="link" data-show="work" aria-pressed="false">Work</button>
+        <button type="button" data-switch="1" data-group="link" data-show="inspect" aria-pressed="false">Inspection</button>
+      </div>
+      <div data-panel="none" data-group="link">
+        <p class="msg">Not resolved. Link work or an inspection.</p>
+        <dl class="rows">
+          <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+        </dl>
+      </div>
+      <div data-panel="work" data-group="link" hidden>
+        <dl class="rows">
+          <div><dt>Work</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+        </dl>
+        <p class="msg">Not saved.</p>
+      </div>
+      <div data-panel="inspect" data-group="link" hidden>
+        <dl class="rows">
+          <div><dt>Inspection</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Limit</dt><dd>Proposed - not approved</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+        </dl>
+        <p class="quiet">Proposed - not approved. An inspection does not reset laps or hours.</p>
+        <p class="msg">Not saved.</p>
+      </div>
+    </section>
+  </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a href="event-prep.html">Prep</a>
+    <a href="session-log.html">Session</a>
+    <a class="on" href="defects.html">Defects</a>
+    <a href="log-maintenance.html">Log</a>
+  </nav>
+  <script src="js/draft.js"></script>
+</body>
+</html>

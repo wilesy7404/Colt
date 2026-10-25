@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Restore — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="admin">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Restore</h1>
+        <p class="sub">Admin</p>
+      </div>
+    </header>
+    <p class="ex">Example data</p>
+    <div class="switch" role="group" aria-label="System state">
+      <button type="button" class="is-on" data-switch="1" data-group="sys" data-show="empty" aria-pressed="true">Empty</button>
+      <button type="button" data-switch="1" data-group="sys" data-show="full" aria-pressed="false">Has data</button>
+    </div>
+
+    <section data-panel="empty" data-group="sys">
+      <p class="lead">Restore is allowed into an empty system.</p>
+      <button type="button" class="btn primary" data-show="ran" data-group="ran">Restore</button>
+      <p class="msg" data-panel="ran" data-group="ran" hidden>Not run.</p>
+    </section>
+
+    <section data-panel="full" data-group="sys" hidden>
+      <p class="lead">This system has data.</p>
+      <p class="quiet">Recovery is a command-line process. It archives the database first. It does not overwrite.</p>
+    </section>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>

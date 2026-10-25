@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="admin">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Component</h1>
+        <p class="sub">Admin</p>
+      </div>
+    </header>
+    <p><span class="chip unknown">Unknown</span></p>
+    <p class="ex">Example data</p>
+
+    <div class="split">
+      <div>
+        <section>
+          <h2>Wheel stud set</h2>
+          <dl class="rows">
+            <div><dt>Catalog part number</dt><dd>— not set —, admin must enter</dd></div>
+            <div><dt>Set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+            <div><dt>Bag</dt><dd>5 for one corner</dd></div>
+            <div><dt>Corner</dt><dd>LF</dd></div>
+          </dl>
+          <p class="quiet">One label. No per-stud IDs.</p>
+        </section>
+
+        <div class="switch" role="group" aria-label="Installation">
+          <button type="button" class="is-on" data-switch="1" data-group="fit" data-show="on" aria-pressed="true">On car</button>
+          <button type="button" data-switch="1" data-group="fit" data-show="off" aria-pressed="false">Removed</button>
+        </div>
+
+        <section data-panel="on" data-group="fit">
+          <h2>On car</h2>
+          <dl class="rows">
+            <div><dt>Vehicle</dt><dd>2004 Nissan 350Z</dd></div>
+            <div><dt>Corner</dt><dd>LF</dd></div>
+            <div><dt>Installed</dt><dd>— not set —</dd></div>
+            <div><dt>Laps</dt><dd>— not set —</dd></div>
+            <div><dt>Engine hours</dt><dd>— not set —</dd></div>
+          </dl>
+        </section>
+
+        <section data-panel="off" data-group="fit" hidden>
+          <h2>Removed</h2>
+          <dl class="rows">
+            <div><dt>Corner</dt><dd>LF</dd></div>
+            <div><dt>Disposition</dt><dd>Set scrapped</dd></div>
+            <div><dt>Record</dt><dd>Kept</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <section>
+        <h2>History</h2>
+        <dl class="rows">
+          <div><dt>Installed</dt><dd>LF · EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+          <div><dt>Laps</dt><dd>86 EXAMPLE</dd></div>
+          <div><dt>Hours</dt><dd>4.5 EXAMPLE</dd></div>
+          <div><dt>Set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+          <div><dt>Removed</dt><dd>Set scrapped</dd></div>
+          <div><dt>Evidence</dt><dd>Photo or notes on the set</dd></div>
+          <div><dt>Reason</dt><dd>— not set —</dd></div>
+          <div><dt>Measurement</dt><dd>Proposed - not approved</dd></div>
+          <div><dt>After removal</dt><dd>Kept</dd></div>
+        </dl>
+        <p class="quiet">Proposed - not approved. The set record stays after removal.</p>
+      </section>
+    </div>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>

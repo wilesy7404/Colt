@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Component life — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Component life</h1>
+      </div>
+    </header>
+    <p class="ex">Example data</p>
+    <p class="chips" aria-label="Statuses">
+      <span class="chip ready">Ready</span>
+      <span class="chip due">Due</span>
+      <span class="chip blocked">Blocked</span>
+      <span class="chip unknown">Unknown</span>
+    </p>
+    <p class="quiet">Unknown is not a pass. These labels are not calculated.</p>
+
+    <section>
+      <h2>Wheel studs</h2>
+      <p><span class="chip unknown">Unknown</span></p>
+      <p class="lead">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+      <dl class="rows">
+        <div><dt>Stud</dt><dd>ARP extended</dd></div>
+        <div><dt>Part number</dt><dd>— not set —, admin must enter</dd></div>
+        <div><dt>Set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+        <div><dt>Corner</dt><dd>LF</dd></div>
+        <div><dt>Laps</dt><dd>UNKNOWN</dd></div>
+        <div><dt>Hours</dt><dd>UNKNOWN</dd></div>
+        <div><dt>Source</dt><dd>Colton decision 2026-10-25 (relayed by Sarg)</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Other parts</h2>
+      <dl class="rows">
+        <div><dt>Ready</dt><dd>History present. Interval blank until a rule exists.</dd></div>
+        <div><dt>Due</dt><dd>Proposed - not approved</dd></div>
+        <div><dt>Blocked</dt><dd>Failed inspection. Limit not set.</dd></div>
+        <div><dt>Source</dt><dd>Proposed - not approved</dd></div>
+      </dl>
+      <p class="quiet">Lap and hour intervals are not converted. A missing reading stays unknown.</p>
+    </section>
+  </div>
+</body>
+</html>

@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Replacement — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Replacement</h1>
+      </div>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+
+    <section>
+      <h2>Lug nut torque</h2>
+      <p class="lead">80 ft-lb</p>
+      <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+      <p class="quiet">Admin edits this on the stud rule.</p>
+    </section>
+
+    <p class="quiet">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+    <p class="quiet">Colton decision 2026-10-25 (relayed by Sarg)</p>
+    <p class="msg">Set still sealed.</p>
+    <p class="msg">Part number not set.</p>
+
+    <div class="switch" role="group" aria-label="Transaction">
+      <button type="button" class="is-on" data-switch="1" data-group="tx" data-show="failed" aria-pressed="true">Failed</button>
+      <button type="button" data-switch="1" data-group="tx" data-show="ok" aria-pressed="false">Example</button>
+    </div>
+
+    <div data-panel="failed" data-group="tx">
+      <section>
+        <h2>Sign-off</h2>
+        <dl class="rows">
+          <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+          <div><dt>Stud</dt><dd>ARP extended</dd></div>
+          <div><dt>Set label</dt><dd class="mono">One label · bag of 5</dd></div>
+        </dl>
+        <div class="switch" role="group" aria-label="Performed at">
+          <button type="button" class="is-on" data-switch="1" data-group="when" data-show="future" aria-pressed="true">Future</button>
+          <button type="button" data-switch="1" data-group="when" data-show="back" aria-pressed="false">Earlier</button>
+        </div>
+        <div data-panel="future" data-group="when">
+          <label class="field bad">
+            <span>Performed at</span>
+            <input type="text" value="EXAMPLE · 15 Jun 2024, 18:00" readonly>
+            <span class="err">Performed at cannot be in the future.</span>
+          </label>
+        </div>
+        <div data-panel="back" data-group="when" hidden>
+          <label class="field">
+            <span>Performed at</span>
+            <input type="text" value="EXAMPLE · 13 Jun 2024, 16:10" readonly>
+          </label>
+          <p class="quiet"><span class="mark">Backdated</span></p>
+        </div>
+
+        <label class="field">
+          <span>Old set label</span>
+          <input type="text" value="EXAMPLE-SET" readonly>
+        </label>
+        <label class="field bad">
+          <span>New set label</span>
+          <input type="text" placeholder="One label" autocomplete="off">
+          <span class="err">Required. One label for the bag.</span>
+        </label>
+        <button type="button" class="btn">Scan label</button>
+        <label class="field bad">
+          <span>Part number</span>
+          <input type="text" value="— not set —, admin must enter" readonly>
+          <span class="err">Cannot use until an admin enters it.</span>
+        </label>
+        <label class="field bad">
+          <span>Corner</span>
+          <input type="text" placeholder="LF, RF, LR, or RR" autocomplete="off">
+          <span class="err">Corner required.</span>
+        </label>
+        <label class="field bad">
+          <span>Laps</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+          <span class="err">Required. Separate from hours.</span>
+        </label>
+        <label class="field">
+          <span>Engine hours</span>
+          <input type="text" value="4.5 EXAMPLE" readonly>
+        </label>
+        <fieldset>
+          <legend>Measurement</legend>
+          <div class="switch thirds" role="group" aria-label="Measurement">
+            <button type="button" data-switch="1" data-group="meas" data-show="none" aria-pressed="false">None</button>
+            <button type="button" class="is-on" data-switch="1" data-group="meas" data-show="unstated" aria-pressed="true">Not stated</button>
+            <button type="button" data-switch="1" data-group="meas" data-show="entered" aria-pressed="false">Entered</button>
+          </div>
+          <p class="quiet" data-panel="none" data-group="meas" hidden>None required.</p>
+          <p class="msg" data-panel="unstated" data-group="meas">Not stated.</p>
+          <p class="quiet" data-panel="entered" data-group="meas" hidden>EXAMPLE</p>
+        </fieldset>
+        <label class="field bad">
+          <span>Inspection</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+          <span class="err">Required.</span>
+        </label>
+        <label class="field">
+          <span>Technician</span>
+          <input type="text" value="EXAMPLE User" readonly>
+        </label>
+        <label class="field bad">
+          <span>Removal reason</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+          <span class="err">Required.</span>
+        </label>
+        <label class="field">
+          <span>Disposition</span>
+          <input type="text" value="Scrapped" readonly>
+        </label>
+        <label class="field">
+          <span>Notes</span>
+          <textarea placeholder="Optional"></textarea>
+        </label>
+        <label class="field bad">
+          <span>Source</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+          <span class="err">Required.</span>
+        </label>
+        <label class="field bad">
+          <span>Revision</span>
+          <input type="text" placeholder="— not set —" autocomplete="off">
+          <span class="err">Required.</span>
+        </label>
+        <button type="button" class="btn primary" disabled>Commit</button>
+      </section>
+      <section>
+        <h2>Unchanged</h2>
+        <dl class="rows">
+          <div><dt>Record</dt><dd>Not saved</dd></div>
+          <div><dt>Set</dt><dd>Still sealed</dd></div>
+          <div><dt>Baseline</dt><dd>Not reset</dd></div>
+        </dl>
+      </section>
+    </div>
+
+    <div data-panel="ok" data-group="tx" hidden>
+      <section>
+        <h2>Example fields</h2>
+        <dl class="rows">
+          <div><dt>Old set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+          <div><dt>New set label</dt><dd class="mono">EXAMPLE-SET-NEW</dd></div>
+          <div><dt>Stud</dt><dd>ARP extended</dd></div>
+          <div><dt>Part number</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Corner</dt><dd>LF</dd></div>
+          <div><dt>Set</dt><dd>Bag of 5 · one label</dd></div>
+          <div><dt>Laps</dt><dd>86 EXAMPLE</dd></div>
+          <div><dt>Hours</dt><dd>4.5 EXAMPLE</dd></div>
+          <div><dt>Measurement</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Inspection</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+          <div><dt>Performed at</dt><dd>EXAMPLE · earlier</dd></div>
+          <div><dt>Marker</dt><dd>Backdated</dd></div>
+          <div><dt>Reason</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Disposition</dt><dd>Set scrapped</dd></div>
+          <div><dt>Evidence</dt><dd>Photo or notes on the set</dd></div>
+          <div><dt>Source</dt><dd>Colton decision 2026-10-25 (relayed by Sarg)</dd></div>
+          <div><dt>Revision</dt><dd>— not set —</dd></div>
+        </dl>
+        <p class="quiet">Laps and hours would move together, as separate numbers. The set would open only in that commit.</p>
+        <button type="button" class="btn" disabled>Commit</button>
+        <p class="msg">Not saved.</p>
+      </section>
+    </div>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>

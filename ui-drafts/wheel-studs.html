@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wheel studs — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Wheel studs</h1>
+      </div>
+    </header>
+    <p><span class="chip unknown">Unknown</span></p>
+    <p class="ex">Example data</p>
+
+    <p class="lead">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+    <p class="quiet">Colton decision 2026-10-25 (relayed by Sarg)</p>
+
+    <section>
+      <h2>Lug nut torque</h2>
+      <p class="lead">80 ft-lb</p>
+      <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+      <p class="quiet">(2004 350Z owner's manual, third-party copy)</p>
+    </section>
+
+    <section>
+      <h2>Rule</h2>
+      <dl class="rows">
+        <div><dt>Source</dt><dd>Colton decision 2026-10-25 (relayed by Sarg)</dd></div>
+        <div><dt>Stud</dt><dd>ARP extended</dd></div>
+        <div><dt>Part number</dt><dd>— not set —, admin must enter</dd></div>
+      </dl>
+      <p class="msg">Cannot use until an admin enters the part number.</p>
+    </section>
+
+    <section>
+      <h2>Set</h2>
+      <p class="lead"><span class="mono">EXAMPLE-SET</span></p>
+      <dl class="rows">
+        <div><dt>Bag</dt><dd>5 for one corner</dd></div>
+        <div><dt>Corner</dt><dd>LF</dd></div>
+        <div><dt>State</dt><dd>Sealed</dd></div>
+        <div><dt>Opens</dt><dd>On commit</dd></div>
+      </dl>
+      <button type="button" class="btn">Scan label</button>
+    </section>
+
+    <section>
+      <h2>Stock</h2>
+      <dl class="rows">
+        <div><dt>On hand</dt><dd>4 EXAMPLE sealed sets</dd></div>
+        <div><dt>Target</dt><dd>4 sealed sets</dd></div>
+        <div><dt>Warning</dt><dd>At 4 or fewer</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Removal</h2>
+      <p class="msg">Photo or notes required.</p>
+      <dl class="rows">
+        <div><dt>Set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+        <div><dt>Corner</dt><dd>LF</dd></div>
+        <div><dt>Disposition</dt><dd>Scrapped</dd></div>
+        <div><dt>Laps</dt><dd>UNKNOWN</dd></div>
+        <div><dt>Hours</dt><dd>UNKNOWN</dd></div>
+        <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+      <p class="quiet">The whole set. Evidence stays on this record.</p>
+      <a class="btn primary" href="stud-break.html">Log a stud break</a>
+    </section>
+  </div>
+</body>
+</html>

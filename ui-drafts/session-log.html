@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Session — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="overview.html">Car</a>
+      <div>
+        <h1>Session</h1>
+        <p class="sub">Laps and hours</p>
+      </div>
+    </header>
+    <p><span class="chip unknown">Unknown</span></p>
+    <p class="ex">Example data</p>
+
+    <section>
+      <h2>This session</h2>
+      <label class="field">
+        <span>Laps</span>
+        <input type="text" inputmode="numeric" placeholder="— not set —" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Engine hours</span>
+        <input type="text" inputmode="decimal" placeholder="— not set —" autocomplete="off">
+      </label>
+      <p class="quiet">Separate fields. Neither fills the other. A blank is not zero.</p>
+    </section>
+
+    <section>
+      <h2>On the car</h2>
+      <div class="meters">
+        <div><span>Laps</span><strong>UNKNOWN</strong></div>
+        <div><span>Hours</span><strong>UNKNOWN</strong></div>
+      </div>
+    </section>
+
+    <label class="field">
+      <span>Session name</span>
+      <input type="text" placeholder="Optional" autocomplete="off">
+    </label>
+    <button type="button" class="btn primary" data-show="preview" data-group="usage">Review</button>
+    <p class="msg" data-panel="preview" data-group="usage" hidden>Not recorded.</p>
+  </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a href="event-prep.html">Prep</a>
+    <a class="on" href="session-log.html">Session</a>
+    <a href="defects.html">Defects</a>
+    <a href="log-maintenance.html">Log</a>
+  </nav>
+  <script src="js/draft.js"></script>
+</body>
+</html>

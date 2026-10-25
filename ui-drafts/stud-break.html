@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Stud break — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Stud break</h1>
+      </div>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+
+    <section>
+      <h2>Corner</h2>
+      <div class="pick two" role="group" aria-label="Corner">
+        <button type="button" data-pick="corner" data-value="LF" aria-pressed="false">LF<small>Left front</small></button>
+        <button type="button" data-pick="corner" data-value="RF" aria-pressed="false">RF<small>Right front</small></button>
+        <button type="button" data-pick="corner" data-value="LR" aria-pressed="false">LR<small>Left rear</small></button>
+        <button type="button" data-pick="corner" data-value="RR" aria-pressed="false">RR<small>Right rear</small></button>
+      </div>
+      <p class="msg" data-need="corner">Corner required.</p>
+    </section>
+
+    <section>
+      <h2>Set label</h2>
+      <div class="pick" role="group" aria-label="Set label">
+        <button type="button" class="is-on wide" data-pick="kit" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
+        <button type="button" class="wide" data-pick="kit" data-value="EXAMPLE-SET" aria-pressed="false">EXAMPLE-SET</button>
+      </div>
+      <p class="quiet">One label for this corner. <span data-pick-out="kit">UNKNOWN</span>.</p>
+      <button type="button" class="btn">Scan label</button>
+      <p class="quiet">ARP extended. Part number — not set —, admin must enter.</p>
+    </section>
+
+    <section>
+      <h2>Which position broke</h2>
+      <div class="pick five" role="group" aria-label="Which position broke">
+        <button type="button" data-pick="pos" data-value="1" aria-pressed="false">1</button>
+        <button type="button" data-pick="pos" data-value="2" aria-pressed="false">2</button>
+        <button type="button" data-pick="pos" data-value="3" aria-pressed="false">3</button>
+        <button type="button" data-pick="pos" data-value="4" aria-pressed="false">4</button>
+        <button type="button" data-pick="pos" data-value="5" aria-pressed="false">5</button>
+      </div>
+      <p class="quiet">Optional. Stored on the set. <span data-pick-out="pos">Not entered</span>.</p>
+    </section>
+
+    <section>
+      <h2>Readings</h2>
+      <div class="switch" role="group" aria-label="Readings">
+        <button type="button" class="is-on" data-switch="1" data-group="reads" data-show="unk" aria-pressed="true">Unknown</button>
+        <button type="button" data-switch="1" data-group="reads" data-show="known" aria-pressed="false">Known</button>
+      </div>
+      <div data-panel="unk" data-group="reads">
+        <div class="meters">
+          <div><span>Laps</span><strong>UNKNOWN</strong></div>
+          <div><span>Hours</span><strong>UNKNOWN</strong></div>
+        </div>
+      </div>
+      <div data-panel="known" data-group="reads" hidden>
+        <div class="meters">
+          <div><span>Laps</span><strong>86 EXAMPLE</strong></div>
+          <div><span>Hours</span><strong>4.5 EXAMPLE</strong></div>
+        </div>
+      </div>
+      <p class="quiet">Laps and hours stay separate. Unknown is not zero.</p>
+    </section>
+
+    <section>
+      <h2>Event</h2>
+      <p class="lead">UNKNOWN</p>
+    </section>
+
+    <section>
+      <h2>Torque method</h2>
+      <div class="pick" role="group" aria-label="Torque method">
+        <button type="button" class="is-on wide" data-pick="method" data-value="UNKNOWN" data-show="method-unk" data-group="method" aria-pressed="true">UNKNOWN</button>
+        <button type="button" class="wide" data-pick="method" data-value="EXAMPLE" data-show="method-ex" data-group="method" aria-pressed="false">EXAMPLE</button>
+        <button type="button" class="wide" data-pick="method" data-value="TYPED" data-show="method-type" data-group="method" aria-pressed="false">Type method</button>
+      </div>
+      <div data-panel="method-unk" data-group="method">
+        <p class="quiet">Words only. <span data-pick-out="method">UNKNOWN</span>.</p>
+      </div>
+      <div data-panel="method-ex" data-group="method" hidden>
+        <p class="quiet">EXAMPLE. Words only.</p>
+      </div>
+      <div data-panel="method-type" data-group="method" hidden>
+        <label class="field">
+          <span>Method</span>
+          <input type="text" placeholder="Method name" autocomplete="off">
+          <span class="hint">Words only.</span>
+        </label>
+      </div>
+    </section>
+
+    <section>
+      <h2>Wheel</h2>
+      <div class="pick two" role="group" aria-label="Wheel type">
+        <button type="button" class="is-on" data-pick="wheel" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
+        <button type="button" data-pick="wheel" data-value="EXAMPLE" aria-pressed="false">EXAMPLE</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Nut</h2>
+      <div class="pick two" role="group" aria-label="Nut type">
+        <button type="button" class="is-on" data-pick="nut" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
+        <button type="button" data-pick="nut" data-value="EXAMPLE" aria-pressed="false">EXAMPLE</button>
+      </div>
+    </section>
+
+    <section>
+      <h2>Performed at</h2>
+      <dl class="rows">
+        <div><dt>Logged</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+      <div class="switch" role="group" aria-label="Performed at">
+        <button type="button" class="is-on" data-switch="1" data-group="when" data-show="future" aria-pressed="true">Future</button>
+        <button type="button" data-switch="1" data-group="when" data-show="back" aria-pressed="false">Earlier</button>
+      </div>
+      <div data-panel="future" data-group="when">
+        <label class="field bad">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · later than logged" readonly>
+          <span class="err">Performed at cannot be in the future.</span>
+        </label>
+      </div>
+      <div data-panel="back" data-group="when" hidden>
+        <label class="field">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · earlier than logged" readonly>
+        </label>
+        <p class="quiet"><span class="mark">Backdated</span></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sign-off</h2>
+      <dl class="rows">
+        <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+    </section>
+
+    <section>
+      <h2>Evidence</h2>
+      <div class="switch thirds" role="group" aria-label="Evidence">
+        <button type="button" class="is-on" data-switch="1" data-group="evid" data-show="nonev" aria-pressed="true">None</button>
+        <button type="button" data-switch="1" data-group="evid" data-show="notesev" aria-pressed="false">Notes</button>
+        <button type="button" data-switch="1" data-group="evid" data-show="photoev" aria-pressed="false">Photo</button>
+      </div>
+      <div data-panel="nonev" data-group="evid">
+        <p class="msg">Photo or notes required.</p>
+        <label class="field">
+          <span>Notes</span>
+          <textarea placeholder="— not set —"></textarea>
+        </label>
+        <div class="photo">No photo</div>
+      </div>
+      <div data-panel="notesev" data-group="evid" hidden>
+        <p class="quiet">Notes EXAMPLE. Scrapped.</p>
+      </div>
+      <div data-panel="photoev" data-group="evid" hidden>
+        <div class="photo">EXAMPLE photo. Not stored.</div>
+        <p class="quiet">Scrapped.</p>
+      </div>
+    </section>
+
+    <button type="button" class="btn primary" data-show="unsaved" data-group="save">Review</button>
+    <p class="msg" data-panel="unsaved" data-group="save" hidden>Not recorded. Set stays sealed.</p>
+  </div>
+  <script src="js/draft.js"></script>
+</body>
+</html>
