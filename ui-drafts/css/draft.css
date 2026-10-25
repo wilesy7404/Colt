@@ -357,6 +357,22 @@ fieldset:disabled textarea {
 .item .chip { margin: 0; }
 .group { margin-top: 26px; }
 .group h2 { margin-bottom: 2px; }
+.systems { margin-top: 18px; }
+.systems > h2 { margin: 0; }
+.item.sub { padding-left: 16px; }
+.sys {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  margin-top: 22px;
+  padding-top: 8px;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none;
+}
+.sys h2 { margin: 0; }
+.sys .chip { margin: 0; }
 
 .nav {
   position: fixed;

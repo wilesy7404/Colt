@@ -10,7 +10,7 @@ Static phone-first mockups for a one-car team (2004 Nissan 350Z, NASA/SCCA). The
 
 Open `index.html` in a browser. There is no build step.
 
-Each screen has one quiet `Example data` tag. Sample readings include the word `EXAMPLE`. Empty values say `— not set —` or `UNKNOWN`. Intervals are blank or `Proposed`. Proposed is a label, not a number. No interval number, part number, or maintenance history is invented.
+Each screen has one quiet `Example data` tag. Sample readings include the word `EXAMPLE`. Empty values say `— not set —` or `UNKNOWN`. A rule or practice the owner has not approved shows as `Proposed - not approved`. No interval number, part number, or maintenance history is invented.
 
 Status chips are Ready, Due, Blocked, or Unknown. Unknown is grey and outlined. It is not a pass. Missing data stays Unknown. Blocking problems are one short line.
 
@@ -22,7 +22,7 @@ The old prototype lives under `archive/prototype/`. These drafts do not modify i
 
 The index and the bottom nav lead with these five:
 
-1. Car overview — `overview.html`. Brakes (pads, rotors, fluid), fluids and oils, tires, suspension, engine and drivetrain, and wheels/studs as one row. One chip per item.
+1. Car overview — `overview.html`. Brakes expands to pads, rotors, and fluid. Fluids and oils, tires, suspension, engine and drivetrain, and wheels and studs are separate systems. One chip per item. Missing data is Unknown.
 2. Event prep — `event-prep.html`. Checklist. A critical defect blocks the screen.
 3. Session — `session-log.html`. Laps and engine hours are separate fields. A blank is not zero.
 4. Defects — `defects.html`. Report, triage, resolve. Only an admin can close a critical defect. Resolve still needs linked work or an inspection.
@@ -42,7 +42,7 @@ A set is one labeled bag of 5 for one corner (LF, RF, LR, RR). The UI shows and 
 
 Approved stud name: ARP extended. Part number: — not set —, admin must enter. The set opens only on a successful commit. Stock is sealed bags only. Target 4. Warning at 4 or fewer.
 
-Life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).
+Life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25). Source: Colton decision 2026-10-25 (relayed by Sarg). Torque keeps its own source and is not this decision.
 
 ## Other screens
 
@@ -65,8 +65,8 @@ Service rules are admin-editable and locked for race day. Restore is allowed onl
 - Only an admin can close a critical defect.
 - Restore runs only into an empty system. A system that already has data is recovered from the command line, which archives the database first.
 - Lug nut torque is 80 ft-lb. Source: Owner's manual p. 6-6 · approved by Colton 2026-10-25. Admin can edit the value. Detail on the stud rule: (2004 350Z owner's manual, third-party copy).
-- Wheel stud life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).
-- Intervals are blank or Proposed. Proposed is not a number.
+- Wheel stud life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25). Source: Colton decision 2026-10-25 (relayed by Sarg).
+- Any other rule or practice the owner has not approved shows as Proposed - not approved. No interval number is invented.
 
 ## Open questions
 
