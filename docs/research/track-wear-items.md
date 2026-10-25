@@ -261,7 +261,7 @@ These are starting choices so the car has a written rule while failure data is s
 - No mile, lap, or hour life. Unknown.
 - At every wheel change, the nut must match the wheel seat. Do not put Z1’s 60 degree open nuts on a factory shank-style wheel. Z1 says they are not compatible.
 - Replace a nut that is galled, rounded, cross-threaded, or that was used to draw a stud into the hub. Core4’s galling note and the my350z thread damage are the reasons.
-- The torque value is the stud policy in `wheel-studs.md`. It stays blank until the car’s manual or the stud maker confirms it.
+- Lug-nut torque is the stud policy in `wheel-studs.md`: 80 ft-lb (108 N·m), admin-editable. Source label, exact: '2004 Nissan 350Z factory service manual (third-party copy, cited), approved by Colton Wiles on 2026-10-25'. Forum figures of 90–100 ft-lb and “20 over” are not adopted.
 
 ### Brake pads and rotors
 

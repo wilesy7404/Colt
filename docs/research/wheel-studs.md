@@ -166,7 +166,7 @@ Section 7.7, Lug Nuts:
 - 7.7.1 Lug bolts may be upgraded to threaded wheel studs, and that upgrade is highly recommended. **It is recommended that threaded wheel studs be replaced every two years.**
 - 7.7.2 Lug bolts may be upgraded to press-in wheel studs, and that upgrade is highly recommended. Hubs may be machined only to accept press-in studs.
 
-The two-year sentence is attached to threaded (screw-in) studs. The press-in sentence does not repeat it. Spec3 also says its own regulations supersede the CCR when they conflict, and that cars must otherwise meet the CCR. Nothing in the fetched Spec3 text makes this interval apply to a 350Z.
+The two-year sentence is attached to threaded (screw-in) studs. The press-in sentence does not repeat it. Spec3 also says its own regulations supersede the CCR when they conflict, and that cars must otherwise meet the CCR. Nothing in the fetched Spec3 text makes this interval apply to a 350Z. Cited reference only. Not team policy.
 
 #### SCCA General Competition Rules
 
@@ -208,7 +208,7 @@ No fetched SCCA page sets a stud replacement interval in miles, hours, events, o
 2. **Lubricant on the fastener.** Reproduced Nissan text: no oil or grease on studs or nuts. ARP: Ultra-Torque on the threads and nut bearing face for the torques ARP publishes, and not mixed with Loctite. Core4: a small amount of anti-seize on a galled aluminum nut seat. Different surfaces, different sources.
 3. **Impact tools.** RallyWays says not to impact lug nuts. my350z write-ups use an impact to draw a stud into the hub, and a reply says cheap nuts used that way ruined ARP threads. Another reply says to use a torque wrench on the wheel nuts. Seating a stud and clamping a wheel are different steps.
 4. **How many studs to replace.** Fetched 350Z write-ups often replace the one broken stud. ARP sells the extended part as a five-pack in the catalog row for 100-7716. Z1 sells the extended stud in quantities of 5, 10, 15, or 20. Neither ARP nor the forum posts say “replace the other four on that hub because one broke.”
-5. **Life.** ARP: reuse if undamaged and correctly torqued. Spec3: two-year recommendation for threaded studs on a BMW class. 350Z anecdotes: no event or hour interval. One front hub lasted 67 track days; another writer suggested replacing front hubs every 12 to 18 track weekends. Those hub numbers are not stud numbers.
+5. **Life.** ARP: reuse if undamaged and correctly torqued. Spec3: two-year recommendation for threaded studs on a BMW E36 class. That Spec3 sentence is a cited reference only and is not team policy. 350Z anecdotes: no event or hour interval. One front hub lasted 67 track days; another writer suggested replacing front hubs every 12 to 18 track weekends. Those hub numbers are not stud numbers.
 6. **Spacers and extended studs.** Z1 and my350z owners use longer studs so spacers and thicker wheels can be clamped. RallyWays says spacers overload hubs and bearings. The my350z hub-failure thread raises spacers as a question and does not answer it.
 7. **Which ARP part is the 350Z part.** Catalog: 100-7716 is a Subaru BRZ/WRX extended stud, M12 × 1.25. A my350z DIY names 100-7716 for a 350Z. Z1 sells an ARP extended stud for the 350Z and does not print the part number; one buyer said the set fit only the rear.
 8. **Tensile strength.** Z1: 190,000 psi. RallyWays: 200,000 psi. ARP catalog page fetched: no tensile figure for that stud.
@@ -218,6 +218,8 @@ No fetched SCCA page sets a stud replacement interval in miles, hours, events, o
 **team policy (community research), v1, not a factory or official interval.**
 
 This is a starting rule so the car is not managed as if studs last the life of the hub. It will be rewritten when the failure log has real dates, laps, and hours. It does not certify the car. The driver still has to meet the NASA or SCCA rules for the event actually entered.
+
+v1 summary: lug-nut torque is 80 ft-lb (108 N·m), admin-editable. Stud calendar life is blank. Replace by inspection and by failure data. The NASA Spec3 two-year sentence is not part of this policy.
 
 ### Hardware
 
@@ -230,11 +232,10 @@ This is a starting rule so the car is not managed as if studs last the life of t
 
 ### Torque method
 
+- Lug-nut torque: **80 ft-lb (108 N·m)**. Source label, exact: '2004 Nissan 350Z factory service manual (third-party copy, cited), approved by Colton Wiles on 2026-10-25'. This value is admin-editable.
+- Forum figures are **not adopted**: 90–100 ft-lb, and “20 over” / “20 ft-lb or more over OEM.”
 - Clamp the wheel with a torque wrench. Do not use an impact gun for the torque that holds the wheel on.
-- Do not set a team torque of 90, 100, or “20 over OEM.” Those numbers are anecdotal, and they disagree.
-- For stock studs and the matching stock nuts, the only candidate figure found is **80 ft-lb (108 N·m)** in a third-party reproduction of the 2004 manual, with no oil or grease on the studs or nuts, in the manual’s 1–5 sequence, and with a recheck after 600 miles (1,000 km). Confirm that figure and the sequence diagram in the manual that belongs to this car before anyone uses it. Until that confirmation, the approved torque in the maintenance system stays blank, not 80.
-- For ARP or any other non-stock stud, the approved lug torque also stays blank until ARP, or the nut maker, supplies a written value for that exact stud, nut, lubricant, and wheel. The reproduced Nissan figure is not an ARP figure.
-- Pull a new press-in stud in until the head is seated, using washers and a nut that will be thrown away. Do not reuse that nut on the car. Do not treat 90–100 ft-lb as the specification for that pull.
+- Pull a new press-in stud in until the head is seated, using washers and a nut that will be thrown away. Do not reuse that nut on the car. Do not treat 90–100 ft-lb as the specification for that pull. That seating figure is one of the forum numbers above and is **not adopted**.
 - Set lug torque cold, before the session. After a session, recheck only once the corner has cooled, and write down that the check was cold. Do not add torque on a hot stud as the way to “make sure.”
 - After a new stud, nut, wheel, rotor, spacer, or hub, check torque again after 30–60 minutes of running. That check is Core4’s vendor guidance for embedment. It does not change the torque value.
 
@@ -251,17 +252,15 @@ Before the first session of an event, and any time the wheel is off:
 
 A stud that fails any of those checks comes off with the rest of its five-stud kit.
 
-### Life-limit options
+### Life limit
 
-No fetched source gives a 350Z stud life in laps, engine hours, or events. Do not enter a lap or hour interval until the failure log supports one.
+Stud calendar life: **none**. Leave the calendar field blank. Do not enter a lap or hour interval. No fetched source gives a 350Z stud life in laps, engine hours, events, or years that this team is adopting.
 
-**Option A — condition only.** Follow ARP’s reuse statement: if the set was installed and torqued correctly and shows no galling or corrosion, it stays. Replace the corner set when inspection fails. No calendar cap. This matches the only wheel-stud reuse statement ARP’s FAQ makes. It does not account for heat cycles the FAQ does not discuss.
+Replacement is by inspection plus failure data. If inspection fails, or a stud fails, replace that corner’s five-stud kit under the hardware rule above. A clean inspection does not get a date cap.
 
-**Option B — condition plus a two-year cap. This is the v1 starting choice.** Everything in Option A, plus: replace each corner’s five-stud kit at two years from the install date, even if it looks fine. The two years come from NASA Spec3 section 7.7.1, which **recommends** replacement of **threaded** studs every two years on a BMW E36 class. It is not a 350Z rule, it is not mandatory even in Spec3, and Spec3 does not attach it to press-in studs. v1 borrows it as a calendar backstop so a set cannot stay on the car forever while the team collects failures. Label the maintenance-system rule with this source and this limitation. Do not label it as Nissan or as a NASA CCR requirement.
+The NASA Spec3 recommendation to replace threaded wheel studs every two years is a cited reference only (BMW E36 class, not a 350Z). It is not team policy. See the Spec3 section above.
 
-**Option C — replace every N events or hours.** Not available. N is unknown. Do not invent it. Revisit after several recorded failures or after a season of clean inspections, whichever comes first.
-
-v1 uses Option B, the whole-corner replacement rule, the blank torque until the manual or ARP confirms a number, and cold torque-wrench installation.
+v1 uses the whole-corner replacement rule, lug-nut torque of 80 ft-lb (108 N·m) as admin-editable, a blank stud calendar life, and cold torque-wrench installation.
 
 ## What to record on each stud failure
 
