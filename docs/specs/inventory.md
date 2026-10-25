@@ -12,7 +12,7 @@ This file does not choose a language, database, host, or migration tool. Phase 1
 
 In scope:
 
-- Identity separation for catalog part, physical component, sealed kit or stock unit, and installation or removal history.
+- Identity separation for catalog part, sealed bag, and installation or removal history. A wheel stud is not its own inventory identity.
 - Sealed wheel-stud sets of five, including hub replacement of a whole set, state, and traceability.
 - An append-only stock-movement ledger and on-hand quantities derived from it.
 - Reorder policy, early reorder warnings, and stock reserved for events.
@@ -76,7 +76,7 @@ What it gets wrong for inventory:
 
 - One stock row can stand for several sealed sets. A single kit/stock id carries an editable `qty`. The illustrative seed does this with a quantity greater than one. A sealed set of five needs its own kit id. Quantity of sets is how many kit rows exist, not a number on one row.
 - The part description and the kit id share one form. Catalog identity and stock identity are different concepts.
-- There is no component id and no installation or removal record.
+- There is no installation or removal record for a bag, and no separate kit id from the label on that bag.
 - Adding stock overwrites a quantity and appends a local activity string. There is no append-only ledger, no receive movement, and no link from consumption to a validated maintenance transaction.
 - Reorder is one number on the stock row. The form also ships with a numeric reorder default. That default is not team policy and must not become a column default.
 - Browser local storage, including the demo seed, is not production stock. Production starts with no stock rows and no historical installs.
@@ -85,26 +85,24 @@ The prototype's unit label for a five-stud set matches the documented packaging.
 
 ## 4. Identity model
 
-These four identities stay distinct. No table, column, or screen may use one of them as a substitute for another.
+These three identities stay distinct. No table, column, or screen may use one of them as a substitute for another. A wheel stud is not a fourth identity.
 
 | Concept | Entity | What it identifies |
 | --- | --- | --- |
-| Catalog / part number | `CatalogItem` | The approved kind of part. Many physical parts share one catalog item. |
-| Component ID | `Component` | One physical component or assembly. |
-| Kit / stock ID | `Kit` | One sealed kit or other stock unit. For wheel studs, one sealed set of five. |
-| Installation / removal record | `ComponentEvent` | What happened to one physical component on the car: installed or removed. |
+| Catalog / part number | `CatalogItem` | The approved kind of part. Many bags share one catalog item. |
+| Kit / bag ID | `Kit` | One bag. For wheel studs, one sealed set of five. The kit id is the single label on that bag. |
+| Installation / removal record | `KitEvent` | What happened to one bag on the car: installed on a corner, or removed. |
 
-A part number does not identify which set a stud came from. A kit id does not identify which wheel a stud is in. An installation record does not become a new catalog item. Replacing a component creates new events; it does not reuse the removed component's id for the new part.
+A part number does not identify which bag was used. A kit id does not identify a stud inside the bag. An installation record does not become a new catalog item or a new bag. Replacing a set creates a new event for the new bag. It does not reuse the removed bag's id.
 
 ```mermaid
 erDiagram
   CatalogItem ||--o{ Kit : classifies
-  CatalogItem ||--o{ Component : classifies
-  Kit ||--o{ Component : originates
-  Component ||--o{ ComponentEvent : history
-  MaintenanceTransaction ||--|{ ComponentEvent : records
+  Kit ||--o{ KitEvent : history
+  MaintenanceTransaction ||--|{ KitEvent : records
   MaintenanceTransaction ||--o{ StockMovement : consumes
   Kit ||--o{ StockMovement : traces
+  KitEvent ||--o{ FailureEvidence : explains
   Supplier ||--o{ PurchaseOrder : supplies
   PurchaseOrder ||--|{ PurchaseOrderLine : contains
   PurchaseOrderLine ||--o{ Receipt : receives
@@ -113,11 +111,9 @@ erDiagram
   CatalogItem ||--o| ReorderPolicy : sets
 ```
 
-`Supplier`, `PurchaseOrder`, `PurchaseOrderLine`, and `Receipt` in that diagram are Phase 2+. `StockReservation` is not in Phase 1. A Phase 1 `receive` creates a `Kit` directly.
+`Supplier`, `PurchaseOrder`, `PurchaseOrderLine`, and `Receipt` in that diagram are Phase 2+. `StockReservation` is not in Phase 1. A Phase 1 `receive` creates a `Kit` directly. There is no `Component` row.
 
-Traceability that must be reconstructable for an installed wheel stud:
-
-Phase 1 traceability is `ComponentEvent` → `Component` → origin `Kit` → `receive` movement. A supplier reference on that receive is optional. `Receipt`, `PurchaseOrderLine`, and `Supplier` are Phase 2+ and are not required to receive a sealed kit.
+Phase 1 traceability for a labeled bag is `KitEvent` → `Kit` → `receive` movement. A supplier reference on that receive is optional. `Receipt`, `PurchaseOrderLine`, and `Supplier` are Phase 2+ and are not required to receive a sealed kit.
 
 The catalog part number is snapshotted on the event so a later catalog edit does not rewrite history.
 
@@ -125,11 +121,11 @@ The catalog part number is snapshotted on the event so a later catalog edit does
 
 ### 5.1 Packaging and profile
 
-Wheel studs are stocked in **sealed sets of five**. `CatalogItem.profile = wheel_stud_set` applies all of the following:
+Wheel studs are stocked in **sealed bags of five**, one bag per wheel. Owner clarification, 2026-10-25: the bag is labeled, and the studs inside it are not labeled individually. `CatalogItem.profile = wheel_stud_set` applies all of the following:
 
 - `tracking_class = sealed_kit`
-- `nominal_set_size = 5`
-- `individual_tracking = on_open`
+- `nominal_set_size = 5`, which is the packaging of the bag. It is not a per-stud inventory count and it does not create five rows.
+- `individual_tracking = none`
 - `safety_critical = true`
 - Hub install quantity is one complete sealed set. See [5.2](#52-owner-decisions-2026-10-25).
 - Removal disposition is `scrapped` only.
@@ -158,7 +154,7 @@ The team also set defaults for items that were still open.
 - Stud stock never goes negative. There is no exception path for studs. `AuthorizedStockException` is not applicable to studs and is not a Phase 1 path. A movement that would take the sealed-set count below zero is rejected.
 - Reused studs are rejected. This restates the scrap decision. It is permanent, not adjustable.
 - Mixed studs on a hub are rejected. This restates the hub rule. It is not adjustable.
-- Studs already on the car when records start are recorded with unknown history. They are not given a made-up date, kit, reading, procedure, or interval. The record kind is `opening_identification` in [11.6](#116-records-that-are-not-a-replacement). Inventing that history is not allowed.
+- A set already on the car when records start is recorded as one unknown-history set on that corner. It is not given a made-up date, bag label, reading, procedure, or interval, and it is not split into studs. The record kind is `opening_identification` in [11.6](#116-records-that-are-not-a-replacement). Inventing that history is not allowed.
 
 ## 6. Shared enumerations
 
@@ -167,20 +163,20 @@ The team also set defaults for items that were still open.
 | Value | Meaning |
 | --- | --- |
 | `sealed_kit` | On-hand complete stock is counted in whole kits. Each kit has its own id. |
-| `serialized` | Each physical item is a `Component`. A kit is optional. Behavior beyond identity is UNKNOWN until a later spec. |
+| `serialized` | A later spec may track some other part one piece at a time. Wheel studs do not. This spec defines no per-stud row. |
 | `bulk` | Ledger quantity without a sealed-set identity. Piece-level kit rules do not apply. |
 
 Wheel studs use `sealed_kit`. This document fully specifies sealed-kit behavior for `profile = wheel_stud_set`. `serialized` and `bulk` exist so the catalog can record other parts without pretending they are five-stud sets. Their movement details beyond the shared ledger fields are UNKNOWN.
 
 ### 6.2 Kit `state`
 
-Phase 1 states are `sealed`, `consumed`, and `scrapped`. There is no partial-set state and no loose-stud state. A set is not left `opened`. The seal is opened inside the replacement commit, and that same commit consumes all five studs.
+Phase 1 states are `sealed`, `installed`, and `scrapped`. There is no partial-set state, no per-stud state, and no loose-stud state. A set is not left `opened`. The replacement commit installs the whole bag on one corner. The same kit id remains the tracked unit while it is on the car and after it is removed.
 
 | Value | Meaning |
 | --- | --- |
-| `sealed` | Seal intact. This is the only state in the on-hand count. One kit counts as one sealed set. |
-| `consumed` | The replacement commit opened this set and installed all five studs on one corner. Terminal for stock. Not on hand. |
-| `scrapped` | The whole sealed set was scrapped and nothing from it was installed. Terminal. Not on hand. |
+| `sealed` | Seal intact. This is the only state in the on-hand count. One kit counts as one sealed bag. |
+| `installed` | That same bag is on one wheel corner. Not on hand. Still the tracked unit. |
+| `scrapped` | That same bag was removed, or an unused sealed bag was scrapped. Terminal. Not on hand. Never reused. |
 
 Phase 2+ adds `quarantined`: a whole sealed set held out of the on-hand count until an admin releases it back to `sealed`. Phase 1 does not quarantine.
 
@@ -192,43 +188,34 @@ Phase 1:
 
 | From | To | When |
 | --- | --- | --- |
-| (none) | `sealed` | `receive` of a new kit id |
-| `sealed` | `consumed` | One replacement commit opens the set and installs all five on one corner. |
-| `sealed` | `scrapped` | Admin scraps the whole sealed set. Nothing is installed. |
-| `consumed` | (none) | Terminal. |
+| (none) | `sealed` | `receive` of one new bag. The kit id is that bag's one label. |
+| `sealed` | `installed` | One replacement commit installs that bag on one corner. |
+| `installed` | `scrapped` | Removal of that bag. The sealed-set count does not change. |
+| `sealed` | `scrapped` | Admin scraps the whole sealed bag. Nothing is installed. |
 | `scrapped` | (none) | Terminal. |
 
 Phase 2+ only: `sealed` to `quarantined`, and `quarantined` back to `sealed` on `release_quarantine`.
 
 Forbidden:
 
-- A resting `opened` state, a partial consume, a leftover stud, or any state that means "some of the five are still stock."
-- A loose-stud ledger or a second on-hand count.
-- Splitting a kit, merging kits, or putting a stud onto a different kit id.
-- Returning a scrapped or consumed kit to `sealed`.
+- A resting `opened` state, a partial bag, a per-stud row, or any state that means "some of the five are still stock."
+- A loose-stud ledger, a per-stud count, or a second on-hand count.
+- Splitting a bag, merging bags, or giving a stud its own id.
+- Returning a scrapped or installed bag to `sealed`.
 - Installing from a kit that is not `sealed` at the start of the commit.
 
 ```mermaid
 stateDiagram-v2
   [*] --> sealed: receive
-  sealed --> consumed: replacement opens and installs all five
-  sealed --> scrapped: scrap whole sealed set
-  consumed --> [*]
+  sealed --> installed: replacement installs the bag
+  sealed --> scrapped: scrap unused bag
+  installed --> scrapped: removal scraps the bag
   scrapped --> [*]
 ```
 
-### 6.4 Component `status`
+### 6.4 No per-stud status
 
-Phase 1 values are `installed` and `scrapped`.
-
-| Status | Meaning |
-| --- | --- |
-| `installed` | Installed on a wheel corner. |
-| `scrapped` | Terminal. |
-
-There is no `in_kit` status. Component rows for a new set are created inside the replacement commit, already `installed`. A sealed kit has no component rows. Removed studs do not sit in stock.
-
-Owner decision, 2026-10-25: a removal sets the stud to `scrapped`. There is no reuse path and no reinstall path. No transition from `scrapped` to `installed` exists. The disposition value `reused` is not in the model. Do not keep `held`, `returned`, or `removed` as a status that could later become installable.
+Wheel studs have no component status and no `Component` row. The bag's `state` is the status of the set, both on the shelf and on the car. A removal sets that bag to `scrapped`. There is no reuse path and no reinstall path. No transition from `scrapped` to `sealed` or `installed` exists. The disposition value `reused` is not in the model. Do not keep a per-stud status such as `held`, `returned`, or `removed`.
 
 ### 6.5 Movement `type`
 
@@ -236,13 +223,13 @@ Phase 1 types are `receive`, `consume`, and `scrap`.
 
 | Value | Effect on the sealed-set count | Service baseline |
 | --- | --- | --- |
-| `receive` | Creates one new kit id in `sealed`. Count +1. Supplier is optional. No receipt and no purchase order. | Unchanged. |
-| `consume` | Opens that sealed set inside the replacement commit and installs all five. Count -1. End state `consumed`. | Updated only inside the replacement bundle in [section 11](#11-atomic-replacement), and only when a verified interval exists. |
-| `scrap` | Whole sealed set to `scrapped`. Count -1. Installs nothing. Creates no loose studs. | Unchanged. |
+| `receive` | Creates one new kit id in `sealed`. That id is the bag's one label. Count +1. Supplier is optional. No receipt and no purchase order. | Unchanged. |
+| `consume` | Installs that sealed bag on one corner inside the replacement commit. Count -1. End state `installed`. | Updated only inside the replacement bundle in [section 11](#11-atomic-replacement), and only when a verified interval exists. |
+| `scrap` | Whole bag to `scrapped`. Count -1 when it was `sealed`, and 0 when it was already `installed`. Installs nothing. Creates no stud rows. | Unchanged. |
 
 Phase 2+ types, not implemented in Phase 1: `quarantine` and `release_quarantine`.
 
-Phase 1 has no `open` movement, no `adjust`, no piece-level `return`, and no reservation movement. Loose studs never exist: the set is opened only inside the replacement that installs all five, and a removed stud is scrapped. Stud stock has no exception path. A movement that would take the sealed-set count below zero is rejected.
+Phase 1 has no `open` movement, no `adjust`, no piece-level `return`, and no reservation movement. Loose studs never exist. The bag is installed as one unit, and a removed bag is scrapped. Stud stock has no exception path. A movement that would take the sealed-set count below zero is rejected.
 
 ### 6.6 Other enumerations
 
@@ -297,10 +284,10 @@ The type of part. Installation stores `catalog_item_id` as a snapshot reference;
 | `profile` | enum | R | `wheel_stud_set` or `none`. | Applies the wheel-stud rules when set. |
 | `tracking_class` | enum | R | See [6.1](#61-tracking_class). Must be `sealed_kit` when profile is `wheel_stud_set`. | How stock identity works. |
 | `nominal_set_size` | integer | C | Required when `tracking_class` is `sealed_kit`. Immutable. Must be 5 when profile is `wheel_stud_set`. No default for other profiles. | Pieces in one sealed kit. |
-| `individual_tracking` | enum | R | `none`, `on_open`, `always`. Wheel-stud profile must be `on_open`: the replacement commit allocates the five component ids. A sealed kit has none. There is no standalone open. | When component ids are allocated. |
+| `individual_tracking` | enum | R | `none`, `on_open`, `always`. Wheel-stud profile must be `none`. Studs are not given ids. | Whether pieces inside a kit have their own ids. |
 | `safety_critical` | boolean | R | Wheel-stud profile must be true. | Safety-critical kind of part. |
 | `set_unit_name` | string | C | Required for `sealed_kit`. | Name of one whole kit, such as the team's words for a sealed set. |
-| `piece_unit_name` | string | C | Required for `sealed_kit` and `bulk`. | Name of one piece. For wheel studs, a stud. |
+| `piece_unit_name` | string | C | Required for `bulk`, and for a `sealed_kit` that is not a wheel-stud set. Empty for `wheel_stud_set`. Not a stock quantity. | Name of one piece, when pieces are tracked. |
 | `status` | enum | R | `draft`, `approved`, `retired`. The wheel-stud item stays `draft` while `part_number` or `approval_source` is null. `approved` requires both of those fields. Manufacturer and description do not approve it. | Approval state. |
 | `approval_source` | string | C | Required before `status` can be `approved`. Empty while the part number is blank. Not a substitute for `part_number`. | Document that approves this part number. |
 | `supersedes_catalog_item_id` | ref(CatalogItem) | O | Must not form a cycle. | Prior catalog row this one replaces. |
@@ -325,18 +312,17 @@ Only an `approved` catalog item may be received or consumed. The wheel-stud row 
 
 ### 7.4 `Kit`
 
-One stock identity. For a wheel-stud set, the row is one sealed set of five, never a stack of sets.
+One stock identity. For wheel studs, the row is one bag of five, never a stack of bags and never five stud rows.
 
-There is no editable `qty` on this entity.
+There is no editable `qty` on this entity. There is no second label.
 
 | Field | Type | Req | Constraints | Meaning |
 | --- | --- | --- | --- | --- |
-| `kit_id` | id | R | Immutable, unique, never reused. | Kit / stock ID. |
+| `kit_id` | id | R | Immutable, unique, never reused. For a wheel-stud bag this is the single label on the bag. `receive` requires that label. A missing label rejects the receive. Do not mint a different stock id and do not invent a label. | Bag label and kit ID. |
 | `catalog_item_id` | ref(CatalogItem) | R | Immutable. Target must be `approved` at receive time. | What this set is. |
-| `nominal_contents_count` | integer | R | Immutable. Copied from the catalog item at receive. Must be 5 for `wheel_stud_set`. | Pieces the sealed unit contains. |
+| `nominal_contents_count` | integer | R | Immutable. Copied from the catalog item at receive. Must be 5 for `wheel_stud_set`. Not a stock quantity and not five inventory rows. | Studs sealed in the bag. |
 | `state` | enum | R | See [6.2](#62-kit-state). Changes only through movements. | Current kit state. |
 | `quarantine_from_state` | enum | O | Phase 2+ only. Empty in Phase 1. When quarantine exists, the only value is `sealed`. | State to restore on release. |
-| `kit_label` | string | O | Unique if present. Format is UNKNOWN. Not a part number. | Human label printed or written on the set. |
 | `location_id` | ref(Location) | O | | Where the kit is stored. |
 | `supplier_id` | ref(Supplier) | O | Optional in Phase 1. `Supplier` is Phase 2+. Empty is valid on a `receive`. | Source supplier, when the team names one. |
 | `purchase_order_line_id` | ref(PurchaseOrderLine) | O | Phase 2+. Empty in Phase 1. | Line this set was ordered on, if any. |
@@ -351,76 +337,62 @@ Derived, not stored as authority:
 | --- | --- |
 | `on_hand_set` | 1 when `state` is `sealed`, otherwise 0. This is the only quantity the kit contributes. |
 
-Phase 1 does not store a loose-stud quantity on a kit. A kit is on hand only while `sealed`.
+Phase 1 does not store a loose-stud quantity or a per-stud count on a kit. A kit is on hand only while `sealed`. While `installed` or `scrapped`, the same kit id is still that bag.
 
-### 7.5 `Component`
+### 7.5 No per-stud record
 
-One physical part. A sealed kit has no component rows. The kit id is the stock identity until a replacement installs the set. That commit creates five component rows together, all `installed`, each with `origin_kit_id` set to that kit. Those rows are not a loose stock count. A removal then sets the removed row to `scrapped`.
+Wheel studs have no `Component` entity, no per-stud id, no per-stud label, no manufacturer mark, and no team-assigned stud id. The bag is the tracked unit. Do not create five rows because the bag contains five studs.
 
-| Field | Type | Req | Constraints | Meaning |
-| --- | --- | --- | --- | --- |
-| `component_id` | id | R | Immutable, unique, never reused. | Component ID. |
-| `catalog_item_id` | ref(CatalogItem) | R | Immutable. Matches the origin kit's catalog item. | Part type. |
-| `origin_kit_id` | ref(Kit) | C | Required for pieces from a sealed kit. Immutable. Null when `history_unknown` is true. Do not invent a kit for studs already on the car. | Kit this physical part came from. |
-| `history_unknown` | boolean | R | True only for studs recorded by `opening_identification`. False for studs installed from a sealed kit. | Prior life was not recorded. Not a claim that the stud is new or that an interval was met. |
-| `identity_source` | enum | R | `team_assigned` or `manufacturer_marked`. | Whether the id is the team's or a mark found on the part. Which source wheel studs actually have is UNKNOWN. The brand ARP is not a serial. |
-| `manufacturer_mark` | string | O | Empty when no mark was observed. Never invented. | Mark read from the part. |
-| `status` | enum | D | See [6.4](#64-component-status). | Projection. |
-| `created_at` | timestamp | R | | |
-| `notes` | text | O | | |
+### 7.6 `KitEvent`
 
-Current vehicle position is not a field on `Component`. It is the position on the latest `installation` event that has no later `removal` for that component.
-
-`origin_kit_id` never changes. There is no transfer onto another kit.
-
-### 7.6 `ComponentEvent`
-
-An installation or a removal of one component. This is the installation/removal record. It is not a catalog row, not a kit, and not the component itself.
+An installation or a removal of one bag. This is the installation/removal record. It is not a catalog row and not a new kit.
 
 Events are immutable. A correction is a later event or a later maintenance transaction, not an edit.
 
-Shared facts about the job (readings, procedure, technician, sign-off) live on `MaintenanceTransaction` and are copied onto the event as a snapshot so the component history still reads correctly if the transaction representation changes.
+Shared facts about the job (readings, procedure, technician, sign-off) live on `MaintenanceTransaction` and are copied onto the event as a snapshot so the bag's history still reads correctly if the transaction representation changes.
 
 | Field | Type | Req | Constraints | Meaning |
 | --- | --- | --- | --- | --- |
-| `component_event_id` | id | R | Immutable, unique. | |
-| `maintenance_transaction_id` | ref(MaintenanceTransaction) | R | A committed `replacement` or `removal_without_install`. A draft must not own events. An `inspection` does not own installation or removal events. | Parent transaction. |
-| `component_id` | ref(Component) | R | Immutable. | The physical part. |
-| `catalog_item_id` | ref(CatalogItem) | R | Snapshot of the approved part used. | Part number identity at the time. |
-| `origin_kit_id` | ref(Kit) | C | Snapshot. Required when the component has an origin kit. | Kit lineage at the time. |
+| `kit_event_id` | id | R | Immutable, unique. | |
+| `maintenance_transaction_id` | ref(MaintenanceTransaction) | R | A committed `replacement`, `removal_without_install`, or `opening_identification`. A draft must not own events. An `inspection` does not own installation or removal events. | Parent transaction. |
+| `kit_id` | ref(Kit) | C | Required when the bag has a label. Null only for an unknown-history set already on the car, and for the removal of that same set. Do not invent a label. | The bag. |
+| `history_unknown` | boolean | R | True only when `kit_id` is null. False when the bag is labeled. Not a claim that the set is new or that an interval was met. | Prior life was not recorded. |
+| `catalog_item_id` | ref(CatalogItem) | C | Snapshot of the approved part when the bag has one. Null on an unknown-history set. | Part number identity at the time. |
 | `vehicle_id` | ref(Vehicle) | R | | Car. |
 | `event_kind` | enum | R | `installation` or `removal`. | |
-| `wheel_corner` | enum | C | Required for a wheel stud. One of `LF`, `RF`, `LR`, `RR`. | Wheel corner. This is the position. |
-| `stud_hole_index` | integer | O | If present, an integer from 1 through 5, unique on that corner in the commit. Omission is valid. | Hole within the corner. Not a stock quantity. |
+| `wheel_corner` | enum | R | One of `LF`, `RF`, `LR`, `RR`. | Hub corner. This is the position. |
 | `occurred_at` | timestamp | R | Server commit time. | When the record committed. |
 | `lap_reading` | integer | C | Snapshot from the transaction. Required when the parent is a `replacement` and the approved rule uses laps. Null on `removal_without_install` means not recorded, not zero. | Laps at the job. |
 | `engine_hour_reading` | decimal | C | Snapshot from the transaction. Required when the parent is a `replacement` and the approved rule uses engine hours. Null on `removal_without_install` means not recorded, not zero. Scale UNKNOWN. | Engine hours at the job. |
-| `removal_reason_code` | enum | C | Required when `event_kind` is `removal`. `failure` or `other`. | Why it came off. |
+| `removal_reason_code` | enum | C | Required when `event_kind` is `removal`. `failure` or `other`. | Why the set came off. |
 | `removal_reason_detail` | text | C | Required when `event_kind` is `removal`. Non-empty. | Observed reason, in the technician's words. |
-| `disposition` | enum | C | Required when `event_kind` is `removal`. Wheel studs: `scrapped` only. Owner decision, 2026-10-25. | What was done with the removed part. |
+| `disposition` | enum | C | Required when `event_kind` is `removal`. Wheel studs: `scrapped` only. Owner decision, 2026-10-25. | What was done with the removed set. |
 | `disposition_notes` | text | C | Required when `disposition` is `other`. | |
-| `paired_event_id` | ref(ComponentEvent) | O | If set, the other side of a replacement: the removal pairs with the installation, or the reverse. | Links old and new component history. |
+| `paired_event_id` | ref(KitEvent) | O | If set, the other side of a replacement: the removal of the old set pairs with the installation of the new bag, or the reverse. | Links the old set and the new bag. |
 | `procedure_source` | string | C | Snapshot of the parent when the parent has one. Empty when no approved procedure was recorded. Do not invent a document title. | Procedure document. |
 | `procedure_revision` | string | C | Required together with `procedure_source`. | Procedure revision. |
-| `measurement_capture_ids` | list of id | C | Present when `measurements_requirement` is not `none required`. Empty only together with the recorded value `none required`. A missing requirement statement is `not stated` and fails the commit. Do not invent torque or limit values. | Measurements for this component. |
-| `inspection_capture_ids` | list of id | C | Empty only together with the recorded value `none required` on the parent sign-off statement. A missing statement on a replacement is `not stated` and fails the commit. | Inspections for this component. |
+| `measurement_capture_ids` | list of id | C | Present when `measurements_requirement` is not `none required`. Empty only together with the recorded value `none required`. A missing requirement statement is `not stated` and fails the commit. Do not invent torque or limit values. | Measurements for this set. |
+| `inspection_capture_ids` | list of id | C | Empty only together with the recorded value `none required` on the parent sign-off statement. A missing statement on a replacement is `not stated` and fails the commit. | Inspections for this set. |
 | `committed_by_user_id` | ref(user) | R | Snapshot of the parent `committed_by_user_id`. | User who committed. |
 | `technician_user_id` | ref(user) | R | Snapshot of the parent `technician_user_id`. That field defaults to the committing user and stays its own value. | Technician. |
 | `performed_at` | timestamp | C | Snapshot of the parent `performed_at` when the parent has one. Calendar intervals use this instant, not `occurred_at`. | When the work was performed. |
 | `notes` | text | O | | |
 
+There is no stud-hole field on this record. Which hole broke, when the team records it, belongs only on `FailureEvidence`.
+
 Measurements and inspection results are the structured captures on the parent transaction (section 7.19). The required set is UNKNOWN until the rule exists. Missing captures that the rule requires fail the commit.
 
-Old and new component ids are the `component_id` values on the paired removal and installation events of one replacement transaction.
+The old bag and the new bag are the `kit_id` values on the paired removal and installation events of one replacement. An unknown-history set has no kit id on its removal.
 
 ### 7.7 `FailureEvidence`
 
-Captured when a removal reason is `failure`, including a snapped stud. The minimum set of photos or measurements beyond a non-empty capture is UNKNOWN.
+Captured when a set's removal reason is `failure`, including a snapped stud. This is a record about that set. It is not an inventory item and not a component. The minimum set of photos or measurements beyond a non-empty capture is UNKNOWN.
 
 | Field | Type | Req | Constraints | Meaning |
 | --- | --- | --- | --- | --- |
 | `evidence_id` | id | R | Immutable, unique. | |
-| `component_event_id` | ref(ComponentEvent) | R | The removal event. | What the evidence belongs to. |
+| `kit_event_id` | ref(KitEvent) | R | The removal event for the set. | What the evidence belongs to. |
+| `stud_hole_index` | integer | O | If present, an integer from 1 through 5. The hole in that corner where a stud broke, when the team saw it. Omission is valid. Not a stock quantity, not a stud id, and not a second position field. Do not invent it. | Which position broke. |
 | `kind` | enum | R | See [6.6](#66-other-enumerations). | Kind of evidence. |
 | `storage_reference` | string | R | Non-empty locator in whatever blob store Phase 1 uses. This spec does not choose the store. | Where the bytes live. |
 | `content_hash` | string | O | | Integrity check, if the implementation computes one. |
@@ -434,7 +406,7 @@ A `removal` with `removal_reason_code = failure` is invalid unless it references
 
 Append-only ledger. Rows are not updated and not deleted. A mistake is a new movement. A restore does not overwrite or destroy these rows. The previous database is archived, as specified in [17](#17-decisions-for-phase-1).
 
-On-hand is the fold of committed movements, checked against kit and component projections in the same commit. There is no editable on-hand column.
+On-hand is the fold of committed movements, checked against kit state in the same commit. There is no editable on-hand column and no per-stud quantity.
 
 | Field | Type | Req | Constraints | Meaning |
 | --- | --- | --- | --- | --- |
@@ -442,9 +414,8 @@ On-hand is the fold of committed movements, checked against kit and component pr
 | `idempotency_key` | string | R | Unique among movements. See [9.4](#94-idempotency). | Replay key. |
 | `movement_type` | enum | R | See [6.5](#65-movement-type). | |
 | `catalog_item_id` | ref(CatalogItem) | R | | Part type affected. |
-| `kit_id` | ref(Kit) | C | Required for `sealed_kit` catalog items. | The set affected. One kit per movement. |
-| `component_id` | ref(Component) | O | Empty on Phase 1 whole-set movements. Those movements name the kit. There is no piece-level return or hold. | A single piece, only if a later movement names one. |
-| `sealed_set_delta` | integer | R | -1, 0, or +1. Summed across committed movements, this equals the number of kits in `sealed`. That sum is the only on-hand count. | Change in sealed sets on hand. |
+| `kit_id` | ref(Kit) | C | Required for `sealed_kit` catalog items. | The bag affected. One kit per movement. |
+| `sealed_set_delta` | integer | R | -1, 0, or +1. Summed across committed movements, this equals the number of kits in `sealed`. That sum is the only on-hand count. | Change in sealed bags on hand. |
 | `actor_user_id` | ref(user) | R | Authenticated server principal. | Who. |
 | `occurred_at` | timestamp | R | Server commit time. | When. |
 | `client_observed_at` | timestamp | O | Present when a future offline client observed the action. Not authoritative over `occurred_at`. | Client clock, for later sync. |
@@ -629,7 +600,7 @@ Each new wheel-stud kit, whether created by a Phase 1 `receive` or by this Phase
 - `state = sealed`
 - `nominal_contents_count = 5`
 - has its own `receive` movement with `sealed_set_delta = +1`
-- has no component rows yet
+- has no stud rows
 
 One arrival of several sets is several kit ids. It is not one kit id with a quantity. Phase 1 does this with `receive` movements alone. `supplier_id` on those movements is optional.
 
@@ -705,7 +676,7 @@ Nested captures, stored with the transaction and referenced from events. Field n
 | `result` | string | R | Recorded result. | |
 | `notes` | text | O | | |
 
-A `draft` may be stored. A draft MUST NOT write `StockMovement`, `ComponentEvent`, kit state changes, or `ServiceBaseline`.
+A `draft` may be stored. A draft MUST NOT write `StockMovement`, `KitEvent`, kit state changes, or `ServiceBaseline`.
 
 A `rejected` row MAY be stored so the failure is visible. It MUST NOT write those effects either.
 
@@ -758,51 +729,51 @@ Audit rows are append-only. A restore does not overwrite or destroy them. The pr
 
 Phase 1 tracks one on-hand figure for a wheel-stud catalog item: the number of kits in `state = sealed`.
 
-That count is the reorder warning input. It is 4 or fewer when the warning is on, including exactly 4. Consumed and scrapped kits are not in the count. There is no loose-stud count, no second remainder count, and no reserved quantity to subtract. Phase 2+ quarantined kits are not on hand either.
+That count is the reorder warning input. It is 4 or fewer when the warning is on, including exactly 4. Installed and scrapped bags are not in the count. There is no per-stud count, no loose-stud count, no second remainder count, and no reserved quantity to subtract. Phase 2+ quarantined kits are not on hand either.
 
 ### 8.2 Opening and hub replacement
 
-Owner decision, 2026-10-25. The only install path is one complete set of five on one wheel corner.
+Owner decision, 2026-10-25, and the later clarification that the bag is the labeled unit. The only install path is one sealed bag of five on one wheel corner.
 
-Position is `wheel_corner`, one of the four fixed corners: `LF`, `RF`, `LR`, or `RR`. It is required. `stud_hole_index` is a separate field. When sent, it is an integer from 1 through 5 and must not repeat on that corner in the commit. Leaving the index off is valid. The hole number is not part of the corner value and is not a stock quantity. The spare plan is four sealed sets, one per wheel.
+Position is `wheel_corner`, one of the four fixed corners: `LF`, `RF`, `LR`, or `RR`. It is required. The installation record names that corner and the bag's `kit_id`. It does not name a stud hole. The spare plan is four sealed bags, one per wheel.
 
 The catalog item must already be `approved`, which requires a real `part_number` and `approval_source`. Otherwise the consume is rejected.
 
 Validation invariant, checked before any effect, for every corner on the transaction:
 
-- The corner installs exactly five studs.
-- All five come from one `kit_id`.
-- That kit is `sealed` at the start. This same commit opens it and installs all five. The kit does not rest in an opened state, and it does not create loose studs.
-- The kit's end state is `consumed`.
-- No stud from another kit is installed on that corner.
-- No scrapped stud and no `history_unknown` stud is reused as one of the five.
-- If any stud is already installed on that corner, every such stud is removed and scrapped in this same commit. If the corner is occupied and the commit omits any of those removals, reject it. Do not invent removals for studs that were never recorded.
-- After the commit, the studs installed on that corner are exactly those five.
+- The corner installs one bag.
+- That bag is one `kit_id`, and the kit's nominal count is 5.
+- That kit is `sealed` at the start. This same commit installs it. The kit does not rest in an opened state, and it does not create stud rows.
+- The kit's end state is `installed`.
+- No other bag is installed on that corner.
+- A scrapped bag is not installed again.
+- If a bag is already `installed` on that corner, or an unknown-history set is recorded there with no later removal, this same commit removes and scraps that set. If the corner is occupied and the commit omits that removal, reject it. Do not invent a removal for a corner that has no recorded set.
+- After the commit, the bag installed on that corner is that one kit.
 
 If any corner fails, Race Backend rejects the whole transaction. Nothing is consumed, scrapped, or baselined.
 
-A transaction may name more than one corner. Each corner needs its own whole sealed kit. One failure rejects the bundle.
+A transaction may name more than one corner. Each corner needs its own whole sealed bag. One failure rejects the bundle.
 
-There is no standalone `open`. A set is opened only inside the replacement commit that installs all five studs from that kit. A successful consume records `sealed_set_delta = -1`. Five components are created as `installed`. There is no piece delta and no loose-stud count.
+There is no standalone `open`. A successful consume records `sealed_set_delta = -1` and leaves the kit `installed`. There is no piece delta and no per-stud count.
 
-If individual marks are present, they are recorded. If they are absent, `identity_source` is `team_assigned` and `manufacturer_mark` stays empty. Do not invent a manufacturer serial. `ARP` is the brand, not a stud serial.
+`ARP` is the brand on the catalog item, not a stud serial. Do not record a manufacturer mark or a team-assigned stud id.
 
 Rollback of a failed replacement leaves the kit as it was.
 
 ### 8.3 No partial set and no loose stock
 
-Phase 1 supports full sealed sets of five per corner only. A set is never partial and never mixed. Loose-leftover stock is not modeled. Owner decision, 2026-10-25, forbids a partial hub replacement. Sets are opened inside the replacement commit, and removed studs are scrapped, so loose studs never exist.
+Phase 1 supports one full sealed bag of five per corner only. A bag is never partial and never mixed. Loose-leftover stock and per-stud stock are not modeled. Owner decision, 2026-10-25, forbids a partial hub replacement. A removed bag is scrapped, so loose studs never exist.
 
 Rejected with no stock effect, including the check in [11.2](#112-validation-before-any-effect) item 12:
 
-- Installing fewer or more than five studs on a corner.
-- Leaving any stud from the kit uninstalled.
-- Mixing studs from more than one kit on one corner.
-- A `partially_used` state, a loose-stud quantity, a loose-stud ledger, or a `loose_piece_delta`.
-- Installing scrapped studs, or studs whose disposition is `reused`.
+- Installing fewer or more than one bag on a corner.
+- Splitting the five studs in a bag into inventory rows.
+- Mixing bags on one corner.
+- A `partially_used` state, a loose-stud quantity, a per-stud count, a loose-stud ledger, or a `loose_piece_delta`.
+- Installing a scrapped bag, or a disposition of `reused`.
 - A negative-stock exception. Studs have no such path.
 
-A damaged sealed set is scrapped as a whole set in Phase 1. That scrap installs nothing and writes no baseline. Quarantine is Phase 2+.
+A damaged sealed bag is scrapped as a whole bag in Phase 1. That scrap installs nothing and writes no baseline. Quarantine is Phase 2+.
 
 ### 8.4 Mixing
 
@@ -810,15 +781,15 @@ Sets are never mixed on one hub. Owner decision, 2026-10-25. This is not waiting
 
 Forbidden, and rejected with no stock effect:
 
-- Two or more `origin_kit_id` values on the studs installed on one hub in a commit.
-- Installing any new stud on a hub that still has a recorded stud from another kit, or a `history_unknown` stud, unless that same commit removes and scraps every previously recorded stud on the hub.
-- Clearing or rewriting `origin_kit_id`.
-- Creating a kit whose pieces come from other kits' leftovers.
-- A consume that names a loose-stud quantity instead of five component ids from one kit.
-- Installing a wheel-stud component whose origin kit is missing, except the separate `opening_identification` record, which does not install from stock.
-- Any screen or import that shows one quantity where distinct kit ids used to be.
+- Two `kit_id` values installed on one corner in a commit.
+- Installing a bag on a corner that still has an installed bag, or an unknown-history set, unless that same commit removes and scraps that set.
+- Clearing or rewriting `kit_id`.
+- Creating a bag whose identity comes from another bag's studs.
+- A consume that names studs instead of one kit id.
+- Installing a wheel-stud row that is not a labeled bag, except the separate `opening_identification` record, which does not install from stock and does not invent a label.
+- Any screen or import that shows one quantity where distinct bag labels used to be, or that shows five stud ids for one bag.
 
-There is no future switch in this spec that allows an explicit multi-kit hub.
+There is no future switch in this spec that allows an explicit multi-bag hub or a per-stud inventory.
 
 ### 8.5 Removal, failure, and evidence
 
@@ -827,14 +798,14 @@ A removal event requires `removal_reason_code` and `removal_reason_detail`.
 Owner decision, 2026-10-25:
 
 - Disposition is `scrapped`. `reused` is not a disposition.
-- Component status becomes `scrapped`.
-- That status is terminal. No install, no return to a kit, no `held` state that could later be installed.
-- `origin_kit_id` is unchanged when the stud had one. A `history_unknown` stud stays without an invented kit.
-- The removal does not change the sealed-set on-hand count. A removed stud is not stock.
+- The bag's state becomes `scrapped` when the removed set is a labeled kit. An unknown-history set has no kit row to change.
+- That state is terminal. No reinstall, and no `held` state that could later be installed.
+- `kit_id` is unchanged. An unknown-history set stays without an invented label.
+- The removal does not change the sealed-set on-hand count. A bag that was already installed is not stock.
 
-When the reason code is `failure`, at least one `FailureEvidence` row is in the same commit. The evidence requirement beyond that one capture is still UNKNOWN. The new studs on a replacement, if the job is a replacement, still have to be one complete sealed set on that corner.
+When the reason code is `failure`, at least one `FailureEvidence` row is in the same commit. The evidence requirement beyond that one capture is still UNKNOWN. An optional `stud_hole_index` on that evidence says which hole broke. It is not required, and it is not an inventory row. The new bag on a replacement, if the job is a replacement, still has to be one complete sealed bag on that corner.
 
-A removal that does not install the new set is `kind = removal_without_install`. It scraps the named studs and does not consume a sealed set and does not reset a baseline. It also does not authorize a later one-stud fill-in. The next replacement on that corner still has to scrap every stud still recorded there and install one new sealed set of five.
+A removal that does not install the new bag is `kind = removal_without_install`. It scraps the named set and does not consume a sealed bag and does not reset a baseline. It also does not authorize a later one-stud fill-in. The next replacement on that corner still has to scrap the set still recorded there and install one new sealed bag of five.
 
 Inspections that do not remove or install a stud are `kind = inspection`. See [11.6](#116-records-that-are-not-a-replacement).
 
@@ -842,7 +813,7 @@ Inspections that do not remove or install a stud are `kind = inspection`. See [1
 
 ### 9.1 Source of truth
 
-Committed `StockMovement` rows are the source of truth for quantities. Kit `state` and component `status` are projections updated in the same commit. After every commit, the projections must match a fold of the ledger. If they do not, that is a defect; the fold wins and the write must not have been considered successful.
+Committed `StockMovement` rows are the source of truth for quantities. Kit `state` is the projection updated in the same commit. After every commit, that projection must match a fold of the ledger. If it does not, that is a defect; the fold wins and the write must not have been considered successful.
 
 Readers see the state before a commit or the state after it. They never see a baseline without its movements. They never see a partial consume.
 
@@ -854,23 +825,23 @@ On-hand is one number: the count of kits in `sealed`. It equals the sum of `seal
 | --- | --- |
 | `sealed_set_count` | Kits in `sealed`. This is on-hand. |
 
-Consumed and scrapped kits add zero. Phase 1 does not subtract reservations. There is no loose-piece fold.
+Installed and scrapped bags add zero. Phase 1 does not subtract reservations. There is no loose-piece fold and no per-stud fold.
 
 The sealed-set count must not go below zero. That commit is rejected. There is no exception path for studs.
 
-A sealed kit accounts for five studs inside the seal. The replacement opens and installs all five together and does not post a loose quantity. Scrapping a sealed set removes the whole set from stock and does not create loose studs. A movement must not make the kit represent more or fewer than five studs.
+A sealed bag contains five studs. The replacement installs that bag as one unit and does not post a stud quantity. Scrapping a bag does not create stud rows. A movement must not turn the bag into a count of studs.
 
 ### 9.3 Movement rules
 
 | Type | Kit precondition | `sealed_set_delta` | End state | Links |
 | --- | --- | --- | --- | --- |
-| `receive` | New kit id. Catalog item `approved`. | +1 | `sealed` | No maintenance transaction. `supplier_id` optional. No receipt and no purchase order. |
-| `consume` | `sealed`. | -1 | `consumed` | `maintenance_transaction_id` required. Opens the set in this commit and installs all five on one corner. |
-| `scrap` | `sealed`. | -1 | `scrapped` | Admin. Installs nothing. Creates no component stock. |
+| `receive` | New kit id, which is the bag's one label. Catalog item `approved`. | +1 | `sealed` | No maintenance transaction. `supplier_id` optional. No receipt and no purchase order. |
+| `consume` | `sealed`. | -1 | `installed` | `maintenance_transaction_id` required. Installs that one bag on one corner. |
+| `scrap` | `sealed` or `installed`. | -1 if `sealed`, else 0 | `scrapped` | Installs nothing. Creates no stud rows. |
 
 Phase 2+ only, not in this Phase 1 table: `quarantine` of a sealed set, count -1, and `release_quarantine` back to `sealed`, count +1.
 
-A consume of any count other than five is rejected and writes nothing. A consume does not leave loose studs.
+A consume that does not name exactly one sealed bag is rejected and writes nothing. A consume does not leave loose studs or stud rows.
 
 ### 9.4 Idempotency
 
@@ -884,13 +855,13 @@ The client supplies one idempotency key on the maintenance transaction. Race Bac
 
 ### 9.5 Concurrency
 
-Two commits that touch the same kit, the same component, or the same baseline behave as if they ran one after the other. The second sees the first's result. If the second would drive the sealed-set count negative, or would install a component the first already took, the second fails validation and persists no effects.
+Two commits that touch the same kit or the same baseline behave as if they ran one after the other. The second sees the first's result. If the second would drive the sealed-set count negative, or would install a bag the first already took, the second fails validation and persists no effects.
 
 A stale client must not overwrite a newer kit state, reorder policy, or approved rule. Conflict handling for offline sync is out of scope beyond this invariant: the server refuses the stale write, and the refusal is visible.
 
 ### 9.6 Negative stock
 
-Before commit, Race Backend computes the sealed-set count as if the movements were applied. If that count would go below zero, the commit fails. Studs have no exception record and no exception path. A failed commit leaves stock, kit state, component status, maintenance records, and baselines as they were.
+Before commit, Race Backend computes the sealed-set count as if the movements were applied. If that count would go below zero, the commit fails. Studs have no exception record and no exception path. A failed commit leaves stock, kit state, maintenance records, and baselines as they were.
 
 ## 10. Reorder and event holds
 
@@ -904,7 +875,7 @@ For the wheel-stud catalog item the reorder warning is Owner decision, 2026-10-2
 
 | Signal | When |
 | --- | --- |
-| `reorder_warning` | Sealed sets on hand (`state = sealed`) are less than or equal to `warning_threshold_sets`. That threshold is 4. The warning is on at 4 and at every lower count. Consumed and scrapped kits do not add to the count. There is no loose count to add. |
+| `reorder_warning` | Sealed bags on hand (`state = sealed`) are less than or equal to `warning_threshold_sets`. That threshold is 4. The warning is on at 4 and at every lower count. Installed and scrapped bags do not add to the count. There is no per-stud count to add. |
 | `at_or_below_target` | The same comparison. `desired_stock_sets` is also 4. Equality with the target does not clear the warning. |
 | `reorder_policy_unknown` | Used for other catalog items when desired or warning threshold is null. Not the steady state of the wheel-stud item. |
 | `early_warning` | Phase 2+. A future `planned` event exists, and the order-by situation below says the team may already be late or cannot tell. Phase 1 does not compute this. |
@@ -926,7 +897,7 @@ These signals do not create movements. Phase 1 stock entry is a `receive` moveme
 
 ### 10.2 What a race-day user may do
 
-A race-day user may submit a corner replacement that opens and consumes one whole sealed set in that same commit. A race-day user must not change reorder policy, authorize negative stock, consume fewer than five studs, leave loose studs, or edit an approved catalog item or rule.
+A race-day user may submit a corner replacement that installs one whole sealed bag in that same commit. A race-day user must not change reorder policy, authorize negative stock, install a partial bag, leave loose studs, or edit an approved catalog item or rule.
 
 ## 11. Atomic replacement
 
@@ -937,10 +908,10 @@ This section is the contract Race Backend implements. It is not an implementatio
 A successful `replacement` persists one bundle:
 
 1. `MaintenanceTransaction` with `status = committed`.
-2. `ComponentEvent` rows for each removal and each installation, including snapshots.
-3. `FailureEvidence` rows required by failure removals.
-4. One `consume` movement per kit. That movement opens the sealed set and installs all five. There is no separate `open` movement and no loose-stud movement.
-5. Kit `state` `consumed` and five new components `installed`. Removed studs are `scrapped`. Disposition is `scrapped` only.
+2. `KitEvent` rows for the removal of the set that was on the corner, when the corner was occupied, and for the installation of the new bag.
+3. `FailureEvidence` rows required by failure removals. An optional stud-hole index lives only on those rows.
+4. One `consume` movement per new bag. That movement installs the sealed bag. There is no separate `open` movement, no loose-stud movement, and no per-stud movement. A labeled bag that this commit scraps also gets one `scrap` movement.
+5. The new kit's `state` is `installed`. A labeled bag removed in this commit is `scrapped`. Disposition is `scrapped` only. No component rows are written.
 6. `ServiceBaseline` row for each rule and corner the replacement completes, and only when that rule's interval is already verified. A wheel-stud replacement with an unknown interval omits this row and does not claim a reset.
 7. An `AuditEvent` for the commit. Its `at` is the server time. When the user-entered `performed_at` is earlier than that server time, the audit row says the entry is backdated.
 
@@ -977,15 +948,15 @@ Race Backend checks all of the following before any bundle write is visible. Fai
 1. The actor is authenticated, and server-side authorization allows this actor to complete maintenance. The actor is not changing the service rule, the reorder policy, or the catalog as part of this request.
 2. The idempotency key is present. If it already committed, return the original result and stop. If it is in flight, do not start a second bundle.
 3. `kind` is `replacement`. `inspection`, `removal_without_install`, and `opening_identification` follow [11.6](#116-records-that-are-not-a-replacement) and stop before any consume or baseline write.
-4. For each wheel corner, [8.2](#82-opening-and-hub-replacement) passes: exactly five studs, one whole kit, end state `consumed`. The catalog item is approved.
-5. If that corner already has installed studs, every one of them is removed and scrapped in this commit. Otherwise the commit is rejected. Studs that were never recorded are not invented.
+4. For each wheel corner, [8.2](#82-opening-and-hub-replacement) passes: one whole bag, one kit id, end state `installed`. The catalog item is approved.
+5. If that corner already has an installed bag or an unknown-history set, that set is removed and scrapped in this commit. Otherwise the commit is rejected. A set that was never recorded is not invented.
 6. The wheel-stud `CatalogItem` is `approved`: `part_number` and `approval_source` are both set. A blank part number means the item is not approved, and the replacement cannot consume it. `ARP` in `part_number` is rejected.
 7. `measurements_requirement` and `signoffs_requirement` are each an explicit recorded value. The value `none required` means the team recorded that none are required. It is different from `not stated`. Null, omission, or any other unstated value is `not stated` and fails closed: the commit is rejected and nothing is consumed. `none required` does not invent a torque, a limit, or a passing inspection. When the value is not `none required`, the named captures or sign-offs must be present. A miss fails closed the same way.
-8. Position is `wheel_corner`: `LF`, `RF`, `LR`, or `RR`. `stud_hole_index` is a separate field. If present, it is from 1 through 5 without duplicates on that corner. Omitting the index is valid. The hole number is not encoded inside the corner.
+8. Position is `wheel_corner`: `LF`, `RF`, `LR`, or `RR`. The installation and removal records do not carry a stud-hole index. A stud hole, when recorded, is only the optional `stud_hole_index` on `FailureEvidence`.
 9. The sealed-set count would not go below zero. Studs have no negative-stock exception.
 10. Every wheel-stud removal has reason code, detail, and disposition `scrapped`. Every `failure` removal has evidence in this same request. A `reused` disposition is rejected. There is no such disposition to store.
 11. Lap and engine-hour readings are stored when the team took them. They are independent. Race Backend must not convert laps into hours. Null means not recorded, not zero. The interval is still UNKNOWN. See `docs/research/wheel-studs.md`. Do not copy an interval out of that file.
-12. A partial set, a mixed set, or a loose-leftover quantity is rejected with no stock effect. Phase 1 has no partial-set state, no mixed hub, and no loose-stud count. See [8.3](#83-no-partial-set-and-no-loose-stock).
+12. A partial bag, a mixed corner, a per-stud inventory row, or a loose-leftover quantity is rejected with no stock effect. Phase 1 has no partial-set state, no mixed hub, and no per-stud count. See [8.3](#83-no-partial-set-and-no-loose-stock).
 13. `performed_at` is entered by the user, is present, and is not in the future relative to server time. Calendar intervals use `performed_at`. Server time is stored on the `AuditEvent` as `at`, and on the transaction as `committed_at`. If `performed_at` is earlier than that server time, the audit row records that the entry is backdated. `committed_by_user_id` is the authenticated actor. `technician_user_id` is required and defaults to that actor when omitted. Both are stored.
 14. A `ServiceBaseline` is written in this same commit only when the transaction cites an approved rule whose interval came from a verified source. While that interval is UNKNOWN, the commit has no baseline row. That is not an interval reset. The maintenance record and the stock movements still commit together or not at all.
 
@@ -993,7 +964,7 @@ Opening the form, clicking a button, or saving a draft fails none of these by it
 
 ### 11.3 Failure and persistence
 
-If validation fails, Race Backend may store the transaction as `rejected` with `rejection_reason`. That row is not a maintenance completion. It has no movements, no component events that install or remove parts, and no baseline.
+If validation fails, Race Backend may store the transaction as `rejected` with `rejection_reason`. That row is not a maintenance completion. It has no movements, no installation or removal events, and no baseline.
 
 If validation passes and the store then fails, the same absence of effects holds. Retry uses the idempotency rules.
 
@@ -1020,9 +991,9 @@ A committed bundle is immutable. Undoing one job is a new transaction with compe
 
 After any failed replacement attempt, all of the following are true:
 
-- No new `consume` movement is readable.
+- No new `consume` or `scrap` movement is readable.
 - No kit changed state.
-- No component changed status.
+- No `KitEvent` was written.
 - No new current baseline exists.
 - The sealed-set count matches the pre-attempt fold. There is no loose remainder and no reservation to compare.
 
@@ -1039,26 +1010,28 @@ Two other committed kinds exist so a failure or a look-over is not stored as a f
 
 `removal_without_install`:
 
-- Used when a stud comes off, including a snap, and this job does not install the replacement set.
-- Writes the removal `ComponentEvent`, disposition `scrapped`, and `FailureEvidence` when the reason is `failure`.
-- Sets that component's status to terminal `scrapped`. `origin_kit_id` stays as it was. It is not rewritten and not cleared to hide the kit.
+- Used when a set comes off, including after a snap, and this job does not install the replacement bag.
+- Writes one removal `KitEvent` for that corner, disposition `scrapped`, and `FailureEvidence` when the reason is `failure`.
+- If the removed set is a labeled bag, that kit's state becomes terminal `scrapped` and the `scrap` movement has `sealed_set_delta` 0. `kit_id` stays as it was. It is not rewritten.
+- If the removed set is unknown history, `kit_id` stays null. No kit row is created.
 - Writes no `consume` and no `ServiceBaseline`.
-- Does not create a fictional new component or a fictional prior install.
+- Does not create a fictional bag, a fictional stud, or a fictional prior install.
 - Readings may be null when they were not taken. Null is stored as unknown, not as zero.
-- The removal, the evidence, and the status change commit together or not at all.
-- This job is not permission to install fewer than five studs later.
+- The removal, the evidence, and any kit-state change commit together or not at all.
+- This job is not permission to install a partial bag later.
 
 `opening_identification`:
 
-- Records studs already on the car when the system starts. Team default, 2026-10-25. Not a made-up history.
-- Creates one `Component` per stud the team actually identifies. `history_unknown` is true. `origin_kit_id` is null. Status is `installed`. Position is `wheel_corner`, required, one of `LF`, `RF`, `LR`, or `RR`. `stud_hole_index` is a separate optional field. Omitting the corner fails closed. The record still must not invent a corner or a history.
+- Records a set already on the car when the system starts. Team default, 2026-10-25. Not a made-up history.
+- Creates one `KitEvent` per corner the team actually identifies. `history_unknown` is true. `kit_id` is null. `event_kind` is `installation`. `wheel_corner` is required and is one of `LF`, `RF`, `LR`, or `RR`. Omitting the corner fails closed. The record still must not invent a corner, a bag label, or a history.
+- It does not record stud holes. A hole number is not part of this record.
 - `occurred_at` is the time of the observation, not a backdated install.
-- Lap reading, engine-hour reading, procedure, kit id, part-number snapshot beyond the wheel-stud catalog item, and service baseline are null or absent. Null is unknown, not zero, and not "interval met."
-- Does not consume a sealed set and does not open one.
-- Does not pad a hub out to five studs. If the team can see five, they record five observations. They do not invent studs they did not identify.
-- A later corner replacement scraps every one of these recorded studs on that corner and installs one new sealed set.
+- Lap reading, engine-hour reading, procedure, kit id, part-number snapshot, and service baseline are null or absent. Null is unknown, not zero, and not "interval met."
+- Does not consume a sealed bag and does not create a kit.
+- Does not split a corner into five studs. One corner is one unknown-history set. The team does not invent studs they did not identify as separate inventory.
+- A later corner replacement scraps that one recorded set and installs one new sealed bag.
 
-A later replacement that installs studs is a new `replacement` transaction. Only that commit consumes a sealed set. It appends a baseline only after a verified interval exists.
+A later replacement that installs a bag is a new `replacement` transaction. Only that commit consumes a sealed bag. It appends a baseline only after a verified interval exists.
 
 ## 12. Purchasing
 
@@ -1142,11 +1115,11 @@ Race-day must not change intervals, approved rules, reorder numbers, or catalog 
 Permanent history:
 
 - `StockMovement`
-- `ComponentEvent`
+- `KitEvent`
 - `FailureEvidence` metadata
 - `ServiceBaseline`
 - `AuditEvent`
-- Kit and component identity rows, including consumed and scrapped kits
+- Kit identity rows, including installed and scrapped bags
 
 Those rows are not deleted or rewritten. Restore does not overwrite or destroy them. The previous database is moved aside to an archived file and kept. See [17](#17-decisions-for-phase-1).
 
@@ -1158,25 +1131,25 @@ Production data starts empty. Do not import the prototype's local storage seed, 
 
 Race Backend and the schema share these invariants.
 
-1. Catalog item, component, kit, and installation/removal event are different identities and different rows. `ARP` is the manufacturer, not the part number. Until an admin enters the part number and the approval source, the wheel-stud item is not approved and cannot be consumed.
-2. Each sealed wheel-stud set has its own `kit_id`. Nominal count is 5. No editable quantity of sets lives on that row.
-3. On-hand is the count of kits in `sealed`. There is no loose-stud count. The warning is on when that count is 4 or fewer, including 4.
-4. A corner replacement installs exactly five studs from one whole kit, and that kit ends `consumed`. Partial replacement and mixed kits are rejected with no stock effect. An occupied corner requires those current studs to be removed in the same commit.
-5. A removed wheel stud is `scrapped`. That state has no installable transition. Reuse is permanently blocked.
+1. Catalog item, kit, and installation/removal event are different identities and different rows. A wheel stud is not its own row. `ARP` is the manufacturer, not the part number. Until an admin enters the part number and the approval source, the wheel-stud item is not approved and cannot be consumed.
+2. Each wheel-stud bag has one `kit_id`, and that id is its only label. Nominal contents are 5. No editable quantity of bags lives on that row, and no per-stud count does either.
+3. On-hand is the count of kits in `sealed`. There is no loose-stud count and no per-stud count. The warning is on when that count is 4 or fewer, including 4.
+4. A corner replacement installs one whole bag, and that kit ends `installed`. Partial replacement and mixed bags are rejected with no stock effect. An occupied corner requires that current set to be removed in the same commit.
+5. A removed wheel-stud bag is `scrapped`. That state has no installable transition. Reuse is permanently blocked.
 6. The ledger is append-only. On-hand is the fold. Projections match the fold after every commit. Restore does not overwrite or destroy ledger or audit history. The previous database is archived and kept.
-7. Wheel-stud `consume` exists only on a committed hub replacement. It opens that sealed kit in the same commit and installs five component ids. An admin whole-set `scrap` removes a sealed kit and installs nothing.
+7. Wheel-stud `consume` exists only on a committed hub replacement. It installs that one sealed bag. It does not write stud ids. An admin `scrap` of a sealed bag, or the removal of an installed bag, scraps that kit and installs nothing.
 8. The hub replacement's maintenance record and stock movements commit together. A verified-interval baseline joins that commit only when a verified interval exists. Failure of validation or persistence leaves no consume and no baseline.
 9. Drafts, rejections, inspections, removals without installation, and opening identifications do not reset a service baseline. A `receive` does not reset one either.
 10. The sealed-set count does not go negative. Studs have no exception that waives that.
 11. Replaying an idempotency key does not apply the bundle twice.
 12. Concurrent commits that touch the same kit serialize. The loser rolls back completely.
-13. Studs already on the car are `opening_identification` rows with unknown history. They are not backfilled with a kit, a date, or an interval.
+13. A set already on the car is one `opening_identification` event for that corner, with unknown history and no kit id. It is not backfilled with a label, a date, an interval, or stud rows.
 14. Numeric lead time stays null until an admin enters it. `a few days` is text on the catalog item in Phase 1, or on the Phase 2 supplier record. It is not converted into a number. Forecasts are estimates, not guarantees.
 15. No service interval, torque, inspection limit, or part number is shipped as a verified value. The wheel-stud spare target of 4 and the inclusive warning threshold of 4 are owner decisions, not service intervals.
 
 ## 16. Open questions
 
-Resolved and removed from this list, or settled in [Decisions for Phase 1](#17-decisions-for-phase-1): ARP extended studs with a blank part number that is not approved until an admin enters the number and the approval source; one sealed set of five per corner, never partial or mixed; no loose-stud count; corners `LF`, `RF`, `LR`, and `RR` with the hole number as its own field; the spare target of 4 and the inclusive warning at 4; the lead-time phrase `a few days` on the catalog item or the Phase 2 supplier; scrapped studs with no `reused` disposition; stud stock never negative and no exception path; startup studs recorded with unknown history; `Supplier`, purchase documents, receipt-from-PO, quarantine, and forecasting labeled Phase 2+; Phase 1 `receive` of one sealed kit id.
+Resolved and removed from this list, or settled in [Decisions for Phase 1](#17-decisions-for-phase-1): ARP extended studs with a blank part number that is not approved until an admin enters the number and the approval source; one sealed bag of five per corner, never partial or mixed; the bag is the only tracked unit, with one label and that label is the kit id; no per-stud id, label, component, manufacturer mark, or team-assigned stud id; no per-stud count; corners `LF`, `RF`, `LR`, and `RR`; a stud hole, when recorded, is only an optional attribute on the set's failure evidence; the spare target of 4 and the inclusive warning at 4; the lead-time phrase `a few days` on the catalog item or the Phase 2 supplier; a removed bag is scrapped and is not reused; stud stock never negative and no exception path; a startup set recorded as one unknown-history corner with no invented label; `Supplier`, purchase documents, receipt-from-PO, quarantine, and forecasting labeled Phase 2+; Phase 1 `receive` of one sealed kit id.
 
 Still open:
 
@@ -1186,31 +1159,29 @@ Still open:
 4. **Reorder numbers for catalog items other than the wheel-stud item.** UNKNOWN. The wheel-stud desired stock and inclusive warning threshold are 4. `min_stock_sets` on that item stays null.
 5. **Supplier names and contacts.** UNKNOWN. `Supplier` is Phase 2+. Numeric lead time stays null until an admin enters one. The text `a few days` must not be parsed.
 6. **Whether purchase cost is tracked.** UNKNOWN. No price field is required.
-7. **Whether individual studs carry a manufacturer mark or serial.** UNKNOWN. `ARP` is the brand, not a serial.
-8. **Stud replacement interval and service thresholds** (laps, engine hours, events, calendar, warning, critical). UNKNOWN pending `docs/research/wheel-studs.md`. Do not copy values from that file. No baseline is written from a guessed interval. When a verified calendar interval exists, it uses `performed_at`.
-9. **Torque, inspection limits, and the numeric content of measurements.** UNKNOWN until a verified source. The commit still requires the explicit statement `none required` or real captures.
-10. **Which sign-off slots apply when sign-offs are required.** UNKNOWN. The commit still requires `none required` or the actual sign-offs.
-11. **Removal-reason taxonomy beyond `failure` and `other`.** UNKNOWN. Disposition is `scrapped`.
-12. **Failure-evidence minimum beyond one attached capture.** UNKNOWN.
-13. **Quarantine release conditions beyond an admin release back to `sealed`.** UNKNOWN. Quarantine itself is Phase 2+.
-14. **Human kit-label format.** UNKNOWN.
-15. **Decimal scale for engine hours, and the instrument those hours and laps come from.** UNKNOWN.
-16. **VIN and competition identifiers** beyond 2004 Nissan 350Z. UNKNOWN.
-17. **Storage location names.** UNKNOWN.
-18. **Lot, batch, or date code.** UNKNOWN. Not required yet.
-19. **How often a corner consumes a sealed set.** Each job consumes one set. The schedule is UNKNOWN pending `docs/research/wheel-studs.md`.
-20. **How a wrong committed baseline is corrected** once a verified interval exists, beyond appending a new transaction and never deleting the old rows. UNKNOWN. Restore is not that correction.
-21. **Binary retention for failure photographs.** Metadata is permanent. Retention of the bytes is UNKNOWN.
-22. **Service-rule fields** beyond the hooks this commit needs. UNKNOWN here.
-23. **Offline queue payload layout.** Stable ids and idempotency keys are the contract. Extra fields must not weaken the whole-set rule or the atomic commit.
+7. **Stud replacement interval and service thresholds** (laps, engine hours, events, calendar, warning, critical). UNKNOWN pending `docs/research/wheel-studs.md`. Do not copy values from that file. No baseline is written from a guessed interval. When a verified calendar interval exists, it uses `performed_at`.
+8. **Torque, inspection limits, and the numeric content of measurements.** UNKNOWN until a verified source. The commit still requires the explicit statement `none required` or real captures.
+9. **Which sign-off slots apply when sign-offs are required.** UNKNOWN. The commit still requires `none required` or the actual sign-offs.
+10. **Removal-reason taxonomy beyond `failure` and `other`.** UNKNOWN. Disposition of the bag is `scrapped`.
+11. **Failure-evidence minimum beyond one attached capture.** UNKNOWN. The optional stud-hole note is not that minimum and is not a stud record.
+12. **Quarantine release conditions beyond an admin release back to `sealed`.** UNKNOWN. Quarantine itself is Phase 2+.
+13. **Decimal scale for engine hours, and the instrument those hours and laps come from.** UNKNOWN.
+14. **VIN and competition identifiers** beyond 2004 Nissan 350Z. UNKNOWN.
+15. **Storage location names.** UNKNOWN.
+16. **Lot, batch, or date code.** UNKNOWN. Not required yet.
+17. **How often a corner consumes a sealed bag.** Each job consumes one bag. The schedule is UNKNOWN pending `docs/research/wheel-studs.md`.
+18. **How a wrong committed baseline is corrected** once a verified interval exists, beyond appending a new transaction and never deleting the old rows. UNKNOWN. Restore is not that correction.
+19. **Binary retention for failure photographs.** Metadata is permanent. Retention of the bytes is UNKNOWN.
+20. **Service-rule fields** beyond the hooks this commit needs. UNKNOWN here.
+21. **Offline queue payload layout.** Stable ids and idempotency keys are the contract. Extra fields must not weaken the whole-bag rule or the atomic commit.
 
 ## 17. Decisions for Phase 1
 
 These answers are normative for Phase 1. Where they differ from an earlier note in this file, these answers win. They sit on top of the owner decisions in [5.2](#52-owner-decisions-2026-10-25). They do not invent part numbers, intervals, torques, supplier names, or numeric lead times.
 
-1. **Occupied corner.** Installing at a wheel corner that already has installed studs requires a removal of every current stud on that corner in the same commit. Those removed studs are scrapped. If any current stud is left off the removal list, the commit is rejected and nothing is consumed. Studs that were never recorded are not invented to fill the corner.
+1. **Occupied corner.** Installing at a wheel corner that already has a set requires a removal of that set in the same commit. The removed set is scrapped. If the commit omits that removal, it is rejected and nothing is consumed. A set that was never recorded is not invented to fill the corner.
 
-2. **Position.** A position is one of the four fixed corners: `LF`, `RF`, `LR`, or `RR`. That value is `wheel_corner` and it is required. The stud hole number is a separate field, `stud_hole_index`. When present it is an integer from 1 through 5 and it does not repeat on that corner in the commit. Omitting it is valid. It is not part of the corner value and it is not a stock quantity.
+2. **Position.** A position is one of the four fixed corners: `LF`, `RF`, `LR`, or `RR`. That value is `wheel_corner` on the installation or removal record, together with the bag's `kit_id` when the bag has a label. The stud hole number is not a position field and not an inventory field. It exists only as the optional `stud_hole_index` on the set's `FailureEvidence`, an integer from 1 through 5 when the team records which hole broke. Omitting it is valid. Do not invent it.
 
 3. **Critical defects.** Only an Admin can close a critical defect. **default, adjustable by team policy.** Until a later policy changes it, a race-day user cannot close one.
 
@@ -1220,7 +1191,7 @@ These answers are normative for Phase 1. Where they differ from an earlier note 
 
 6. **Measurements and sign-offs.** `none required` is an explicit recorded value. It is different from `not stated`. Null, omission, or any other unstated value is `not stated` and fails closed. The commit is rejected and nothing is consumed. `none required` is not a torque, a limit, or a passing inspection.
 
-7. **Sets.** Full sealed sets of five only. Never partial and never mixed. The set is opened inside the replacement commit. Removed studs are always scrapped. Loose studs never exist. There is no loose-stud ledger. `StockReservation` is not in Phase 1. The only disposition is `scrapped`. `reused` is not a disposition.
+7. **Bags.** Full sealed bags of five only. Never partial and never mixed. Owner clarification, 2026-10-25: wheel studs are labeled as a bag of five per wheel, not individually. The bag is the tracked unit on the shelf, on the hub, and after removal. One label per bag, and `kit_id` is that label. There is no per-stud component, per-stud id, per-stud label, manufacturer mark, or team-assigned stud id, and no per-stud count. A removed bag is scrapped and is never reused. Loose studs never exist. There is no loose-stud ledger. `StockReservation` is not in Phase 1. The only disposition is `scrapped`. `reused` is not a disposition.
 
 8. **Stud stock and negative quantity.** The sealed-set count can never go below zero. There is no exception path. `AuthorizedStockException` is not applicable to studs and has no Phase 1 path.
 
@@ -1229,7 +1200,7 @@ These answers are normative for Phase 1. Where they differ from an earlier note 
 10. **Accounts.** User creation, login, and logout are recorded in `AuditEvent`.
 
 11. **Phase 1 and Phase 2+.**
-    - Phase 1 required: `CatalogItem` (the wheel-stud row stays unapproved until an admin enters the part number and the approval source), `Kit` in `sealed`, `consumed`, or `scrapped`, `Component` and `ComponentEvent`, `FailureEvidence`, the `StockMovement` ledger with idempotency, a plain `receive` movement that creates one new sealed kit id, the all-or-nothing replacement, `ReorderPolicy` and the reorder warning, and `lead_time_text` on the catalog item.
+    - Phase 1 required: `CatalogItem` (the wheel-stud row stays unapproved until an admin enters the part number and the approval source), `Kit` in `sealed`, `installed`, or `scrapped`, `KitEvent`, `FailureEvidence`, the `StockMovement` ledger with idempotency, a plain `receive` movement that creates one new sealed kit id from that bag's one label, the all-or-nothing replacement, `ReorderPolicy` and the reorder warning, and `lead_time_text` on the catalog item. No `Component` row.
     - A supplier reference on `receive` is optional.
     - Phase 2+, kept in this spec and not built in Phase 1: `Supplier`, `PurchaseNote`, `PurchaseOrder`, `PurchaseOrderLine`, receipt-from-PO, quarantine, and forecasting. The phrase `a few days` may live on the catalog item now or on the Phase 2 supplier record later. Do not parse it.
     - Not in Phase 1: `StockReservation`, a loose-stud ledger, and `AuthorizedStockException`.
