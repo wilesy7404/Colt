@@ -25,6 +25,8 @@
       });
       var out = document.querySelector('[data-pick-out="' + group + '"]');
       if (out) out.textContent = btn.getAttribute("data-value") || "";
+      var need = document.querySelector('[data-need="' + group + '"]');
+      if (need) need.hidden = true;
     });
   });
 

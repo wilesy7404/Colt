@@ -3,84 +3,41 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>UI drafts — Race Team Maintenance</title>
+  <title>Race day drafts</title>
   <link rel="stylesheet" href="css/draft.css">
 </head>
 <body class="admin">
-  <div class="admin-wrap">
-    <header class="appbar">
+  <div class="wrap">
+    <header class="top">
       <div>
-        <p class="eyebrow">2004 Nissan 350Z · NASA / SCCA · one car</p>
-        <h1>UI drafts</h1>
+        <h1>Race day</h1>
+        <p class="sub">2004 Nissan 350Z</p>
       </div>
     </header>
-    <p class="example-banner" role="note">EXAMPLE DATA, not real maintenance history</p>
-    <p class="draft-flag">DRAFT MOCKUP · not a working app · Sync: not implemented</p>
-    <main>
-      <p>Static screens for review. They do not save, calculate maintenance, or certify the car. Sample values are example data. Intervals, torque, part numbers, and history are not filled in.</p>
-      <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong></p>
-
-      <h2>Race day</h2>
-      <p class="muted">Laid out for a phone about 390px wide. Large targets, little typing.</p>
-      <div class="link-grid cols">
-        <a class="screen-link" href="stud-break.html">
-          <span class="k">Race day</span>
-          <strong>Log a wheel stud break</strong>
-          <span>Fast phone log. Corner, stud, set, laps, hours, method. No torque number.</span>
-        </a>
-        <a class="screen-link" href="event-prep.html">
-          <span class="k">1 · Race day</span>
-          <strong>Event prep</strong>
-          <span>Safety-critical items, maintenance, defects, stock, inspections. A failed check never looks ready.</span>
-        </a>
-        <a class="screen-link" href="pre-session.html">
-          <span class="k">2 · Race day</span>
-          <strong>Pre-session</strong>
-          <span>Checklist, plus laps and engine hours as separate metrics.</span>
-        </a>
-        <a class="screen-link" href="component-life.html">
-          <span class="k">3 · Race day</span>
-          <strong>Component life</strong>
-          <span>Not due, approaching, due, overdue, failed inspection, and unknown.</span>
-        </a>
-        <a class="screen-link" href="defects.html">
-          <span class="k">4 · Race day</span>
-          <strong>Defects</strong>
-          <span>Report, then triage, then resolve with linked work or an inspection.</span>
-        </a>
-        <a class="screen-link" href="replacement.html">
-          <span class="k">5 · Race day</span>
-          <strong>Replacement sign-off</strong>
-          <span>All or nothing. Partial failure and example commit, side by side as states.</span>
-        </a>
-        <a class="screen-link" href="wheel-studs.html">
-          <span class="k">6 · Race day</span>
-          <strong>Wheel studs</strong>
-          <span>Sealed sets of five, mix block, removal evidence, early reorder.</span>
-        </a>
-      </div>
-
-      <h2>Admin</h2>
-      <p class="muted">Same screens on a phone and on a desktop.</p>
-      <div class="link-grid cols">
-        <a class="screen-link" href="component-detail.html">
-          <span class="k">7 · Admin</span>
-          <strong>Component detail</strong>
-          <span>Catalog part number, component ID, and kit ID stay distinct. History is kept.</span>
-        </a>
-        <a class="screen-link" href="service-rules.html">
-          <span class="k">8 · Admin</span>
-          <strong>Service rules</strong>
-          <span>Independent lap, hour, and calendar intervals. Admin-only, audited, locked for race day.</span>
-        </a>
-      </div>
-
-      <p class="fineprint">Notes for reviewers: <a href="README.md">ui-drafts/README.md</a>. The Version 2 prototype at the repository root is a separate file and is not this draft.</p>
-      <footer class="fineprint">
-        <p><strong>The software does not certify vehicle safety.</strong></p>
-        <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
-      </footer>
-    </main>
+    <p class="ex">Example data</p>
+    <nav class="links" aria-label="Main screens">
+      <a href="overview.html"><b>Car</b><span>Status across systems</span></a>
+      <a href="event-prep.html"><b>Event prep</b><span>Checklist</span></a>
+      <a href="session-log.html"><b>Session</b><span>Laps and engine hours</span></a>
+      <a href="defects.html"><b>Defects</b><span>Report, triage, resolve</span></a>
+      <a href="log-maintenance.html"><b>Log maintenance</b><span>Any system, one commit</span></a>
+      <h2>More</h2>
+      <a href="wheel-studs.html"><b>Wheel studs</b><span>One label per bag of five</span></a>
+      <a href="stud-break.html"><b>Stud break</b><span>Corner and set label</span></a>
+      <a href="replacement.html"><b>Stud sign-off</b><span>Set replacement</span></a>
+      <a href="component-detail.html"><b>Component</b><span>Set label and history</span></a>
+      <a href="component-life.html"><b>Life</b><span>Ready, Due, Blocked, Unknown</span></a>
+      <a href="service-rules.html"><b>Service rules</b><span>Admin</span></a>
+      <a href="restore.html"><b>Restore</b><span>Empty system only</span></a>
+      <a href="about.html"><b>Settings</b><span>About</span></a>
+    </nav>
   </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a href="event-prep.html">Prep</a>
+    <a href="session-log.html">Session</a>
+    <a href="defects.html">Defects</a>
+    <a href="log-maintenance.html">Log</a>
+  </nav>
 </body>
 </html>

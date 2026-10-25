@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Log maintenance — UI draft</title>
+  <link rel="stylesheet" href="css/draft.css">
+</head>
+<body class="race">
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="overview.html">Car</a>
+      <div>
+        <h1>Log</h1>
+        <p class="sub">Any system</p>
+      </div>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+    <p class="quiet">Nothing is saved until the whole form commits.</p>
+
+    <section>
+      <h2>System</h2>
+      <div class="pick two compact" role="group" aria-label="System">
+        <button type="button" class="is-on" data-pick="system" data-value="Brakes" data-show="brakes" data-group="system" aria-pressed="true">Brakes</button>
+        <button type="button" data-pick="system" data-value="Fluids" data-show="fluids" data-group="system" aria-pressed="false">Fluids</button>
+        <button type="button" data-pick="system" data-value="Tires" data-show="tires" data-group="system" aria-pressed="false">Tires</button>
+        <button type="button" data-pick="system" data-value="Suspension" data-show="suspension" data-group="system" aria-pressed="false">Suspension</button>
+        <button type="button" data-pick="system" data-value="Engine" data-show="engine" data-group="system" aria-pressed="false">Engine</button>
+        <button type="button" data-pick="system" data-value="Wheels" data-show="wheels" data-group="system" aria-pressed="false">Wheels</button>
+      </div>
+    </section>
+
+    <section data-panel="brakes" data-group="system">
+      <h2>Brakes</h2>
+      <p class="quiet">Pads, rotors, or fluid.</p>
+    </section>
+    <section data-panel="fluids" data-group="system" hidden>
+      <h2>Fluids and oils</h2>
+    </section>
+    <section data-panel="tires" data-group="system" hidden>
+      <h2>Tires</h2>
+    </section>
+    <section data-panel="suspension" data-group="system" hidden>
+      <h2>Suspension</h2>
+    </section>
+    <section data-panel="engine" data-group="system" hidden>
+      <h2>Engine and drivetrain</h2>
+    </section>
+    <section data-panel="wheels" data-group="system" hidden>
+      <h2>Wheels</h2>
+      <dl class="rows">
+        <div><dt>Set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+        <div><dt>Bag</dt><dd>5 · one corner</dd></div>
+        <div><dt>Lug nut torque</dt><dd>80 ft-lb</dd></div>
+      </dl>
+      <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+      <p class="quiet">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+    </section>
+
+    <section>
+      <h2>Interval</h2>
+      <p class="lead">Proposed</p>
+      <p class="quiet">Proposed. Not an approved interval.</p>
+    </section>
+
+    <section>
+      <h2>Performed at</h2>
+      <dl class="rows">
+        <div><dt>Logged</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+      <div class="switch" role="group" aria-label="Performed at">
+        <button type="button" class="is-on" data-switch="1" data-group="when" data-show="future" aria-pressed="true">Future</button>
+        <button type="button" data-switch="1" data-group="when" data-show="back" aria-pressed="false">Earlier</button>
+      </div>
+      <div data-panel="future" data-group="when">
+        <label class="field bad">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · later than logged" readonly>
+          <span class="err">Performed at cannot be in the future.</span>
+        </label>
+      </div>
+      <div data-panel="back" data-group="when" hidden>
+        <label class="field">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · earlier than logged" readonly>
+        </label>
+        <p class="quiet"><span class="mark">Backdated</span></p>
+      </div>
+    </section>
+
+    <section>
+      <h2>Sign-off</h2>
+      <dl class="rows">
+        <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Defaults to</dt><dd>Signed-in user</dd></div>
+        <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+    </section>
+
+    <fieldset>
+      <legend>Measurement</legend>
+      <div class="switch thirds" role="group" aria-label="Measurement">
+        <button type="button" data-switch="1" data-group="meas" data-show="none" aria-pressed="false">None</button>
+        <button type="button" class="is-on" data-switch="1" data-group="meas" data-show="unstated" aria-pressed="true">Not stated</button>
+        <button type="button" data-switch="1" data-group="meas" data-show="entered" aria-pressed="false">Value</button>
+      </div>
+      <p class="quiet" data-panel="none" data-group="meas" hidden>None required.</p>
+      <p class="msg" data-panel="unstated" data-group="meas">Not stated.</p>
+      <p class="quiet" data-panel="entered" data-group="meas" hidden>EXAMPLE</p>
+    </fieldset>
+
+    <label class="field">
+      <span>Notes</span>
+      <textarea placeholder="Optional"></textarea>
+    </label>
+    <button type="button" class="btn primary" disabled>Commit</button>
+  </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a href="event-prep.html">Prep</a>
+    <a href="session-log.html">Session</a>
+    <a href="defects.html">Defects</a>
+    <a class="on" href="log-maintenance.html">Log</a>
+  </nav>
+  <script src="js/draft.js"></script>
+</body>
+</html>

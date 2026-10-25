@@ -3,180 +3,179 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Log a wheel stud break — UI draft</title>
+  <title>Stud break — UI draft</title>
   <link rel="stylesheet" href="css/draft.css">
 </head>
 <body class="race">
-  <header class="appbar">
-    <a class="back" href="index.html">All</a>
-    <div>
-      <p class="eyebrow">Race day · failure log</p>
-      <h1>Stud break</h1>
-    </div>
-  </header>
-  <p class="example-banner" role="note">EXAMPLE DATA, not real maintenance history</p>
-  <p class="draft-flag">DRAFT MOCKUP · not a working app · Sync: not implemented</p>
-  <main>
-    <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> Logging a break does not repair the car and does not set an interval. Nothing on this page is saved.</p>
-    <p class="small muted">Tap the corner, the stud, and the set. Readings stay UNKNOWN unless a real reading is already known. Unknown is not zero.</p>
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Stud break</h1>
+      </div>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
 
-    <section class="card">
+    <section>
       <h2>Corner</h2>
       <div class="pick two" role="group" aria-label="Corner">
-        <button type="button" data-pick="corner" data-value="FL" aria-pressed="false">FL<small>Front left</small></button>
-        <button type="button" data-pick="corner" data-value="FR" aria-pressed="false">FR<small>Front right</small></button>
-        <button type="button" data-pick="corner" data-value="RL" aria-pressed="false">RL<small>Rear left</small></button>
-        <button type="button" data-pick="corner" data-value="RR" aria-pressed="false">RR<small>Rear right</small></button>
+        <button type="button" data-pick="corner" data-value="LF" aria-pressed="false">LF<small>Left front</small></button>
+        <button type="button" data-pick="corner" data-value="RF" aria-pressed="false">RF<small>Right front</small></button>
+        <button type="button" data-pick="corner" data-value="LR" aria-pressed="false">LR<small>Left rear</small></button>
+        <button type="button" data-pick="corner" data-value="RR" aria-pressed="false">RR<small>Right rear</small></button>
       </div>
-      <p>Corner: <strong data-pick-out="corner">UNKNOWN</strong>. Not chosen yet. A blank is not a corner.</p>
+      <p class="msg" data-need="corner">Corner required.</p>
     </section>
 
-    <section class="card">
-      <h2>Stud position</h2>
-      <p class="small muted">Position in the set of five. Tap one.</p>
-      <div class="pick five" role="group" aria-label="Stud position">
-        <button type="button" data-pick="stud" data-value="1" aria-pressed="false">1</button>
-        <button type="button" data-pick="stud" data-value="2" aria-pressed="false">2</button>
-        <button type="button" data-pick="stud" data-value="3" aria-pressed="false">3</button>
-        <button type="button" data-pick="stud" data-value="4" aria-pressed="false">4</button>
-        <button type="button" data-pick="stud" data-value="5" aria-pressed="false">5</button>
+    <section>
+      <h2>Set label</h2>
+      <div class="pick" role="group" aria-label="Set label">
+        <button type="button" class="is-on wide" data-pick="kit" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
+        <button type="button" class="wide" data-pick="kit" data-value="EXAMPLE-SET" aria-pressed="false">EXAMPLE-SET</button>
       </div>
-      <p>Stud number: <strong data-pick-out="stud">UNKNOWN</strong>.</p>
+      <p class="quiet">One label for this corner. <span data-pick-out="kit">UNKNOWN</span>.</p>
+      <button type="button" class="btn">Scan label</button>
+      <p class="quiet">ARP extended. Part number — not set —, admin must enter.</p>
     </section>
 
-    <section class="card">
-      <h2>Stud set</h2>
-      <p class="example-tag">Example data</p>
-      <p class="small muted">Kit / stock ID for the set. Example IDs only. Not a catalog part number.</p>
-      <div class="pick" role="group" aria-label="Stud set">
-        <button type="button" class="is-on" data-pick="kit" data-value="UNKNOWN" aria-pressed="true">UNKNOWN<small>Set not identified</small></button>
-        <button type="button" data-pick="kit" data-value="EXAMPLE-KIT-OPEN" aria-pressed="false">EXAMPLE-KIT-OPEN<small>Example opened set</small></button>
-        <button type="button" data-pick="kit" data-value="EXAMPLE-KIT-SEALED" aria-pressed="false">EXAMPLE-KIT-SEALED<small>Example sealed set</small></button>
+    <section>
+      <h2>Which position broke</h2>
+      <div class="pick five" role="group" aria-label="Which position broke">
+        <button type="button" data-pick="pos" data-value="1" aria-pressed="false">1</button>
+        <button type="button" data-pick="pos" data-value="2" aria-pressed="false">2</button>
+        <button type="button" data-pick="pos" data-value="3" aria-pressed="false">3</button>
+        <button type="button" data-pick="pos" data-value="4" aria-pressed="false">4</button>
+        <button type="button" data-pick="pos" data-value="5" aria-pressed="false">5</button>
       </div>
-      <p>Set: <strong data-pick-out="kit">UNKNOWN</strong>.</p>
+      <p class="quiet">Optional. Stored on the set. <span data-pick-out="pos">Not entered</span>.</p>
     </section>
 
-    <section class="card">
-      <h2>Readings at the time</h2>
-      <p>Laps and engine hours are separate. They are not converted. If a reading is not already known, it stays UNKNOWN. It is never shown as zero, and a blank is not treated as fine.</p>
-      <div class="switch" role="group" aria-label="Whether readings are known">
+    <section>
+      <h2>Readings</h2>
+      <div class="switch" role="group" aria-label="Readings">
         <button type="button" class="is-on" data-switch="1" data-group="reads" data-show="unk" aria-pressed="true">Unknown</button>
-        <button type="button" data-switch="1" data-group="reads" data-show="known" aria-pressed="false">Example known</button>
+        <button type="button" data-switch="1" data-group="reads" data-show="known" aria-pressed="false">Known</button>
       </div>
       <div data-panel="unk" data-group="reads">
-        <div class="meter-pair">
-          <div class="meter">
-            <span>Laps</span>
-            <strong><span class="pill unknown">UNKNOWN</span></strong>
-          </div>
-          <div class="meter">
-            <span>Engine hours</span>
-            <strong><span class="pill unknown">UNKNOWN</span></strong>
-          </div>
+        <div class="meters">
+          <div><span>Laps</span><strong>UNKNOWN</strong></div>
+          <div><span>Hours</span><strong>UNKNOWN</strong></div>
         </div>
-        <p class="hint">No reading is on file, so nothing was prefilled. UNKNOWN is the value. It is not zero.</p>
       </div>
       <div data-panel="known" data-group="reads" hidden>
-        <p class="example-tag">Example data</p>
-        <div class="meter-pair">
-          <div class="meter">
-            <span>Laps, prefilled</span>
-            <strong>EXAMPLE</strong>
-          </div>
-          <div class="meter">
-            <span>Engine hours, prefilled</span>
-            <strong>EXAMPLE</strong>
-          </div>
+        <div class="meters">
+          <div><span>Laps</span><strong>86 EXAMPLE</strong></div>
+          <div><span>Hours</span><strong>4.5 EXAMPLE</strong></div>
         </div>
-        <p class="hint">Example of a known reading filled in on its own. Not a real meter value, not a history entry, and not zero. The two fields stay independent.</p>
       </div>
+      <p class="quiet">Laps and hours stay separate. Unknown is not zero.</p>
     </section>
 
-    <section class="card">
+    <section>
       <h2>Event</h2>
-      <div class="meter">
-        <span>Event</span>
-        <strong><span class="pill unknown">UNKNOWN</span></strong>
-      </div>
-      <p class="hint">No event list is loaded. The name is UNKNOWN, not a made-up event and not a blank that means “no event.”</p>
+      <p class="lead">UNKNOWN</p>
     </section>
 
-    <section class="card">
-      <h2>Torque method used</h2>
-      <p>What was done, in words. This is not a torque specification. No torque number is shown or accepted as a spec.</p>
+    <section>
+      <h2>Torque method</h2>
       <div class="pick" role="group" aria-label="Torque method">
-        <button type="button" class="is-on" data-pick="method" data-value="UNKNOWN" data-show="method-unk" data-group="method" aria-pressed="true">UNKNOWN<small>Method not recorded</small></button>
-        <button type="button" data-pick="method" data-value="EXAMPLE" data-show="method-ex" data-group="method" aria-pressed="false">EXAMPLE<small>Method words only</small></button>
-        <button type="button" data-pick="method" data-value="TYPED" data-show="method-type" data-group="method" aria-pressed="false">Type the method<small>Still no torque number</small></button>
+        <button type="button" class="is-on wide" data-pick="method" data-value="UNKNOWN" data-show="method-unk" data-group="method" aria-pressed="true">UNKNOWN</button>
+        <button type="button" class="wide" data-pick="method" data-value="EXAMPLE" data-show="method-ex" data-group="method" aria-pressed="false">EXAMPLE</button>
+        <button type="button" class="wide" data-pick="method" data-value="TYPED" data-show="method-type" data-group="method" aria-pressed="false">Type method</button>
       </div>
       <div data-panel="method-unk" data-group="method">
-        <p>Method: <span class="pill unknown">UNKNOWN</span></p>
+        <p class="quiet">Words only. <span data-pick-out="method">UNKNOWN</span>.</p>
       </div>
       <div data-panel="method-ex" data-group="method" hidden>
-        <p class="example-tag">Example data</p>
-        <p>Method: EXAMPLE. A label only. Not a procedure and not a torque value.</p>
+        <p class="quiet">EXAMPLE. Words only.</p>
       </div>
       <div data-panel="method-type" data-group="method" hidden>
         <label class="field">
-          <span>Method name</span>
-          <input type="text" placeholder="Method name only" autocomplete="off">
-          <span class="hint">Words only. Do not enter a torque number. This mockup does not keep what you type.</span>
+          <span>Method</span>
+          <input type="text" placeholder="Method name" autocomplete="off">
+          <span class="hint">Words only.</span>
         </label>
       </div>
     </section>
 
-    <section class="card">
-      <h2>Wheel type</h2>
+    <section>
+      <h2>Wheel</h2>
       <div class="pick two" role="group" aria-label="Wheel type">
         <button type="button" class="is-on" data-pick="wheel" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
         <button type="button" data-pick="wheel" data-value="EXAMPLE" aria-pressed="false">EXAMPLE</button>
       </div>
-      <p class="small muted">EXAMPLE is not a real wheel. No part number is supplied.</p>
     </section>
 
-    <section class="card">
-      <h2>Nut type</h2>
+    <section>
+      <h2>Nut</h2>
       <div class="pick two" role="group" aria-label="Nut type">
         <button type="button" class="is-on" data-pick="nut" data-value="UNKNOWN" aria-pressed="true">UNKNOWN</button>
         <button type="button" data-pick="nut" data-value="EXAMPLE" aria-pressed="false">EXAMPLE</button>
       </div>
-      <p class="small muted">EXAMPLE is not a real nut. No part number is supplied.</p>
     </section>
 
-    <section class="card">
-      <h2>Notes</h2>
-      <label class="field">
-        <span>What was observed <span class="hint">(optional)</span></span>
-        <textarea placeholder="— not set —"></textarea>
-      </label>
-    </section>
-
-    <section class="card">
-      <h2>Photo</h2>
-      <div class="photo-slot" data-panel="nophoto" data-group="photo">
-        <p>Photo placeholder. Nothing is attached. This mockup cannot take or store a photo.</p>
+    <section>
+      <h2>Performed at</h2>
+      <dl class="rows">
+        <div><dt>Logged</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+      <div class="switch" role="group" aria-label="Performed at">
+        <button type="button" class="is-on" data-switch="1" data-group="when" data-show="future" aria-pressed="true">Future</button>
+        <button type="button" data-switch="1" data-group="when" data-show="back" aria-pressed="false">Earlier</button>
       </div>
-      <div class="photo-slot" data-panel="photoex" data-group="photo" hidden>
-        <p>Example slot only. No file, no image, and no evidence was stored.</p>
+      <div data-panel="future" data-group="when">
+        <label class="field bad">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · later than logged" readonly>
+          <span class="err">Performed at cannot be in the future.</span>
+        </label>
       </div>
-      <button type="button" class="btn" data-show="photoex" data-group="photo">Show photo placeholder</button>
+      <div data-panel="back" data-group="when" hidden>
+        <label class="field">
+          <span>Performed at</span>
+          <input type="text" value="EXAMPLE · earlier than logged" readonly>
+        </label>
+        <p class="quiet"><span class="mark">Backdated</span></p>
+      </div>
     </section>
 
-    <button type="button" class="btn primary" data-show="unsaved" data-group="save">Review this log</button>
-    <div data-panel="unsaved" data-group="save" hidden>
-      <p class="warn-banner"><strong>Not recorded</strong> No break was saved. No photo was stored. Stock was not changed and no interval was reset. Sync: not implemented.</p>
-    </div>
+    <section>
+      <h2>Sign-off</h2>
+      <dl class="rows">
+        <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+        <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+      </dl>
+    </section>
 
-    <nav class="more" aria-label="Related drafts">
-      <a href="event-prep.html">Event prep</a>
-      <a href="wheel-studs.html">Wheel stud sets</a>
-      <a href="replacement.html">Replacement sign-off</a>
-    </nav>
-    <footer class="fineprint">
-      <p><strong>The software does not certify vehicle safety.</strong></p>
-      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
-    </footer>
-  </main>
+    <section>
+      <h2>Evidence</h2>
+      <div class="switch thirds" role="group" aria-label="Evidence">
+        <button type="button" class="is-on" data-switch="1" data-group="evid" data-show="nonev" aria-pressed="true">None</button>
+        <button type="button" data-switch="1" data-group="evid" data-show="notesev" aria-pressed="false">Notes</button>
+        <button type="button" data-switch="1" data-group="evid" data-show="photoev" aria-pressed="false">Photo</button>
+      </div>
+      <div data-panel="nonev" data-group="evid">
+        <p class="msg">Photo or notes required.</p>
+        <label class="field">
+          <span>Notes</span>
+          <textarea placeholder="— not set —"></textarea>
+        </label>
+        <div class="photo">No photo</div>
+      </div>
+      <div data-panel="notesev" data-group="evid" hidden>
+        <p class="quiet">Notes EXAMPLE. Scrapped.</p>
+      </div>
+      <div data-panel="photoev" data-group="evid" hidden>
+        <div class="photo">EXAMPLE photo. Not stored.</div>
+        <p class="quiet">Scrapped.</p>
+      </div>
+    </section>
+
+    <button type="button" class="btn primary" data-show="unsaved" data-group="save">Review</button>
+    <p class="msg" data-panel="unsaved" data-group="save" hidden>Not recorded. Set stays sealed.</p>
+  </div>
   <script src="js/draft.js"></script>
 </body>
 </html>

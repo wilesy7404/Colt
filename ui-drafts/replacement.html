@@ -3,185 +3,180 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Replacement sign-off — UI draft</title>
+  <title>Replacement — UI draft</title>
   <link rel="stylesheet" href="css/draft.css">
 </head>
 <body class="race">
-  <header class="appbar">
-    <a class="back" href="index.html">All</a>
-    <div>
-      <p class="eyebrow">Race day · one transaction</p>
-      <h1>Replacement sign-off</h1>
-    </div>
-  </header>
-  <p class="example-banner" role="note">EXAMPLE DATA, not real maintenance history</p>
-  <p class="draft-flag">DRAFT MOCKUP · not a working app · Sync: not implemented</p>
-  <main>
-    <div class="block-banner">
-      <strong>All or nothing</strong>
-      <p>Nothing is saved, no stock is consumed, and no interval is reset until every required field validates and the whole transaction commits. Opening this screen does not reset an interval. Inspections without replacement are a separate record.</p>
-    </div>
-    <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> A committed replacement is still not a certification.</p>
-    <section class="card">
-      <h2>Service rule</h2>
-      <p class="small muted">Example sign-off against the wheel stud rule. Other rules on this draft have no source yet.</p>
-      <div class="rule-src">
-        <p class="k">Source</p>
-        <p class="src-label">Team policy (community research) v1</p>
-        <p class="k">Revision</p>
-        <p class="src-label">v1</p>
-        <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="index.html">All</a>
+      <div>
+        <h1>Replacement</h1>
       </div>
-      <dl class="kv">
-        <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
-        <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
-        <div><dt>Calendar interval</dt><dd>TBD (admin rule required)</dd></div>
-      </dl>
-      <p class="hint">Showing the rule does not copy it into the transaction and does not reset either interval.</p>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+
+    <section>
+      <h2>Lug nut torque</h2>
+      <p class="lead">80 ft-lb</p>
+      <p class="quiet">Owner's manual p. 6-6 · approved by Colton 2026-10-25</p>
+      <p class="quiet">Admin edits this on the stud rule.</p>
     </section>
-    <div class="switch" role="group" aria-label="Transaction state">
-      <button type="button" class="is-on" data-switch="1" data-group="tx" data-show="failed" aria-pressed="true">Partial / failed</button>
-      <button type="button" data-switch="1" data-group="tx" data-show="ok" aria-pressed="false">Example commit</button>
+
+    <p class="quiet">No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).</p>
+    <p class="msg">Set still sealed.</p>
+    <p class="msg">Part number not set.</p>
+
+    <div class="switch" role="group" aria-label="Transaction">
+      <button type="button" class="is-on" data-switch="1" data-group="tx" data-show="failed" aria-pressed="true">Failed</button>
+      <button type="button" data-switch="1" data-group="tx" data-show="ok" aria-pressed="false">Example</button>
     </div>
 
-    <section data-panel="failed" data-group="tx">
-      <div class="warn-banner" role="alert">
-        <strong>Validation failed</strong>
-        <p>Partial example: 3 of 13 required fields have a token. The transaction did not commit.</p>
-      </div>
-      <section class="card">
-        <h2>Required fields</h2>
+    <div data-panel="failed" data-group="tx">
+      <section>
+        <h2>Sign-off</h2>
+        <dl class="rows">
+          <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+          <div><dt>Stud</dt><dd>ARP extended</dd></div>
+          <div><dt>Set label</dt><dd class="mono">One label · bag of 5</dd></div>
+        </dl>
+        <div class="switch" role="group" aria-label="Performed at">
+          <button type="button" class="is-on" data-switch="1" data-group="when" data-show="future" aria-pressed="true">Future</button>
+          <button type="button" data-switch="1" data-group="when" data-show="back" aria-pressed="false">Earlier</button>
+        </div>
+        <div data-panel="future" data-group="when">
+          <label class="field bad">
+            <span>Performed at</span>
+            <input type="text" value="EXAMPLE · 15 Jun 2024, 18:00" readonly>
+            <span class="err">Performed at cannot be in the future.</span>
+          </label>
+        </div>
+        <div data-panel="back" data-group="when" hidden>
+          <label class="field">
+            <span>Performed at</span>
+            <input type="text" value="EXAMPLE · 13 Jun 2024, 16:10" readonly>
+          </label>
+          <p class="quiet"><span class="mark">Backdated</span></p>
+        </div>
+
         <label class="field">
-          <span>Old component ID</span>
-          <input type="text" value="EXAMPLE-COMP-OLD" readonly>
-          <span class="hint">Example token. Not a real component.</span>
+          <span>Old set label</span>
+          <input type="text" value="EXAMPLE-SET" readonly>
         </label>
         <label class="field bad">
-          <span>New component ID</span>
-          <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required. Empty, so the transaction stops.</span>
+          <span>New set label</span>
+          <input type="text" placeholder="One label" autocomplete="off">
+          <span class="err">Required. One label for the bag.</span>
+        </label>
+        <button type="button" class="btn">Scan label</button>
+        <label class="field bad">
+          <span>Part number</span>
+          <input type="text" value="— not set —, admin must enter" readonly>
+          <span class="err">Cannot use until an admin enters it.</span>
         </label>
         <label class="field bad">
-          <span>Approved part number</span>
+          <span>Corner</span>
+          <input type="text" placeholder="LF, RF, LR, or RR" autocomplete="off">
+          <span class="err">Corner required.</span>
+        </label>
+        <label class="field bad">
+          <span>Laps</span>
           <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required catalog part number. None is approved. Do not type a guessed number. Not a real part number.</span>
+          <span class="err">Required. Separate from hours.</span>
         </label>
         <label class="field">
-          <span>Vehicle position</span>
-          <input type="text" value="EXAMPLE" readonly>
+          <span>Engine hours</span>
+          <input type="text" value="4.5 EXAMPLE" readonly>
         </label>
+        <fieldset>
+          <legend>Measurement</legend>
+          <div class="switch thirds" role="group" aria-label="Measurement">
+            <button type="button" data-switch="1" data-group="meas" data-show="none" aria-pressed="false">None</button>
+            <button type="button" class="is-on" data-switch="1" data-group="meas" data-show="unstated" aria-pressed="true">Not stated</button>
+            <button type="button" data-switch="1" data-group="meas" data-show="entered" aria-pressed="false">Entered</button>
+          </div>
+          <p class="quiet" data-panel="none" data-group="meas" hidden>None required.</p>
+          <p class="msg" data-panel="unstated" data-group="meas">Not stated.</p>
+          <p class="quiet" data-panel="entered" data-group="meas" hidden>EXAMPLE</p>
+        </fieldset>
         <label class="field bad">
-          <span>Lap reading</span>
+          <span>Inspection</span>
           <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required. Independent of engine hours. A hour token does not fill this.</span>
+          <span class="err">Required.</span>
         </label>
         <label class="field">
-          <span>Engine-hour reading</span>
-          <input type="text" value="EXAMPLE" readonly>
-          <span class="hint">Example token only. Not converted to laps, and not a real meter reading.</span>
-        </label>
-        <label class="field bad">
-          <span>Required measurements</span>
-          <input type="text" value="TBD (admin rule required)" readonly>
-          <span class="err">No approved limit. A number typed here would not be a specification. Commit stays blocked.</span>
-        </label>
-        <label class="field bad">
-          <span>Required inspections</span>
-          <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required inspection is missing.</span>
-        </label>
-        <label class="field bad">
           <span>Technician</span>
-          <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Sign-off name is required.</span>
+          <input type="text" value="EXAMPLE User" readonly>
         </label>
         <label class="field bad">
           <span>Removal reason</span>
           <input type="text" placeholder="— not set —" autocomplete="off">
           <span class="err">Required.</span>
         </label>
-        <label class="field bad">
+        <label class="field">
           <span>Disposition</span>
-          <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required. No disposition list is defined yet.</span>
+          <input type="text" value="Scrapped" readonly>
         </label>
         <label class="field">
-          <span>Notes <span class="hint">(optional)</span></span>
-          <textarea placeholder="— not set —"></textarea>
+          <span>Notes</span>
+          <textarea placeholder="Optional"></textarea>
         </label>
         <label class="field bad">
           <span>Source</span>
           <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required on the transaction. The rule source above is not copied in until this field is filled. Nothing was saved.</span>
+          <span class="err">Required.</span>
         </label>
         <label class="field bad">
           <span>Revision</span>
           <input type="text" placeholder="— not set —" autocomplete="off">
-          <span class="err">Required. Revision is separate from the source line. Not filled, so the transaction stops.</span>
+          <span class="err">Required.</span>
         </label>
-        <button type="button" class="btn primary" disabled>Commit unavailable — validation failed</button>
-        <p class="hint">The button does nothing. A failed or partial form must not consume stock or reset a lap interval or an hour interval.</p>
+        <button type="button" class="btn primary" disabled>Commit</button>
       </section>
-      <section class="card">
-        <h2>Did not happen</h2>
-        <ul class="bundle refused">
-          <li><b>Maintenance record</b> Not saved.</li>
-          <li><b>Stock</b> Not consumed. Example kit EXAMPLE-KIT was not changed.</li>
-          <li><b>Service baseline</b> Not reset. Laps and engine hours stay independent and were not moved.</li>
-        </ul>
+      <section>
+        <h2>Unchanged</h2>
+        <dl class="rows">
+          <div><dt>Record</dt><dd>Not saved</dd></div>
+          <div><dt>Set</dt><dd>Still sealed</dd></div>
+          <div><dt>Baseline</dt><dd>Not reset</dd></div>
+        </dl>
       </section>
-    </section>
+    </div>
 
-    <section data-panel="ok" data-group="tx" hidden>
-      <div class="review-banner" role="status">
-        <strong>Example commit state</strong>
-        <p>Layout of a transaction that has already passed validation. Identity fields are EXAMPLE tokens, not history. Source and revision match the wheel stud rule shown above. Intervals stay TBD (admin rule required). This mockup did not commit, save a record, consume stock, or reset an interval.</p>
-      </div>
-      <section class="card">
-        <h2>Fields that would have validated</h2>
-        <p class="example-tag">Example data</p>
-        <dl class="kv">
-          <div><dt>Old component ID</dt><dd>EXAMPLE-COMP-OLD</dd></div>
-          <div><dt>New component ID</dt><dd>EXAMPLE-COMP-NEW</dd></div>
-          <div><dt>Approved part number</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Not a real part number</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Vehicle position</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Lap reading</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Engine-hour reading</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Required measurements</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Required inspections</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Technician</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Removal reason</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Disposition</dt><dd>EXAMPLE</dd></div>
-          <div><dt>Notes</dt><dd>EXAMPLE</dd></div>
+    <div data-panel="ok" data-group="tx" hidden>
+      <section>
+        <h2>Example fields</h2>
+        <dl class="rows">
+          <div><dt>Old set label</dt><dd class="mono">EXAMPLE-SET</dd></div>
+          <div><dt>New set label</dt><dd class="mono">EXAMPLE-SET-NEW</dd></div>
+          <div><dt>Stud</dt><dd>ARP extended</dd></div>
+          <div><dt>Part number</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Corner</dt><dd>LF</dd></div>
+          <div><dt>Set</dt><dd>Bag of 5 · one label</dd></div>
+          <div><dt>Laps</dt><dd>86 EXAMPLE</dd></div>
+          <div><dt>Hours</dt><dd>4.5 EXAMPLE</dd></div>
+          <div><dt>Measurement</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Inspection</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Technician</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Signed by</dt><dd>EXAMPLE User</dd></div>
+          <div><dt>Timestamp</dt><dd>EXAMPLE logged time</dd></div>
+          <div><dt>Performed at</dt><dd>EXAMPLE · earlier</dd></div>
+          <div><dt>Marker</dt><dd>Backdated</dd></div>
+          <div><dt>Reason</dt><dd>EXAMPLE</dd></div>
+          <div><dt>Disposition</dt><dd>Set scrapped</dd></div>
+          <div><dt>Evidence</dt><dd>Photo or notes on the set</dd></div>
           <div><dt>Source</dt><dd>Team policy (community research) v1</dd></div>
           <div><dt>Revision</dt><dd>v1</dd></div>
         </dl>
-        <p class="hint">Lap and engine-hour baselines would update only inside this same transaction, as separate metrics, with no conversion. A real commit is still refused while measurement limits are TBD (admin rule required). This panel does not supply those limits.</p>
-        <button type="button" class="btn" disabled>Commit unavailable — mockup only</button>
+        <p class="quiet">Laps and hours would move together, as separate numbers. The set would open only in that commit.</p>
+        <button type="button" class="btn" disabled>Commit</button>
+        <p class="msg">Not saved.</p>
       </section>
-      <section class="card">
-        <h2>Would commit together</h2>
-        <p>One transaction. These three move together or not at all. None of them ran.</p>
-        <ul class="bundle together">
-          <li><b>Maintenance record</b> Would be written with the fields above. Not written.</li>
-          <li><b>Stock movement</b> Would consume the issued kit or stock unit. EXAMPLE-KIT was not consumed.</li>
-          <li><b>Service baseline</b> Would set the new lap baseline and the new hour baseline together. Neither was reset.</li>
-        </ul>
-      </section>
-    </section>
-
-    <nav class="more" aria-label="Related drafts">
-      <a href="defects.html">Defects</a>
-      <a href="wheel-studs.html">Wheel studs</a>
-      <a href="component-detail.html">Component detail</a>
-      <a href="service-rules.html">Service rules</a>
-    </nav>
-    <footer class="fineprint">
-      <p><strong>The software does not certify vehicle safety.</strong></p>
-      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
-    </footer>
-  </main>
+    </div>
+  </div>
   <script src="js/draft.js"></script>
 </body>
 </html>

@@ -7,223 +7,61 @@
   <link rel="stylesheet" href="css/draft.css">
 </head>
 <body class="race">
-  <header class="appbar">
-    <a class="back" href="index.html">All</a>
-    <div>
-      <p class="eyebrow">Race day · 2004 Nissan 350Z</p>
-      <h1>Event prep</h1>
-    </div>
-  </header>
-  <p class="example-banner" role="note">EXAMPLE DATA, not real maintenance history</p>
-  <p class="draft-flag">DRAFT MOCKUP · not a working app · Sync: not implemented</p>
-  <main>
-    <p class="small muted">Phone layout, about 390px. Event: — not set —. Date: — not set —.</p>
-    <a class="btn alarm" href="stud-break.html">Log a wheel stud break</a>
-    <p class="hint">Failure log. Large targets, no interval numbers. Nothing is saved from that draft either.</p>
-    <div class="switch" role="group" aria-label="Example readiness state">
-      <button type="button" class="is-on" data-switch="1" data-group="prep" data-show="blocked" aria-pressed="true">Blocked</button>
-      <button type="button" data-switch="1" data-group="prep" data-show="clear" aria-pressed="false">Not certified</button>
-    </div>
-
-    <section data-panel="blocked" data-group="prep">
-      <div class="block-banner" role="alert">
-        <strong>Blocked</strong>
-        <p>Example: a safety check failed, and a critical defect is unresolved. This state must not show a ready status.</p>
+  <div class="wrap">
+    <header class="top">
+      <a class="back" href="overview.html">Car</a>
+      <div>
+        <h1>Event prep</h1>
+        <p class="sub">NASA Utah · 14 Jun 2024</p>
       </div>
-      <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> Clearing items on this screen is not approval to race.</p>
-      <section class="card">
-        <h2>Safety-critical</h2>
-        <article>
-          <div class="row-top">
-            <h3>Wheel studs</h3>
-            <span class="pill unknown">Unknown</span>
-          </div>
-          <p class="example-tag">Example data</p>
-          <p>Missing history. Unknown is not healthy and is not a pass.</p>
-          <div class="rule-src">
-            <p class="k">Source</p>
-            <p class="src-label">Team policy (community research) v1</p>
-            <p class="k">Revision</p>
-            <p class="src-label">v1</p>
-            <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
-          </div>
-          <dl class="kv">
-            <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
-            <div><dt>Component ID</dt><dd>EXAMPLE-COMP</dd></div>
-            <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
-            <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
-          </dl>
-        </article>
-        <article>
-          <div class="row-top">
-            <h3>Safety check</h3>
-            <span class="pill failed">Failed inspection</span>
-          </div>
-          <p class="example-tag">Example data</p>
-          <p>Example failed check. This is why the banner says blocked. Limit: TBD (admin rule required). No inspection is stored.</p>
-        </article>
-      </section>
-      <section class="card">
-        <h2>Overdue</h2>
-        <div class="row-top">
-          <h3>Maintenance item</h3>
-          <span class="pill overdue">Overdue</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>Example label only. Not calculated from a reading.</p>
-        <dl class="kv">
-          <div><dt>Source</dt><dd>— not set —</dd></div>
-          <div><dt>Revision</dt><dd>— not set —</dd></div>
-          <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
-          <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
-        </dl>
-        <p class="hint">The two intervals are independent and are not converted.</p>
-      </section>
-      <section class="card">
-        <h2>Approaching</h2>
-        <div class="row-top">
-          <h3>Maintenance item</h3>
-          <span class="pill approaching">Approaching</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>Example label only. Warning threshold: — not set —.</p>
-        <dl class="kv">
-          <div><dt>Source</dt><dd>— not set —</dd></div>
-          <div><dt>Revision</dt><dd>— not set —</dd></div>
-          <div><dt>Lap side</dt><dd>TBD (admin rule required)</dd></div>
-          <div><dt>Hour side</dt><dd>TBD (admin rule required)</dd></div>
-        </dl>
-      </section>
-      <section class="card">
-        <h2>Open defects</h2>
-        <article>
-          <div class="row-top">
-            <h3>Critical defect</h3>
-            <span class="pill overdue">Unresolved</span>
-          </div>
-          <p class="example-tag">Example data</p>
-          <p>Unresolved critical defect. This blocks a ready status. Observed detail: — not set —. Not a record of a real failure.</p>
-        </article>
-        <article>
-          <div class="row-top">
-            <h3>Other defect</h3>
-            <span class="pill neutral">Needs review</span>
-          </div>
-          <p class="example-tag">Example data</p>
-          <p>Open example. Detail: — not set —.</p>
-        </article>
-      </section>
-      <section class="card">
-        <h2>Stock</h2>
-        <div class="row-top">
-          <h3>Wheel-stud sets</h3>
-          <span class="pill approaching">Early reorder</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>Example warning state. The count is not a real shortage.</p>
-        <dl class="kv">
-          <div><dt>Kit / stock ID</dt><dd>EXAMPLE-KIT</dd></div>
-          <div><dt>On hand</dt><dd>— not set —</dd></div>
-          <div><dt>Reorder threshold</dt><dd>TBD (admin rule required)</dd></div>
-        </dl>
-        <p>Other stock: — not set —.</p>
-      </section>
-      <section class="card">
-        <h2>Required inspections</h2>
-        <p class="example-tag">Example data</p>
-        <p>Pre-event inspection: not recorded. Limit: TBD (admin rule required).</p>
-      </section>
-      <section class="card">
-        <h2>Tools</h2>
-        <p>Required tools: — not set —.</p>
-      </section>
-    </section>
+    </header>
+    <p><span class="chip blocked">Blocked</span></p>
+    <p class="ex">Example data</p>
+    <p class="lead">Critical defect open.</p>
 
-    <section data-panel="clear" data-group="prep" hidden>
-      <div class="review-banner" role="status">
-        <strong>Not certified</strong>
-        <p>Example with no failed safety check and no unresolved critical defect. There is still no ready status. Unset rules are not a clean bill of health.</p>
-      </div>
-      <p class="disclaimer"><strong>The software does not certify vehicle safety.</strong> This view is not approval to race.</p>
-      <section class="card">
-        <h2>Safety-critical</h2>
-        <div class="row-top">
-          <h3>Wheel studs</h3>
-          <span class="pill unknown">Unknown</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>No failed check in this example. Missing history stays unknown. Unknown is not healthy. Whether unknown itself blocks an event is undecided; this draft does not relabel it.</p>
-        <div class="rule-src">
-          <p class="k">Source</p>
-          <p class="src-label">Team policy (community research) v1</p>
-          <p class="k">Revision</p>
-          <p class="src-label">v1</p>
-          <p class="plain">Team starting point, not a factory interval or a guarantee.</p>
-        </div>
-        <dl class="kv">
-          <div><dt>Catalog part number</dt><dd>— not set —</dd></div>
-          <div><dt>Lap interval</dt><dd>TBD (admin rule required)</dd></div>
-          <div><dt>Engine-hour interval</dt><dd>TBD (admin rule required)</dd></div>
-        </dl>
-      </section>
-      <section class="card">
-        <h2>Overdue</h2>
-        <p>No overdue example in this view. Intervals stay TBD (admin rule required), which is not a healthy result.</p>
-        <dl class="kv">
-          <div><dt>Source</dt><dd>— not set —</dd></div>
-          <div><dt>Revision</dt><dd>— not set —</dd></div>
-        </dl>
-      </section>
-      <section class="card">
-        <h2>Approaching</h2>
-        <div class="row-top">
-          <h3>Maintenance item</h3>
-          <span class="pill approaching">Approaching</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>Example label only. Lap side and hour side are both TBD (admin rule required) and are not converted.</p>
-        <dl class="kv">
-          <div><dt>Source</dt><dd>— not set —</dd></div>
-          <div><dt>Revision</dt><dd>— not set —</dd></div>
-        </dl>
-      </section>
-      <section class="card">
-        <h2>Open defects</h2>
-        <div class="row-top">
-          <h3>Other defect</h3>
-          <span class="pill neutral">Needs review</span>
-        </div>
-        <p class="example-tag">Example data</p>
-        <p>No unresolved critical defect in this example. A needs-review item does not make the car ready. Detail: — not set —.</p>
-      </section>
-      <section class="card">
-        <h2>Stock</h2>
-        <p>On hand: — not set —. Reorder threshold: TBD (admin rule required).</p>
-      </section>
-      <section class="card">
-        <h2>Required inspections</h2>
-        <p>Pre-event inspection: not recorded. Limit: TBD (admin rule required).</p>
-      </section>
-      <section class="card">
-        <h2>Tools</h2>
-        <p>Required tools: — not set —.</p>
-      </section>
+    <section>
+      <h2>Checklist</h2>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Brake pads, rotors, fluid</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Fluids and oils</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Tires</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Suspension</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Engine and drivetrain</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Wheels and studs</span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Lug nuts<small>80 ft-lb · Owner's manual p. 6-6 · approved by Colton 2026-10-25</small></span>
+      </button>
+      <button type="button" class="check" data-toggle="check" aria-pressed="false">
+        <span class="box" aria-hidden="true"></span>
+        <span>Tools</span>
+      </button>
     </section>
-
-    <p class="note">Service rules cannot be changed from this race-day screen. Nothing on this page is saved.</p>
-    <nav class="more" aria-label="Related drafts">
-      <a href="pre-session.html">Pre-session checklist</a>
-      <a href="component-life.html">Component life</a>
-      <a href="defects.html">Defects</a>
-      <a href="stud-break.html">Log a wheel stud break</a>
-      <a href="wheel-studs.html">Wheel studs</a>
-      <a href="replacement.html">Replacement sign-off</a>
-    </nav>
-    <footer class="fineprint">
-      <p><strong>The software does not certify vehicle safety.</strong></p>
-      <p>Draft mockup. Not a working app. Example data only. Sync: not implemented.</p>
-    </footer>
-  </main>
+  </div>
+  <nav class="nav" aria-label="Main">
+    <a href="overview.html">Car</a>
+    <a class="on" href="event-prep.html">Prep</a>
+    <a href="session-log.html">Session</a>
+    <a href="defects.html">Defects</a>
+    <a href="log-maintenance.html">Log</a>
+  </nav>
   <script src="js/draft.js"></script>
 </body>
 </html>

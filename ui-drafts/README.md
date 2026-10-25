@@ -6,95 +6,83 @@
 
 That opens the preview in a browser from the file on disk. Nothing else needs to be installed, and no server is required.
 
-Static phone-first mockups for a one-car team (2004 Nissan 350Z, NASA/SCCA). These pages are drawings for review. They are not a working app, they do not save data, and they do not calculate maintenance. Links and scripts use relative paths only.
+Static phone-first mockups for a one-car team (2004 Nissan 350Z, NASA/SCCA). These pages are drawings for review. They do not save data, and they do not calculate maintenance. Links and scripts use relative paths only.
 
 Open `index.html` in a browser. There is no build step.
 
-Sample values are example data. Where a real value would go, the screens say `— not set —`, `EXAMPLE`, `UNKNOWN`, or `TBD (admin rule required)`. No interval number, torque number, part number, or maintenance history is invented. Status line on every screen: `Sync: not implemented`.
+Each screen has one quiet `Example data` tag. Sample readings include the word `EXAMPLE`. Empty values say `— not set —` or `UNKNOWN`. Intervals are blank or `Proposed`. Proposed is a label, not a number. No interval number, part number, or maintenance history is invented.
 
-The wheel stud service rule shows source `Team policy (community research) v1` and revision `v1`, with the statement “Team starting point, not a factory interval or a guarantee.” Its lap, engine-hour, and calendar intervals stay `TBD (admin rule required)`. Other example rules show source and revision as `— not set —`.
+Status chips are Ready, Due, Blocked, or Unknown. Unknown is grey and outlined. It is not a pass. Missing data stays Unknown. Blocking problems are one short line.
 
-The Version 2 prototype at the repository root is a separate file. These drafts do not modify it.
+The safety line and `Sync: not implemented` are only on Settings (`about.html`).
 
-## Screens
+The old prototype lives under `archive/prototype/`. These drafts do not modify it.
 
-### 1. Event prep — `event-prep.html`
+## Main screens
 
-Race-day readiness. Safety-critical items, overdue and approaching maintenance, open defects, stock, required inspections, and tools.
+The index and the bottom nav lead with these five:
 
-Entities: vehicle, safety check, inspection, service rule (source, revision, lap interval, engine-hour interval), defect, component, kit/stock, reorder threshold, event (name and date unset). The wheel stud rule source is `Team policy (community research) v1`. Other rules on this screen have source and revision `— not set —`.
+1. Car overview — `overview.html`. Brakes (pads, rotors, fluid), fluids and oils, tires, suspension, engine and drivetrain, and wheels/studs as one row. One chip per item.
+2. Event prep — `event-prep.html`. Checklist. A critical defect blocks the screen.
+3. Session — `session-log.html`. Laps and engine hours are separate fields. A blank is not zero.
+4. Defects — `defects.html`. Report, triage, resolve. Only an admin can close a critical defect. Resolve still needs linked work or an inspection.
+5. Log maintenance — `log-maintenance.html`. Any system. Nothing is saved until the whole form commits. Technician defaults to the signed-in user (EXAMPLE User) and a timestamp is kept. Performed at cannot be in the future. Earlier than logged time is marked Backdated. Measurement is none required, not stated (blocks commit), or an entered value.
 
-### Stud break — `stud-break.html`
+## Torque
 
-Fast phone log for a wheel stud break. Linked from event prep and from the stud-set screen. Corner (FL, FR, RL, RR), stud position in the set of five, kit / stock ID, laps and engine hours, event, torque method (words only, no torque number), wheel type, nut type, notes, and a photo placeholder.
+Lug nut torque is `80 ft-lb`, admin-editable on the stud rule. Source: `Owner's manual p. 6-6 · approved by Colton 2026-10-25`. The stud rule also shows `(2004 350Z owner's manual, third-party copy)`.
 
-Laps and engine hours are prefilled only in an example “known reading” state, using the token `EXAMPLE`. Otherwise they are `UNKNOWN`. They are never `0`, and a blank is not treated as okay. The photo control does not attach a file. Nothing is saved.
+It appears on the event-prep lug-nut check, the maintenance log when Wheels is selected, the stud rule, and the stud sign-off. The stud-break log records the torque method in words and does not show this value.
 
-Entities: defect / failure evidence, wheel position, stud position, kit/stock ID, lap reading, engine-hour reading, event, torque method (not a torque value), wheel type, nut type, notes, photo placeholder.
+## Wheel studs
 
-### 2. Pre-session — `pre-session.html`
+Secondary pages: `wheel-studs.html`, `stud-break.html`, `replacement.html`.
 
-Checklist and usage capture before an outing. Laps and engine hours are separate inputs.
+A set is one labeled bag of 5 for one corner (LF, RF, LR, RR). The UI shows and scans one label. There are no per-stud IDs. Replacement and removal are the whole set. Removed sets are scrapped. Photo or notes stay on the set record. Stud break stores that label, plus an optional “Which position broke” value from 1 to 5 on the same record.
 
-Entities: checklist line, session usage (laps), session usage (engine hours), vehicle readings. The two usage metrics are not converted.
+Approved stud name: ARP extended. Part number: — not set —, admin must enter. The set opens only on a successful commit. Stock is sealed bags only. Target 4. Warning at 4 or fewer.
 
-### 3. Component life — `component-life.html`
+Life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).
 
-One example card for each status: not due, approaching due, due, overdue, failed inspection, and unknown. Unknown is hatched and is never shown as healthy. Labels are not calculations.
+## Other screens
 
-Entities: component, component ID, catalog part number, kit/stock ID, lap reading, engine-hour reading, service rule (source, revision, intervals), inspection result. The wheel stud card uses source `Team policy (community research) v1`. The other cards use source and revision `— not set —`.
+`component-detail.html`, `component-life.html`, `service-rules.html` (admin), `restore.html`, `about.html`.
 
-### 4. Defects — `defects.html`
+Service rules are admin-editable and locked for race day. Restore is allowed only into an empty system. If the system has data, recovery is a command-line process that archives the database first and does not overwrite.
 
-Report, then triage, then resolve. Resolve stays blocked until a work record or an inspection record is linked. Linked states are example tokens and are not saved.
+## Decided
 
-Entities: defect, severity, component, inspection, work / maintenance record, technician, sign-off, evidence.
+- Corners are LF, RF, LR, and RR.
+- A wheel-stud set is one labeled bag of 5 for one corner. One label is shown and scanned. There are no per-stud IDs.
+- Replacement and removal are the whole set. The set opens only when the commit succeeds. It is not split.
+- Removed sets are scrapped. There is no reuse choice. Failure evidence (photo or notes) is stored on the set record.
+- Which position broke (1–5) is optional and is stored on the set record.
+- Stock is sealed sets only. Pre-event target is 4. Warning at 4 or fewer.
+- Approved stud name is ARP extended. Part number is — not set —, admin must enter.
+- Technician defaults to the signed-in user. Every sign-off stores technician and timestamp.
+- Performed at in the future is rejected. Earlier than logged time is marked Backdated.
+- A measurement is none required, not stated, or an entered value. Not stated blocks commit.
+- Only an admin can close a critical defect.
+- Restore runs only into an empty system. A system that already has data is recovered from the command line, which archives the database first.
+- Lug nut torque is 80 ft-lb. Source: Owner's manual p. 6-6 · approved by Colton 2026-10-25. Admin can edit the value. Detail on the stud rule: (2004 350Z owner's manual, third-party copy).
+- Wheel stud life: No calendar, lap or hour life. Managed by inspection plus failure data (owner decision 2026-10-25).
+- Intervals are blank or Proposed. Proposed is not a number.
 
-### 5. Replacement sign-off — `replacement.html`
+## Open questions
 
-All-or-nothing replacement. Partial / failed validation and an example commit state. Nothing is saved, no stock is consumed, and no interval is reset unless every required field validates and the whole transaction commits. This mockup never commits.
-
-Entities: installation/removal record, old component ID, new component ID, approved catalog part number, vehicle position, lap reading, engine-hour reading, required measurement, required inspection, technician, removal reason, disposition, notes, service rule source, service rule revision, stock movement, service baseline (laps and engine hours stay independent). The example rule is the wheel stud rule: source `Team policy (community research) v1`, revision `v1`, intervals `TBD (admin rule required)`. Showing that rule does not commit the transaction.
-
-### 6. Wheel studs — `wheel-studs.html`
-
-Sealed sets of five. Kit/stock ID per set, sealed versus opened/used, per-stud IDs and wheel positions where tracked, a block on mixing studs from different sets, removal reason and failure evidence, and an early reorder warning.
-
-Entities: kit/stock ID, sealed set, stud component ID, wheel position, opened/used state, catalog part number, removal reason, failure evidence, disposition, reorder threshold, stock count, service rule source, service rule revision. Source `Team policy (community research) v1`. Intervals `TBD (admin rule required)`. The break log is linked from this screen.
-
-### 7. Component detail — `component-detail.html`
-
-Admin, on a phone and on a desktop. Catalog part number, component ID, and kit/stock ID are separate. Installation and removal history stays after removal.
-
-Entities: catalog part number, component ID, kit/stock ID, installation record, removal record, vehicle position, lap reading, engine-hour reading, technician, procedure/source revision, removal reason, disposition, measurement, inspection, notes.
-
-### 8. Service rules — `service-rules.html`
-
-Admin editor and a locked race-day view, showing the wheel stud rule. Lap interval, engine-hour interval, calendar interval, warning threshold, critical threshold, inspection limits, required measurements, required sign-offs, safety criticality, approved procedure, source, and revision. Source is `Team policy (community research) v1`. Revision is `v1`. Intervals are `TBD (admin rule required)`, not numbers. Lap and hour thresholds are independent and are not converted. Edits are admin-only and would be audited. This draft writes no audit row. Race-day users see the same source and revision and cannot change them.
-
-Entities: service rule, audit entry (shape only), admin role, race-day role.
-
-Index of the screens: `index.html`.
-
-## Open questions for the backend
-
-1. Event prep blocks a ready status on a failed safety check or an unresolved critical defect. Does unknown on a safety-critical component also block, or only display as unknown?
+1. Does unknown on a safety-critical part block the event, or only display as Unknown?
 2. Is a safety check its own record, an inspection, a checklist line, or some of each?
-3. Are session laps and engine hours deltas or meter totals? Who may correct a reading, and is the correction audited? No conversion between the two metrics is defined.
-4. May a replacement commit while measurement limits on the service rule are still unset? This draft refuses.
-5. The commit is the maintenance record, the stock movement, and the service baseline together. Which other rows must be in that same commit (defect link, stud-set opened/used)? What rolls back if one write fails?
-6. Are notes required? This draft treats notes as optional and the other sign-off fields named in the handoff as required.
-7. Removal reason and disposition need a vocabulary, or they stay free text. Neither list exists yet.
-8. Is a sealed stud set always five studs for one wheel? When does the set flip from sealed to opened/used? Are individual stud IDs mandatory or only when someone tracks them?
-9. Mixing is blocked at assignment in this draft. Should a stock move that would split a set be blocked the same way?
-10. Reorder counts sealed sets only, or opened sets as well? The threshold is an admin setting and is not supplied.
-11. What failure evidence must be attached before a stud removal can commit? The fields are empty here.
-12. Which component-history fields are immutable after commit? Confirm a removed component row is never deleted and its ID is never reused.
-13. Does a rule allow one approved catalog part number or a list of alternates? None are supplied.
-14. Who may publish a rule revision, and which audit fields are stored? Race day is read-only in the draft; the server still has to refuse a rule change from that role.
-15. An inspection without replacement is a separate record. Confirm it does not move a lap baseline or an hour baseline.
-16. IDs that start with `EXAMPLE` must never be loaded as inventory or history for the car. How will seed data be kept out of the real vehicle?
-17. ID formats (component, kit, stud, work, inspection) are not chosen.
-18. Forecasts, purchasing, and user administration are in the handoff and are not screens in this draft.
-19. The stud-break photo control is a placeholder. What a stored evidence file must contain, and who may attach it, is undecided. This draft does not take or keep a photo.
-20. When laps or engine hours are unknown at a break, the value stored should be an explicit unknown, not zero and not an empty field that later reads as healthy. Who is allowed to replace that unknown with a reading later is undecided.
+3. Are session laps and engine hours deltas or meter totals? Who may correct a reading?
+4. May a maintenance log commit while measurement limits are still unset? This draft refuses when a measurement is not stated.
+5. Which other rows join the commit, and what rolls back if one write fails?
+6. Are notes required on an ordinary log? This draft treats them as optional. A stud-set failure still needs a photo or notes.
+7. Removal reason still needs a vocabulary, or it stays free text.
+8. What must a stored evidence file contain, and who may attach it? This draft does not take a photo.
+9. Which history fields are immutable after commit?
+10. Does a rule allow one approved part number or a list? None are supplied for studs.
+11. Who may publish a rule revision, and which audit fields are stored?
+12. Confirm an inspection without replacement does not move a lap or hour baseline.
+13. How are values that contain EXAMPLE kept out of the real car?
+14. ID formats are not chosen. A stud set uses one label.
+15. Forecasts, purchasing, and user administration are not screens here.
+16. Who may later replace an explicit UNKNOWN reading?
