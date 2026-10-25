@@ -34,7 +34,8 @@ Each case has an ID, a priority, and a mode.
 | --- | --- |
 | Catalog part | The kind of part, for example a sealed wheel-stud set. |
 | Component | One physical part or assembly on the car, with its own ID. |
-| Kit / stock ID | The ID of one sealed set or one stock unit. Stud sets are not mixed in silence. |
+| Kit / stock ID | The ID of one sealed set or one stock unit. A stud bag is one set of five for one corner. |
+| Corner | LF, RF, LR, or RR. Intervals and inspections on a corner stay on that corner. |
 | Baseline | The lap reading, engine-hour reading, and date the interval counts from. |
 | Ready lamp | The single indicator a crew member could read as "good to go." Green, or the words Ready, OK, Good, or Healthy, count as the lamp on. |
 | UNKNOWN | The word UNKNOWN, on screen and in the stored status. A blank, a dash, a zero, or "not due" is not UNKNOWN. |
@@ -74,10 +75,15 @@ When a case says the garage is unchanged, all of the following are true:
 
 | Document | What it decides |
 | --- | --- |
-| [atomic-transactions.md](atomic-transactions.md) | A stud job is saved completely, or the garage is unchanged. Sealed sets of five, partial sets, short stock, and a set opened by mistake. |
-| [roles-and-authorization.md](roles-and-authorization.md) | The server enforces the role matrix, including direct requests and replayed requests. |
-| [unknown-and-readiness.md](unknown-and-readiness.md) | Missing, stale, or corrupt data shows UNKNOWN. The ready lamp stays off. |
-| [audit-trail.md](audit-trail.md) | Each committed create, update, delete, consume, and reset is logged once, with who, when, what, before, and after. |
+| [components-and-maintenance.md](components-and-maintenance.md) | Brakes, fluids and oils, tires, suspension, engine, and drivetrain. Add a part, log service, and show due, overdue, or UNKNOWN. Intervals stay blank until the owner enters one with a source. |
+| [event-checklists.md](event-checklists.md) | Build an event checklist from a template, start each event fresh, and keep the car not ready while anything is open. |
+| [usage-log.md](usage-log.md) | Per-session laps and engine hours. No negatives. Totals feed intervals. Edits and deletes are audited. |
+| [defects.md](defects.md) | Open a defect, store its severity, close it only under the role matrix, and block the car on a critical one. |
+| [phone-ui.md](phone-ui.md) | The rebuild's phone screens: thumb-sized targets, UNKNOWN in plain sight, honest wording, and errors the crew can see. |
+| [atomic-transactions.md](atomic-transactions.md) | A job is saved completely, or the garage is unchanged. Includes a short P1 note: studs are a sealed set of five at one corner, with no per-stud fields. |
+| [roles-and-authorization.md](roles-and-authorization.md) | The server enforces the role matrix, including direct requests, replayed requests, and the server-chosen signer. |
+| [unknown-and-readiness.md](unknown-and-readiness.md) | Missing, stale, or corrupt data shows UNKNOWN. The ready lamp stays off. Readiness is per corner. |
+| [audit-trail.md](audit-trail.md) | Each committed create, update, delete, consume, and reset is logged once, with who, when, what, before, and after. A rejected signer swap is audited too. |
 | [backup-restore.md](backup-restore.md) | Export, empty restore target, compare. Bad files do nothing. Demo data stays separate. |
 | [concurrency.md](concurrency.md) | Two people, one set left, two resets, a stale save, and an edit racing a delete. |
 | [release-honesty.md](release-honesty.md) | The short checklist to tick before any release the crew might trust. |
@@ -110,13 +116,12 @@ Other open questions are listed in the documents. Several of them already have a
 | ID | Question | Fail-closed behavior already tested |
 | --- | --- | --- |
 | AQ-AT-1 | How a repeated save is recognized as the same job | Same job cannot be applied twice |
-| AQ-AT-3 | Leftover studs after a legal open | Using part of a still-sealed set is refused |
-| AQ-AT-4 | A recorded mix of two stud sets | A mix with no record is refused |
+| AQ-AT-4 | Whether two whole sets can ever be named on one corner | A corner names one set; a mix is refused |
 | AQ-AT-5 | Whether reserved stock can be used for another job | Looking at the screen does not reserve a set |
 | AQ-AT-6 | Who may authorize negative stock | Negative stock is refused for both roles |
 | AQ-AT-7 | A recorded "seal this set again" action | Erasing an open is refused |
 | AQ-AT-8 | Readings required beyond the rule's own list | A metric the rule uses needs a reading; sign-off is always required on a replacement |
-| AQ-AT-9 | Whether individual stud tracking is on in the first release | A saved install always keeps the kit ID; a partial list of stud IDs is refused |
+| AQ-SIGN-1 | How an Admin verifies a signer other than the logged-in user | The logged-in user is the signer; a different user id in the request is refused and audited |
 | AQ-ROLE-2 | Who may correct history, if anyone | History cannot disappear without a log entry |
 | AQ-ROLE-3 | Who may change or delete a log entry, if anyone | Both roles are refused today |
 | AQ-ROLE-4 | Race-day access to reports, forecasts, and other people's defects | Those writes and views stay refused |
@@ -128,7 +133,7 @@ Other open questions are listed in the documents. Several of them already have a
 | AQ-UNK-4 | Full list of corrupt-record checks | The examples in the unknown plan are already P0 |
 | AQ-UNK-5 | Overdue item that is not safety-critical | An overdue safety-critical item keeps the lamp off |
 | AQ-AUD-1 | One log note for the job, or one note per effect | Each effect is present once; the grain may be either |
-| AQ-AUD-2 | Whether failed attempts are logged | No success entry on a failed save. See the recommendation in the audit plan |
+| AQ-AUD-2 | Whether failed attempts are logged, other than a signer swap | No success entry for a failed save. A rejected signer swap is already audited (AUD-09) |
 | AQ-AUD-3 | Time zone on log entries, and whether the log is inside the backup | Server time is stored; a client-supplied time cannot rewrite it |
 | AQ-AUD-4 | Whether a restore writes one log entry | A failed restore writes no success entry |
 | AQ-BR-2 | Where the format version sits in the file | A file with no version, or an unsupported version, is refused |

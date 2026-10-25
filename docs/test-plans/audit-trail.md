@@ -6,7 +6,7 @@ Priorities and modes are defined in [README.md](README.md).
 
 ## What every success entry contains
 
-- **Who:** the signed-in account. A name typed into a technician box may also be stored on the work record. It does not replace the account on the log, and a client cannot name a different account and have the log believe it.
+- **Who:** the signed-in account. On a sign-off, the server also stores that same person as the signer and the technician, unless it attaches an admin-verified signer by its own rule (ROLE-09). A name or user id in the request does not choose either field. A crew attempt to name someone else is rejected and audited (ROLE-08, AUD-09).
 - **When:** the server's time at commit. A time sent by the device does not become the log time.
 - **What:** the action and the identity of the record (component, kit, rule, or job).
 - **Before and after:** the previous values and the new values. A create has an empty before. A delete has an empty after. A consume shows the old count and the new count, with the kit ID. A reset shows the old baseline and the new baseline (laps, engine hours, and date).
@@ -120,7 +120,7 @@ Testers count effects, not paragraphs.
 
 **Open question AQ-AUD-2.**
 
-Locked now, and already covered by AUD-04: a failed transaction writes **no success entry**. Testers do not require a failure log, and they do not fail the build because a failure log exists, until the team answers this question.
+Locked now, and already covered by AUD-04: a failed transaction writes **no success entry** for completed work. One refusal is already decided: a crew attempt to name a different signer is rejected and audited (AUD-09). That entry records the rejection. It is not a completed sign-off. Other failures stay under this open question. Testers do not require a general failure log, and they do not fail the build because a general failure log exists, until the team answers this question.
 
 Recommendation, to accept or replace before the audit feature is called done:
 
@@ -131,6 +131,24 @@ Recommendation, to accept or replace before the audit feature is called done:
 Until that recommendation is accepted or replaced, do not claim in the release notes that failed attempts are logged.
 
 Cases that would grade the trouble log stay unwritten on purpose. Add them in this file after AQ-AUD-2 is answered, with their own IDs.
+
+## AUD-09 — A rejected signer substitution is logged
+
+- **Priority:** P0
+- **Mode:** Automatable
+
+**Preconditions:** ROLE-08 has been run.
+
+**Steps**
+
+1. Read the log after the refused request.
+
+**Expected result**
+
+- One audit entry records the rejected attempt.
+- Who is the Race-day account that sent it. When is the server's time. What says the signer substitution was rejected, and it includes the user id the request tried to use.
+- Before and after show that the signer and the technician were not changed to that person.
+- The entry is not a completed sign-off, consume, or reset. History, stock, and baselines match the garage from before the request.
 
 ## AUD-08 — Restore and the log
 

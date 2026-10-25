@@ -12,7 +12,7 @@ All of these are present, or the test fails:
 
 - A history line with the test wheel, the date, the lap reading, the engine-hour reading, the approved catalog part `TEST-STUD-SET`, the kit ID, the measurements and evidence the rule required, the inspection result, the removal reason, and the signed-in person who signed off.
 - The new component identity is the kit that was on the shelf. On the first job at that wheel, the old-component field says none on file. That is an honest empty history, and it is a different thing from the maintenance status UNKNOWN. The field contains no made-up ID.
-- If the request included individual stud IDs, all five IDs and their positions are stored, and every one of them belongs to that same kit.
+- The record names that set and the corner. It does not carry a per-stud ID, label, serial, or scan field. The short P1 note at the end of this file is the check for that shape.
 - That kit is no longer a sealed set on the shelf. The other test kit is still sealed.
 - The baseline matches the readings and the date on this job. The lap baseline is the lap reading. The hour baseline is the hour reading. One is not copied into the other.
 - The log shows the create, the consume, and the reset once each. See AQ-AUD-1 for whether that is one note or three. A duplicate of any effect is a fail. A missing effect is a fail.
@@ -188,9 +188,7 @@ AT-10, AT-11, AT-12, AT-13, and AT-18 need the harness from AQ-AT-2. Leave them 
 
 **Expected result:** The server refuses. `TEST-KIT-001` stays sealed, with its original kit ID. The garage is unchanged.
 
-**Open question AQ-AT-3.** The handoff does not say whether a set that was opened on purpose may later yield leftover studs as individuals under the same kit ID. Until that is answered, there is no passing result for a job that consumes a leftover. Do not invent that workflow during the test.
-
-**Open question AQ-AT-9.** Individual stud IDs are required when the request sends them, and a list shorter than the sealed set is refused (this case). The handoff does not say the first release must turn individual tracking on for every stud. A release that claims individual stud tracking is done also stores each stud ID and wheel position on the complete job.
+**Owner rule (P1, not a release blocker).** Studs are not leftover individuals. Stock moves in whole sets. See "Stud sets" at the end of this file.
 
 ### AT-19 — Studs from two sets on one wheel, with no mix record
 
@@ -205,7 +203,7 @@ AT-10, AT-11, AT-12, AT-13, and AT-18 need the harness from AQ-AT-2. Leave them 
 
 **Expected result:** The server refuses. Both kits stay sealed. The garage is unchanged. The history does not contain a wheel built from two kits.
 
-**Open question AQ-AT-4.** "Do not silently mix" is the rule. The handoff does not say whether an authorized person may mix two sets when the mix, the reason, and both kit IDs are recorded. Until that is answered, a request that includes a mix reason has no pass result. The no-record request in this case is a fail if the server accepts it.
+**Open question AQ-AT-4.** A corner record names one set (see the P1 stud-set note). The handoff does not say whether a written reason may ever put two whole sets on one corner. Until that is answered, AT-19 still refuses. There is no pass result for a mix.
 
 ### AT-20 — A set is opened by mistake, and the open is never confirmed
 
@@ -289,3 +287,41 @@ The handoff says stock can be reserved for an event. It does not say a reserved 
 - Two people saving the last set is [concurrency.md](concurrency.md) CC-01.
 - The log shape for the complete job is [audit-trail.md](audit-trail.md).
 - A failed save must not load demo data. The full demo rules are in [backup-restore.md](backup-restore.md).
+
+## Stud sets (P1)
+
+Wheel studs are labeled and tracked only as a sealed bag of five for one corner. Install, removal, scrap, and failure records name the set and the corner. Stock moves in whole sets. The product has no per-stud IDs, labels, serials, or scan fields. These checks are P1. They do not, by themselves, block a release. The all-or-nothing save rules above stay P0.
+
+### SET-01 — Set and corner only
+
+- **Priority:** P1
+- **Mode:** Both
+
+**Preconditions:** Standard garage. Corners are LF, RF, LR, and RR.
+
+**Steps**
+
+1. Add extra sealed test sets if the shelf needs them. Test IDs only.
+2. Save one install, one removal, one scrap, and one failure. Each names one set and one corner.
+3. Look through the screens, a backup file, the inventory description, and the fields a save accepts. Include a direct server request, not only the form.
+
+**Expected result**
+
+- Each stored record names its set and its corner.
+- A corner that this test did not write is unchanged.
+- Stock changes by a whole set, or stays put when the record is a note that does not consume a set.
+- No per-stud ID, label, serial, or scan field is stored or accepted. A request that sends one is refused, and the garage stays unchanged.
+
+### SET-02 — "Which position broke" is a note
+
+- **Priority:** P1
+- **Mode:** Automatable
+
+**Preconditions:** Standard garage.
+
+**Steps**
+
+1. Save a failure for one set at LF and include an optional "which position broke" note.
+2. Read that failure, the shelf, and the other corners.
+
+**Expected result:** The note sits on that set at LF. It does not create a stud identity, a label, a serial, or another stock unit. The sealed count changes only if the failure itself was a whole-set scrap or install. RF, LR, and RR are unchanged.

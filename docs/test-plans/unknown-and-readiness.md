@@ -19,8 +19,10 @@ The lamp may be on only when every safety-critical item has all of the following
 - A status of not due for those metrics.
 - No failed inspection, and no unresolved critical defect.
 - Data the server itself does not call stale or corrupt.
+- For parts that sit on a corner, that corner's own interval and its own inspection both pass. A pass on another corner does not count. See CORNER-01 and CORNER-02.
+- The current event checklist is complete. See [event-checklists.md](event-checklists.md).
 
-Any gap on a safety-critical item: the lamp is off, and the item is not described as healthy. Wheel studs are the safety-critical example in these cases.
+Any gap on a safety-critical item, on any corner, or on the current checklist: the lamp is off, and that item is not described as healthy. A component that has been added counts, including brakes, fluids and oils, tires, suspension, engine, and drivetrain. A blank interval on it is UNKNOWN.
 
 A completed first installation is a real service record. The history line may say none on file for the previous component, because the car started with empty records. That phrase is not the status UNKNOWN, and that job can clear UNKNOWN for the metrics its rule covers. An empty history, with no completed job, stays UNKNOWN.
 
@@ -209,7 +211,7 @@ A record with no "as of" time is not current. Treat that record as failing this 
 - **Priority:** P0
 - **Mode:** Both
 
-**Preconditions:** AT-01 completed. Readings are inside the Admin's not-due range for every metric the rule uses. No failed inspection, no open critical defect, and the data is not stale or corrupt.
+**Preconditions:** AT-01 completed. Readings are inside the Admin's not-due range for every metric the rule uses. No failed inspection on any corner, no open critical defect, the current event checklist is complete, and the data is not stale or corrupt. Any other component on the car is also inside this rule. A blank interval anywhere keeps the lamp off.
 
 **Steps**
 
@@ -257,3 +259,55 @@ A record with no "as of" time is not current. Treat that record as failing this 
 **Expected result:** Each status uses the words above, or a shorter label the team records in answer to AQ-UNK-3. UNKNOWN is spelled UNKNOWN. None of the missing-data setups use the not-due label.
 
 **Open question AQ-UNK-3.** Exact colors, icons, and abbreviations are not specified. The pass rule is the word UNKNOWN and the lamp rule. Pick colors later and update this case. Do not use the ready color for UNKNOWN.
+
+## Per-corner readiness
+
+Corners in these cases are LF, RF, LR, and RR. Intervals and inspections are judged on the corner they belong to. The car lamp is off when any corner is failed, overdue, or UNKNOWN.
+
+### CORNER-01 — A pass on one corner leaves another corner failed
+
+- **Priority:** P0
+- **Mode:** Both
+- **Why it matters:** A later "looks good" on the right front must not wipe a failed left front. The car would go out with a known bad corner.
+
+**Preconditions:** The same kind of inspection exists for LF and RF. Both were open. No other failed inspection is on the car.
+
+**Steps**
+
+1. Save a failed inspection for LF.
+2. Save a passed inspection for RF.
+3. Read LF, RF, and the ready lamp, on the phone and on the desktop.
+
+**Expected result**
+
+- LF still shows failed inspection.
+- RF shows the pass.
+- The lamp is off.
+- LR and RR are unchanged.
+- The LF failure is still the same record. RF's pass did not edit it.
+
+### CORNER-02 — Service on one corner leaves another corner overdue
+
+- **Priority:** P0
+- **Mode:** Automatable
+
+**Preconditions:** LF and RF each have an owner-entered interval with a source and a revision. LF is overdue on that interval. RF is then serviced with a complete job and sits inside the not-due range. The numbers are whatever the owner typed for the test. This plan does not supply them.
+
+**Steps**
+
+1. Read both corners and the lamp after the RF service.
+
+**Expected result:** LF still shows overdue. RF may show not due. The lamp is off. RF's new baseline is not copied onto LF.
+
+### CORNER-03 — Each corner keeps its own UNKNOWN
+
+- **Priority:** P0
+- **Mode:** Automatable
+
+**Preconditions:** LF has no service record. RF has a complete service and an approved interval, and its readings are in the not-due range.
+
+**Steps**
+
+1. Read both corners and the lamp.
+
+**Expected result:** LF is UNKNOWN. RF may show not due. The lamp is off. RF's history is not displayed as LF's history.
