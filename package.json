@@ -1,0 +1,15 @@
+{
+  "name": "race-team-maintenance",
+  "private": true,
+  "type": "module",
+  "description": "Phase 1 data foundation for a one-car race team maintenance ledger.",
+  "engines": {
+    "node": ">=22.18"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning src/server.ts",
+    "test": "node --disable-warning=ExperimentalWarning --test --test-reporter=spec test/*.test.ts",
+    "backup:export": "node --disable-warning=ExperimentalWarning src/backup-cli.ts export",
+    "backup:restore": "node --disable-warning=ExperimentalWarning src/backup-cli.ts restore"
+  }
+}

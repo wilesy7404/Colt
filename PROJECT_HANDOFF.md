@@ -1,5 +1,7 @@
 # Complete Project Handoff — Race Team Maintenance System
 
+The disposable localStorage prototype has been moved to `archive/prototype/` and is not the product. Phase 1 is the Node.js and SQLite ledger in the root README. The requirements below still apply. This repository does not ship with service intervals or maintenance history.
+
 ## Mission
 Build a dependable maintenance and inventory application for a one-car road-racing team. Prevent failures before race weekends, track component life, document completed work, and ensure parts are available before events.
 
