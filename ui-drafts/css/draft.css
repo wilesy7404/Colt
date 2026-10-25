@@ -90,6 +90,18 @@ a.back {
   border-radius: 12px;
   padding: 12px 14px;
 }
+.example-banner {
+  margin: 0 16px 10px;
+  padding: 16px;
+  border-radius: 12px;
+  background: #f0b429;
+  color: #1c1404;
+  font-size: 1.2rem;
+  font-weight: 800;
+  line-height: 1.25;
+  letter-spacing: -0.01em;
+}
+body.admin .example-banner { margin: 0 0 10px; }
 .draft-flag {
   margin: 0 16px 12px;
   background: #241c12;

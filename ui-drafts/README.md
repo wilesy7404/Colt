@@ -1,6 +1,12 @@
 # UI drafts — Race Team Maintenance System
 
-Static phone-first mockups for a one-car team (2004 Nissan 350Z, NASA/SCCA). These pages are drawings for review. They are not a working app, they do not save data, and they do not calculate maintenance.
+1. Download the repo ZIP from the ui/raceday-draft branch and unzip it.
+2. Open the ui-drafts folder.
+3. Double-click index.html.
+
+That opens the preview in a browser from the file on disk. Nothing else needs to be installed, and no server is required.
+
+Static phone-first mockups for a one-car team (2004 Nissan 350Z, NASA/SCCA). These pages are drawings for review. They are not a working app, they do not save data, and they do not calculate maintenance. Links and scripts use relative paths only.
 
 Open `index.html` in a browser. There is no build step.
 
