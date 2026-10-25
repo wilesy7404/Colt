@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Race Team Maintenance — Phase 1</title>
+<style>
+  :root { color-scheme: dark; --bg:#12141a; --panel:#1c2028; --line:#343a46; --text:#f3f5f8; --muted:#aeb6c4; --accent:#d6ef4a; --warn:#f0c36a; --bad:#ff8d8d; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 16px/1.45 system-ui, sans-serif; background: var(--bg); color: var(--text); }
+  main { max-width: 880px; margin: 0 auto; padding: 28px 18px 48px; }
+  h1 { font-size: 1.6rem; margin: 0 0 6px; }
+  h2 { font-size: 1.05rem; margin: 0 0 10px; }
+  p { margin: 0 0 10px; }
+  .muted { color: var(--muted); }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; margin: 14px 0; }
+  .warn { border-left: 3px solid var(--warn); }
+  label { display: grid; gap: 4px; font-size: .9rem; color: var(--muted); }
+  input, select, button { font: inherit; color: var(--text); background: #101319; border: 1px solid var(--line); border-radius: 8px; padding: 9px 10px; }
+  button { cursor: pointer; background: var(--accent); color: #17190d; font-weight: 700; border-color: var(--accent); }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: end; }
+  .row > * { flex: 1; min-width: 140px; }
+  .status { font-weight: 700; }
+  .unknown, .blocked { color: var(--warn); }
+  .bad { color: var(--bad); }
+  ul { margin: 8px 0 0; padding-left: 18px; }
+  code { font-family: ui-monospace, monospace; }
+  .hidden { display: none; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Race team maintenance</h1>
+  <p class="muted">Phase 1 data foundation for the 2004 Nissan 350Z. This page is a smoke check for the local API. It is not the race-day phone app.</p>
+  <section class="panel warn">
+    <h2>Limitations</h2>
+    <ul>
+      <li>No service intervals or maintenance history are included. Empty readings stay unknown. Unknown is not healthy.</li>
+      <li>Offline sync, cross-device sync, and a native iPhone app are not implemented.</li>
+      <li>This screen does not certify that the car is safe to race.</li>
+    </ul>
+  </section>
+  <section class="panel" id="loginPanel">
+    <h2>Sign in</h2>
+    <p class="muted">Local development usernames are <code>admin</code> and <code>crew</code>. Passwords are printed in the server log and the README. They are not written here.</p>
+    <form id="loginForm" class="row">
+      <label>Username<input name="username" autocomplete="username" required></label>
+      <label>Password<input name="password" type="password" autocomplete="current-password" required></label>
+      <button type="submit">Sign in</button>
+    </form>
+    <p id="loginError" class="bad"></p>
+  </section>
+  <section class="panel hidden" id="appPanel">
+    <div class="row">
+      <div>
+        <h2 id="who"></h2>
+        <p class="muted" id="roleNote"></p>
+      </div>
+      <button type="button" id="logoutBtn">Sign out</button>
+    </div>
+    <h2>Vehicle</h2>
+    <p id="vehicle"></p>
+    <h2>Recorded status</h2>
+    <p id="readiness" class="status"></p>
+    <p class="muted" id="disclaimer"></p>
+    <ul id="reasons"></ul>
+    <div id="rules"></div>
+    <form id="ruleForm" class="hidden">
+      <h2>Add a draft rule</h2>
+      <p class="muted">Leave intervals blank unless you are entering a value from a real source. Blank means unknown, not healthy. This form does not suggest an interval.</p>
+      <div class="row">
+        <label>Name<input name="name" required></label>
+        <label>Action
+          <select name="action">
+            <option value="inspect">inspect</option>
+            <option value="replace">replace</option>
+            <option value="inspect_and_replace">inspect and replace</option>
+          </select>
+        </label>
+      </div>
+      <div class="row">
+        <label>Source<input name="procedureSource" required placeholder="Document title"></label>
+        <label>Revision<input name="procedureRevision" required placeholder="Revision or date"></label>
+      </div>
+      <div class="row">
+        <label>Lap interval<input name="lapInterval" inputmode="decimal" placeholder="Blank if not set"></label>
+        <label>Engine-hour interval<input name="engineHourInterval" inputmode="decimal" placeholder="Blank if not set"></label>
+        <label>Calendar days<input name="calendarIntervalDays" inputmode="numeric" placeholder="Blank if not set"></label>
+      </div>
+      <button type="submit">Save draft rule</button>
+      <p id="ruleError" class="bad"></p>
+    </form>
+  </section>
+</main>
+<script>
+const tokenKey = 'race-maint-phase1-token';
+let token = sessionStorage.getItem(tokenKey) || '';
+
+function show(id, on) { document.getElementById(id).classList.toggle('hidden', !on); }
+function text(id, value) { document.getElementById(id).textContent = value; }
+
+async function api(path, options = {}) {
+  const headers = { ...(options.headers || {}) };
+  if (token) headers.authorization = 'Bearer ' + token;
+  if (options.body) headers['content-type'] = 'application/json';
+  const response = await fetch(path, { ...options, headers });
+  const body = await response.json().catch(() => ({}));
+  if (response.status === 401) { token = ''; sessionStorage.removeItem(tokenKey); }
+  return { response, body };
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, (ch) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[ch]));
+}
+
+function numberOrNull(value) {
+  if (value === '' || value === undefined || value === null) return null;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function reading(value, known) {
+  return known ? String(value) : 'Unknown';
+}
+
+async function refresh() {
+  if (!token) { show('loginPanel', true); show('appPanel', false); return; }
+  const me = await api('/api/me');
+  if (!me.response.ok) { show('loginPanel', true); show('appPanel', false); return; }
+  show('loginPanel', false);
+  show('appPanel', true);
+  const user = me.body.user;
+  text('who', user.displayName + ' · ' + user.role);
+  text('roleNote', user.role === 'administrator'
+    ? 'Administrator. Rule changes are checked on the server.'
+    : 'Race-day user. The server rejects changes to rules and intervals.');
+  show('ruleForm', user.role === 'administrator');
+
+  const vehicles = await api('/api/vehicles');
+  const vehicle = vehicles.body.vehicles[0];
+  text('vehicle', vehicle.year + ' ' + vehicle.make + ' ' + vehicle.model
+    + '. Laps: ' + reading(vehicle.lapsTotal, vehicle.lapsKnown)
+    + '. Engine hours: ' + reading(vehicle.engineHoursTotal, vehicle.engineHoursKnown)
+    + '. Earlier life is not in this database.');
+
+  const assessment = await api('/api/vehicles/' + vehicle.id + '/assessment');
+  const readiness = assessment.body.readiness;
+  const readinessNode = document.getElementById('readiness');
+  readinessNode.textContent = readiness.blocksReady ? 'Blocked or unknown' : 'No known blockers in the recorded data';
+  readinessNode.className = 'status ' + (readiness.blocksReady ? 'blocked' : '');
+  text('disclaimer', readiness.disclaimer);
+  document.getElementById('reasons').innerHTML = [...(readiness.reasons || []), ...(readiness.notes || [])]
+    .map((reason) => '<li>' + escapeHtml(reason) + '</li>').join('');
+
+  const rules = await api('/api/maintenance-rules');
+  const list = rules.body.rules.length ? rules.body.rules.map((rule) => {
+    const intervals = [
+      rule.lapInterval === null ? 'laps not set' : rule.lapInterval + ' laps',
+      rule.engineHourInterval === null ? 'engine hours not set' : rule.engineHourInterval + ' engine hours',
+      rule.calendarIntervalDays === null ? 'calendar not set' : rule.calendarIntervalDays + ' days'
+    ].join(' · ');
+    const label = rule.label ? ' — ' + escapeHtml(rule.label) : '';
+    return '<p><strong>' + escapeHtml(rule.name) + '</strong> (' + escapeHtml(rule.ruleStatus) + ')' + label + '<br><span class="muted">' + escapeHtml(intervals) + '. Source: ' + escapeHtml(rule.procedureSource) + ' / ' + escapeHtml(rule.procedureRevision) + '</span></p>';
+  }).join('') : '<p class="muted">No service rules. Nothing is assumed to be healthy.</p>';
+  document.getElementById('rules').innerHTML = '<h2>Rules</h2>' + list;
+}
+
+document.getElementById('loginForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const result = await api('/api/session', { method: 'POST', body: JSON.stringify({ username: form.get('username'), password: form.get('password') }) });
+  if (!result.response.ok) { text('loginError', result.body.message || 'Sign-in failed.'); return; }
+  text('loginError', '');
+  token = result.body.token;
+  sessionStorage.setItem(tokenKey, token);
+  await refresh();
+});
+
+document.getElementById('logoutBtn').addEventListener('click', async () => {
+  await api('/api/session', { method: 'DELETE' });
+  token = '';
+  sessionStorage.removeItem(tokenKey);
+  await refresh();
+});
+
+document.getElementById('ruleForm').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  const form = new FormData(event.target);
+  const lap = numberOrNull(form.get('lapInterval'));
+  const hours = numberOrNull(form.get('engineHourInterval'));
+  const days = numberOrNull(form.get('calendarIntervalDays'));
+  const result = await api('/api/maintenance-rules', {
+    method: 'POST',
+    body: JSON.stringify({
+      name: form.get('name'),
+      action: form.get('action'),
+      procedureSource: form.get('procedureSource'),
+      procedureRevision: form.get('procedureRevision'),
+      ruleStatus: 'draft',
+      lapInterval: lap,
+      engineHourInterval: hours,
+      calendarIntervalDays: days
+    })
+  });
+  if (!result.response.ok) { text('ruleError', result.body.message || 'The rule was not saved.'); return; }
+  text('ruleError', '');
+  event.target.reset();
+  await refresh();
+});
+
+refresh();
+</script>
+</body>
+</html>
