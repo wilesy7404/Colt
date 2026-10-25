@@ -431,6 +431,116 @@ test('sign-off records the signer and server time, and an inactive signer is rej
   db.close();
 });
 
+test('a crew user cannot sign off as another user, and a self sign-off records server time', () => {
+  const db = tempDb();
+  const { admin, vehicle, rule, kit, part } = studFixture(db, 'crew-signer');
+  const crew = actor(db, 'crew');
+  const other = createUser(db, admin, {
+    username: 'other',
+    displayName: 'Other crew',
+    role: 'race_day',
+    password: 'long-enough',
+  });
+  const clientTime = '1999-01-01T00:00:00.000Z';
+  const rejected = [
+    studPayload(kit, crew.id, { signoffs: [{ label: 'work_completed', userId: admin.id, signedAt: clientTime }] }),
+    studPayload(kit, crew.id, { signoffs: [{ label: 'work_completed', userId: other.id }] }),
+    studPayload(kit, crew.id, {
+      signoffs: [{ label: 'work_completed', userId: admin.id, adminVerified: true }],
+    }),
+    studPayload(kit, admin.id, { signoffs: ['work_completed'] }),
+  ];
+  for (const [index, payload] of rejected.entries()) {
+    const draft = createDraftTransaction(db, crew, {
+      idempotencyKey: `crew-reject-${index}`,
+      vehicleId: vehicle.id,
+      ruleId: rule.id,
+      kind: 'initial_installation',
+      payload,
+    });
+    const before = effectCounts(db);
+    const stock = onHand(db, part.id);
+    assert.throws(() => commitTransaction(db, crew, draft.id), (error: unknown) => {
+      assert.ok(error instanceof AppError);
+      assert.equal(error.status, 422);
+      return true;
+    });
+    assert.deepEqual(effectCounts(db), before);
+    assert.equal(onHand(db, part.id), stock);
+    assert.equal(getTransaction(db, draft.id).status, 'draft');
+    assert.deepEqual(getTransaction(db, draft.id).recordedSignoffs, []);
+  }
+  const accepted = createDraftTransaction(db, crew, {
+    idempotencyKey: 'crew-self',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(kit, crew.id, {
+      signoffs: [{ label: 'work_completed', userId: crew.id, signedAt: clientTime }],
+    }),
+  });
+  const committed = commitTransaction(db, crew, accepted.id);
+  const recorded = committed.transaction.recordedSignoffs as { userId: string; label: string; signedAt: string }[];
+  assert.equal(recorded.length, 1);
+  assert.equal(recorded[0].userId, crew.id);
+  assert.equal(recorded[0].label, 'work_completed');
+  assert.notEqual(recorded[0].signedAt, clientTime);
+  assert.ok(Math.abs(Date.parse(recorded[0].signedAt) - Date.now()) < 60_000);
+  assert.equal(onHand(db, part.id), 0);
+  db.close();
+});
+
+test('an administrator can record only an explicitly verified active signer', () => {
+  const db = tempDb();
+  const { admin, vehicle, rule, kit, part } = studFixture(db, 'admin-verify');
+  const crew = actor(db, 'crew');
+  const unnamed = createDraftTransaction(db, admin, {
+    idempotencyKey: 'admin-unverified',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(kit, admin.id, { signoffs: [{ label: 'work_completed', userId: crew.id }] }),
+  });
+  assert.throws(() => commitTransaction(db, admin, unnamed.id), (error: unknown) => error instanceof AppError && error.status === 422);
+  assert.equal(onHand(db, part.id), 1);
+  assert.equal(getTransaction(db, unnamed.id).status, 'draft');
+
+  const inactive = createUser(db, admin, {
+    username: 'inactive-signer',
+    displayName: 'Inactive',
+    role: 'race_day',
+    password: 'long-enough',
+  });
+  db.prepare('UPDATE users SET active = 0 WHERE id = ?').run(inactive.id);
+  const inactiveDraft = createDraftTransaction(db, admin, {
+    idempotencyKey: 'admin-inactive-verified',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(kit, admin.id, {
+      signoffs: [{ label: 'work_completed', userId: inactive.id, adminVerified: true }],
+    }),
+  });
+  assert.throws(() => commitTransaction(db, admin, inactiveDraft.id), (error: unknown) => error instanceof AppError && error.status === 422);
+  assert.equal(effectCounts(db).consumes, 0);
+
+  const verified = createDraftTransaction(db, admin, {
+    idempotencyKey: 'admin-verified',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(kit, admin.id, {
+      signoffs: [{ label: 'work_completed', userId: crew.id, adminVerified: true, signedAt: '1999-01-01T00:00:00.000Z' }],
+    }),
+  });
+  const committed = commitTransaction(db, admin, verified.id);
+  const recorded = committed.transaction.recordedSignoffs as { userId: string; signedAt: string }[];
+  assert.equal(recorded[0].userId, crew.id);
+  assert.notEqual(recorded[0].signedAt, '1999-01-01T00:00:00.000Z');
+  assert.ok(Math.abs(Date.parse(recorded[0].signedAt) - Date.now()) < 60_000);
+  db.close();
+});
+
 test('a kit changed after validation is not consumed', () => {
   const db = tempDb();
   const { admin, vehicle, rule, kit, part } = studFixture(db, 'race');

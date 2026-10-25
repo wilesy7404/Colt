@@ -59,7 +59,7 @@ export type StudLine = {
   oldComponentId?: string;
 };
 
-export type SignoffInput = string | { label: string; userId: string; signedAt?: string };
+export type SignoffInput = string | { label: string; userId?: string; signedAt?: string; adminVerified?: boolean };
 
 export type StudWorkPayload = {
   kitId: string;
@@ -70,7 +70,7 @@ export type StudWorkPayload = {
   performedAt: string;
   measurements: Record<string, number | string>;
   signoffs: SignoffInput[];
-  technicianUserId: string;
+  technicianUserId?: string;
   notes: string;
   removalReason?: string;
   disposition?: string;
@@ -390,10 +390,10 @@ export function commitTransaction(db: DatabaseSync, actor: User, id: string) {
         validationMessage = message;
         throw new AppError(422, message, 'incomplete_transaction');
       };
-      const firstError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id);
+      const firstError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id, actor);
       if (firstError) reject(firstError);
       commitTestHooks.get(id)?.(db);
-      const secondError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id);
+      const secondError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id, actor);
       if (secondError) reject(secondError);
       const committedAt = nowIso();
       const signoffs = fresh.kind === 'inspection_only' ? [] : recordedSignoffs(db, payload, actor, committedAt);
@@ -444,14 +444,21 @@ export function effectCounts(db: DatabaseSync): { baselines: number; consumes: n
   return { baselines, consumes, installations };
 }
 
-function validateCommit(db: DatabaseSync, kind: string, payload: unknown, rule: RuleRow, vehicleId: string): string | null {
+function validateCommit(
+  db: DatabaseSync,
+  kind: string,
+  payload: unknown,
+  rule: RuleRow,
+  vehicleId: string,
+  actor: User,
+): string | null {
   if (rule.rule_status !== 'active') return 'The maintenance rule is not active. A draft or retired rule cannot establish a baseline or consume stock.';
   if (rule.illustrative_draft === 1) return 'Illustrative draft rules cannot be used for maintenance transactions.';
   if (kind === 'inspection_only') return validateInspectionPayload(payload);
   if (rule.lap_interval === null && rule.engine_hour_interval === null && rule.calendar_interval_days === null) {
     return 'The rule has no lap, engine-hour, or calendar interval. Refusing to invent one.';
   }
-  return validateStudPayload(db, kind, payload, rule, vehicleId);
+  return validateStudPayload(db, kind, payload, rule, vehicleId, actor);
 }
 
 function validateInspectionPayload(payload: unknown): string | null {
@@ -465,17 +472,26 @@ function validateInspectionPayload(payload: unknown): string | null {
   return null;
 }
 
-function validateStudPayload(db: DatabaseSync, kind: string, payload: unknown, rule: RuleRow, vehicleId: string): string | null {
+function validateStudPayload(
+  db: DatabaseSync,
+  kind: string,
+  payload: unknown,
+  rule: RuleRow,
+  vehicleId: string,
+  actor: User,
+): string | null {
   const body = asRecord(payload);
   if (!body) return 'Transaction payload must be an object.';
   if (typeof body.kitId !== 'string' || !body.kitId) return 'kitId is required.';
   if (!WHEELS.has(String(body.wheel))) return 'wheel must be LF, RF, LR, or RR.';
   if (!Array.isArray(body.studs) || body.studs.length !== 5) return 'A sealed stud set transaction must include exactly five studs.';
   if (!isTimestamp(body.performedAt)) return 'performedAt is required and cannot be in the future.';
-  const signoffError = signoffProblems(db, body.signoffs, rule);
+  const signoffError = signoffProblems(db, body.signoffs, rule, actor);
   if (signoffError) return signoffError;
-  if (typeof body.technicianUserId !== 'string' || !findUserById(db, body.technicianUserId)?.active) {
-    return 'technicianUserId must be an active user.';
+  if (body.technicianUserId !== undefined && body.technicianUserId !== null && body.technicianUserId !== '') {
+    if (typeof body.technicianUserId !== 'string' || body.technicianUserId !== actor.id) {
+      return 'The technician is the signed-in user. A client-supplied technician is not accepted.';
+    }
   }
   const occupied = one(
     db,
@@ -1039,7 +1055,7 @@ export function listAudit(db: DatabaseSync, actor: User) {
   return many(db, 'SELECT * FROM audit_records ORDER BY created_at');
 }
 
-function signoffProblems(db: DatabaseSync, signoffs: unknown, rule: RuleRow): string | null {
+function signoffProblems(db: DatabaseSync, signoffs: unknown, rule: RuleRow, actor: User): string | null {
   const parsed = parseSignoffs(signoffs);
   if (typeof parsed === 'string') return parsed;
   const requiredSignoffs = parseJson<string[]>(rule.required_signoffs_json, []);
@@ -1047,8 +1063,8 @@ function signoffProblems(db: DatabaseSync, signoffs: unknown, rule: RuleRow): st
     if (!parsed.labels.includes(required)) return `Missing required sign-off: ${required}.`;
   }
   for (const entry of parsed.entries) {
-    if (!entry.userId) continue;
-    if (!findUserById(db, entry.userId)?.active) return 'An inactive user cannot sign off this work.';
+    const resolved = resolveSigner(db, actor, entry);
+    if (typeof resolved === 'string') return resolved;
   }
   return null;
 }
@@ -1063,32 +1079,54 @@ function recordedSignoffs(
   const parsed = parseSignoffs(body?.signoffs);
   if (typeof parsed === 'string') throw new AppError(422, parsed, 'incomplete_transaction');
   return parsed.entries.map((entry) => {
-    const userId = entry.userId ?? actor.id;
-    if (!findUserById(db, userId)?.active) {
-      throw new AppError(422, 'An inactive user cannot sign off this work.', 'incomplete_transaction');
-    }
-    return { userId, label: entry.label, signedAt };
+    const resolved = resolveSigner(db, actor, entry);
+    if (typeof resolved === 'string') throw new AppError(422, resolved, 'incomplete_transaction');
+    return { userId: resolved.userId, label: entry.label, signedAt };
   });
+}
+
+function resolveSigner(
+  db: DatabaseSync,
+  actor: User,
+  entry: { userId: string | null; adminVerified: boolean },
+): { userId: string } | string {
+  if (!entry.userId || entry.userId === actor.id) {
+    if (!findUserById(db, actor.id)?.active) return 'An inactive user cannot sign off this work.';
+    return { userId: actor.id };
+  }
+  if (actor.role !== 'administrator' || !entry.adminVerified) {
+    return 'The signer is the signed-in user. A client-supplied signer is not accepted.';
+  }
+  const signer = findUserById(db, entry.userId);
+  if (!signer?.active) return 'An inactive user cannot sign off this work.';
+  return { userId: signer.id };
 }
 
 function parseSignoffs(
   signoffs: unknown,
-): { labels: string[]; entries: { label: string; userId: string | null }[] } | string {
+): { labels: string[]; entries: { label: string; userId: string | null; adminVerified: boolean }[] } | string {
   if (!Array.isArray(signoffs) || signoffs.length === 0) {
     return 'At least one sign-off is required. An empty or missing sign-off does not complete the transaction.';
   }
-  const entries: { label: string; userId: string | null }[] = [];
+  const entries: { label: string; userId: string | null; adminVerified: boolean }[] = [];
   for (const item of signoffs) {
     if (typeof item === 'string') {
       if (!item.trim()) return 'At least one sign-off is required. An empty or missing sign-off does not complete the transaction.';
-      entries.push({ label: item.trim(), userId: null });
+      entries.push({ label: item.trim(), userId: null, adminVerified: false });
       continue;
     }
     const row = asRecord(item);
-    if (!row || typeof row.label !== 'string' || !row.label.trim() || typeof row.userId !== 'string' || !row.userId.trim()) {
-      return 'Each sign-off needs a label and the signer user id. The server records the time.';
+    if (!row || typeof row.label !== 'string' || !row.label.trim()) {
+      return 'Each sign-off needs a label. The server records the signer and the time.';
     }
-    entries.push({ label: row.label.trim(), userId: row.userId.trim() });
+    let userId: string | null = null;
+    if (row.userId !== undefined && row.userId !== null) {
+      if (typeof row.userId !== 'string' || !row.userId.trim()) {
+        return 'A sign-off signer id must be a user id. The server records the signer and the time.';
+      }
+      userId = row.userId.trim();
+    }
+    entries.push({ label: row.label.trim(), userId, adminVerified: row.adminVerified === true });
   }
   return { labels: entries.map((entry) => entry.label), entries };
 }

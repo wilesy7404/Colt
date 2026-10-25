@@ -70,11 +70,22 @@ function evaluateCorner(
   const inspection = hasActiveSet
     ? one<{ result: InspectionResult }>(
         db,
-        `SELECT result FROM inspections
-         WHERE rule_id = ? AND vehicle_id = ?
-         ORDER BY performed_at DESC
-         LIMIT 1`,
-        [rule.id, vehicle.id],
+        corner
+          ? `SELECT inspections.result AS result
+             FROM inspections
+             JOIN installations
+               ON installations.component_id = inspections.component_id
+              AND installations.vehicle_id = inspections.vehicle_id
+             WHERE inspections.rule_id = ?
+               AND inspections.vehicle_id = ?
+               AND installations.position LIKE ?
+             ORDER BY inspections.performed_at DESC, inspections.created_at DESC
+             LIMIT 1`
+          : `SELECT result FROM inspections
+             WHERE rule_id = ? AND vehicle_id = ?
+             ORDER BY performed_at DESC
+             LIMIT 1`,
+        corner ? [rule.id, vehicle.id, `${corner}-%`] : [rule.id, vehicle.id],
       )
     : undefined;
 

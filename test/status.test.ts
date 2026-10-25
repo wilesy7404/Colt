@@ -99,7 +99,7 @@ test('a rule without a baseline or current reading stays unknown', () => {
     eventId: null,
     sessionId: null,
     ruleId: rule.id,
-    componentId: null,
+    componentId: kit.components[0].id,
     inspectionKind: 'component',
     result: 'fail',
     measurements: {},
@@ -156,6 +156,222 @@ test('one serviced corner does not hide an overdue corner', () => {
   assert.equal(byCorner.RR.status, 'unknown');
   assert.equal(assessment.readiness.status, 'overdue');
   assert.equal(assessment.readiness.blocksReady, true);
+  db.close();
+});
+
+test('a pass at one corner does not clear a fail at another, in either order', () => {
+  for (const passFirst of [false, true]) {
+    const db = tempDb();
+    const label = passFirst ? 'pass-first' : 'fail-first';
+    const { admin, vehicle, rule, kit, part } = studFixture(db, label);
+    const rightFrontKit = openKit(
+      db,
+      admin,
+      createKit(db, admin, { partId: part.id, humanLabel: `SET-${label}-rf`, location: 'cabinet', notes: '' }).id,
+    );
+    commitTransaction(
+      db,
+      admin,
+      createDraftTransaction(db, admin, {
+        idempotencyKey: `${label}-lf`,
+        vehicleId: vehicle.id,
+        ruleId: rule.id,
+        kind: 'initial_installation',
+        payload: studPayload(kit, admin.id, { lapReading: 0, engineHoursReading: 0 }),
+      }).id,
+    );
+    commitTransaction(
+      db,
+      admin,
+      createDraftTransaction(db, admin, {
+        idempotencyKey: `${label}-rf`,
+        vehicleId: vehicle.id,
+        ruleId: rule.id,
+        kind: 'initial_installation',
+        payload: studPayload(rightFrontKit, admin.id, { wheel: 'RF', lapReading: 0, engineHoursReading: 0 }),
+      }).id,
+    );
+    recordSession(db, admin, {
+      vehicleId: vehicle.id,
+      eventId: null,
+      name: 'Practice',
+      lapsCompleted: 20,
+      engineHoursAdded: 1,
+      meterNote: '',
+      notes: '',
+    });
+    const failAt = '2020-01-02T00:00:00.000Z';
+    const passAt = passFirst ? '2020-01-01T00:00:00.000Z' : '2020-01-03T00:00:00.000Z';
+    recordInspection(db, admin, {
+      vehicleId: vehicle.id,
+      eventId: null,
+      sessionId: null,
+      ruleId: rule.id,
+      componentId: kit.components[0].id,
+      inspectionKind: 'component',
+      result: 'fail',
+      measurements: {},
+      notes: 'LF play',
+      performedAt: failAt,
+      maintenanceTransactionId: null,
+    });
+    recordInspection(db, admin, {
+      vehicleId: vehicle.id,
+      eventId: null,
+      sessionId: null,
+      ruleId: rule.id,
+      componentId: rightFrontKit.components[0].id,
+      inspectionKind: 'component',
+      result: 'pass',
+      measurements: {},
+      notes: 'RF ok',
+      performedAt: passAt,
+      maintenanceTransactionId: null,
+    });
+    const assessment = assessVehicle(db, vehicle.id);
+    const byCorner = Object.fromEntries(assessment.items.map((item) => [item.corner, item]));
+    assert.equal(byCorner.LF.status, 'failed_inspection');
+    assert.equal(byCorner.RF.status, 'not_due');
+    assert.equal(byCorner.LR.status, 'unknown');
+    assert.equal(byCorner.RR.status, 'unknown');
+    assert.equal(assessment.readiness.status, 'failed_inspection');
+    assert.equal(assessment.readiness.state, 'blocked');
+    assert.equal(assessment.readiness.blocksReady, true);
+    db.close();
+  }
+});
+
+test('a later pass at the same corner clears that corner under the metric rule', () => {
+  const db = tempDb();
+  const { admin, vehicle, rule, kit } = studFixture(db, 'same-corner');
+  commitTransaction(
+    db,
+    admin,
+    createDraftTransaction(db, admin, {
+      idempotencyKey: 'same-lf',
+      vehicleId: vehicle.id,
+      ruleId: rule.id,
+      kind: 'initial_installation',
+      payload: studPayload(kit, admin.id, { lapReading: 0, engineHoursReading: 0 }),
+    }).id,
+  );
+  recordSession(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    name: 'Practice',
+    lapsCompleted: 20,
+    engineHoursAdded: 1,
+    meterNote: '',
+    notes: '',
+  });
+  recordInspection(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    sessionId: null,
+    ruleId: rule.id,
+    componentId: kit.components[0].id,
+    inspectionKind: 'component',
+    result: 'fail',
+    measurements: {},
+    notes: 'LF play',
+    performedAt: '2020-01-02T00:00:00.000Z',
+    maintenanceTransactionId: null,
+  });
+  const failed = assessVehicle(db, vehicle.id);
+  assert.equal(Object.fromEntries(failed.items.map((item) => [item.corner, item])).LF.status, 'failed_inspection');
+  recordInspection(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    sessionId: null,
+    ruleId: rule.id,
+    componentId: kit.components[0].id,
+    inspectionKind: 'component',
+    result: 'pass',
+    measurements: {},
+    notes: 'LF corrected',
+    performedAt: '2020-01-03T00:00:00.000Z',
+    maintenanceTransactionId: null,
+  });
+  const cleared = assessVehicle(db, vehicle.id);
+  const byCorner = Object.fromEntries(cleared.items.map((item) => [item.corner, item]));
+  assert.equal(byCorner.LF.status, 'not_due');
+  assert.equal(byCorner.RF.status, 'unknown');
+  assert.equal(byCorner.LR.status, 'unknown');
+  assert.equal(byCorner.RR.status, 'unknown');
+  assert.equal(cleared.readiness.state, 'blocked');
+  assert.equal(cleared.readiness.blocksReady, true);
+  db.close();
+});
+
+test('a corner with no inspection stays unknown when the rule requires one', () => {
+  const db = tempDb();
+  const { admin, vehicle, rule, kit, part } = studFixture(db, 'no-inspection');
+  const rightFrontKit = openKit(
+    db,
+    admin,
+    createKit(db, admin, { partId: part.id, humanLabel: 'SET-no-inspection-rf', location: 'cabinet', notes: '' }).id,
+  );
+  commitTransaction(
+    db,
+    admin,
+    createDraftTransaction(db, admin, {
+      idempotencyKey: 'none-lf',
+      vehicleId: vehicle.id,
+      ruleId: rule.id,
+      kind: 'initial_installation',
+      payload: studPayload(kit, admin.id, { lapReading: 0, engineHoursReading: 0 }),
+    }).id,
+  );
+  commitTransaction(
+    db,
+    admin,
+    createDraftTransaction(db, admin, {
+      idempotencyKey: 'none-rf',
+      vehicleId: vehicle.id,
+      ruleId: rule.id,
+      kind: 'initial_installation',
+      payload: studPayload(rightFrontKit, admin.id, { wheel: 'RF', lapReading: 0, engineHoursReading: 0 }),
+    }).id,
+  );
+  recordSession(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    name: 'Practice',
+    lapsCompleted: 20,
+    engineHoursAdded: 1,
+    meterNote: '',
+    notes: '',
+  });
+  db.prepare(`UPDATE maintenance_rules SET action = 'inspect' WHERE id = ?`).run(rule.id);
+  const before = assessVehicle(db, vehicle.id);
+  const beforeCorner = Object.fromEntries(before.items.map((item) => [item.corner, item]));
+  assert.equal(beforeCorner.LF.status, 'unknown');
+  assert.equal(beforeCorner.RF.status, 'unknown');
+  assert.equal(beforeCorner.LR.status, 'unknown');
+  assert.notEqual(beforeCorner.LF.status, 'not_due');
+  assert.equal(before.readiness.state, 'blocked');
+  assert.equal(before.readiness.blocksReady, true);
+  recordInspection(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    sessionId: null,
+    ruleId: rule.id,
+    componentId: rightFrontKit.components[0].id,
+    inspectionKind: 'component',
+    result: 'pass',
+    measurements: {},
+    notes: 'RF only',
+    performedAt: '2020-02-01T00:00:00.000Z',
+    maintenanceTransactionId: null,
+  });
+  const after = assessVehicle(db, vehicle.id);
+  const afterCorner = Object.fromEntries(after.items.map((item) => [item.corner, item]));
+  assert.equal(afterCorner.LF.status, 'unknown');
+  assert.equal(afterCorner.RF.status, 'not_due');
+  assert.equal(afterCorner.LR.status, 'unknown');
+  assert.equal(afterCorner.RR.status, 'unknown');
+  assert.equal(after.readiness.state, 'blocked');
+  assert.equal(after.readiness.blocksReady, true);
   db.close();
 });
 
