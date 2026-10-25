@@ -432,7 +432,7 @@ A `removal` with `removal_reason_code = failure` is invalid unless it references
 
 ### 7.8 `StockMovement`
 
-Append-only ledger in normal operation. Rows are not updated and not deleted. A mistake is a new movement. The only exception is the disaster-recovery restore in [17](#17-decisions-for-phase-1), which replaces the store after an automatic pre-restore export and writes its own audit row.
+Append-only ledger. Rows are not updated and not deleted. A mistake is a new movement. A restore does not overwrite or destroy these rows. The previous database is archived, as specified in [17](#17-decisions-for-phase-1).
 
 On-hand is the fold of committed movements, checked against kit and component projections in the same commit. There is no editable on-hand column.
 
@@ -746,10 +746,11 @@ It also records edits to policy and master data: catalog, reorder policy, and, i
 | `actor_user_id` | ref(user) | R | | |
 | `at` | timestamp | R | Server time. This is the server clock for the action, including a maintenance commit, a login, and a restore. | |
 | `reason` | text | O | Required for a restore. Phase 2+ quarantine release also requires it. | |
+| `archive_reference` | string | C | Required when `action` records a restore. Non-empty locator of the archived database file. The file is never deleted. Do not invent a path. | Archived database this restore kept. |
 | `prior_values` | text | O | Prior field values. Encoding is an implementation choice. | |
 | `new_values` | text | O | New field values. | |
 
-Audit rows are append-only, except for the disaster-recovery restore in [17](#17-decisions-for-phase-1). That restore is the single exception to permanent history.
+Audit rows are append-only. A restore does not overwrite or destroy them. The previous database stays in the archive named by `archive_reference`. See [17](#17-decisions-for-phase-1).
 
 ## 8. Sealed sets of five
 
@@ -1013,7 +1014,7 @@ If validation or persistence fails, the current baseline remains the previous on
 
 An inspection does not append a baseline. A `removal_without_install` does not append a baseline. An `opening_identification` does not append a baseline.
 
-A committed bundle is immutable in normal operation. Undoing one job is a new transaction with compensating movements and, when the team intends to change the baseline, a new baseline row. Race Backend does not delete the original consume or the original baseline to correct that job. The procedure for correcting a wrong baseline is otherwise UNKNOWN. Disaster-recovery restore, in [17](#17-decisions-for-phase-1), is the single exception to permanent history. It is not the way to fix one baseline.
+A committed bundle is immutable. Undoing one job is a new transaction with compensating movements and, when the team intends to change the baseline, a new baseline row. Race Backend does not delete the original consume or the original baseline to correct that job. The procedure for correcting a wrong baseline is otherwise UNKNOWN. Restore, in [17](#17-decisions-for-phase-1), is not that correction. It does not overwrite or destroy the ledger or the audit history.
 
 ### 11.5 What "nothing was consumed" means
 
@@ -1138,7 +1139,7 @@ Race-day, enforced on the server, may:
 
 Race-day must not change intervals, approved rules, reorder numbers, or catalog approval. A stale offline edit must not overwrite a newer admin rule. The sync design is future work; the refusal rule is already in force for any write the server accepts.
 
-Permanent history, except for the one restore below:
+Permanent history:
 
 - `StockMovement`
 - `ComponentEvent`
@@ -1147,7 +1148,7 @@ Permanent history, except for the one restore below:
 - `AuditEvent`
 - Kit and component identity rows, including consumed and scrapped kits
 
-Normal commits do not delete or rewrite those rows. Disaster-recovery restore is the single explicit exception. It is specified in [17](#17-decisions-for-phase-1). An automatic pre-restore export always runs first, and the restore itself is audited.
+Those rows are not deleted or rewritten. Restore does not overwrite or destroy them. The previous database is moved aside to an archived file and kept. See [17](#17-decisions-for-phase-1).
 
 Accounts. User creation, login, and logout are recorded in `AuditEvent`, the main audit table. Each row stores the actor and the server time. This spec does not define passwords or the user table.
 
@@ -1162,7 +1163,7 @@ Race Backend and the schema share these invariants.
 3. On-hand is the count of kits in `sealed`. There is no loose-stud count. The warning is on when that count is 4 or fewer, including 4.
 4. A corner replacement installs exactly five studs from one whole kit, and that kit ends `consumed`. Partial replacement and mixed kits are rejected with no stock effect. An occupied corner requires those current studs to be removed in the same commit.
 5. A removed wheel stud is `scrapped`. That state has no installable transition. Reuse is permanently blocked.
-6. The ledger is append-only in normal operation. On-hand is the fold. Projections match the fold after every commit. Disaster-recovery restore is the single exception, and only after an automatic pre-restore export, with the restore audited.
+6. The ledger is append-only. On-hand is the fold. Projections match the fold after every commit. Restore does not overwrite or destroy ledger or audit history. The previous database is archived and kept.
 7. Wheel-stud `consume` exists only on a committed hub replacement. It opens that sealed kit in the same commit and installs five component ids. An admin whole-set `scrap` removes a sealed kit and installs nothing.
 8. The hub replacement's maintenance record and stock movements commit together. A verified-interval baseline joins that commit only when a verified interval exists. Failure of validation or persistence leaves no consume and no baseline.
 9. Drafts, rejections, inspections, removals without installation, and opening identifications do not reset a service baseline. A `receive` does not reset one either.
@@ -1223,7 +1224,7 @@ These answers are normative for Phase 1. Where they differ from an earlier note 
 
 8. **Stud stock and negative quantity.** The sealed-set count can never go below zero. There is no exception path. `AuthorizedStockException` is not applicable to studs and has no Phase 1 path.
 
-9. **Restore.** Restore is a full disaster-recovery replace of the live store. It is the single explicit exception to permanent history. An automatic pre-restore export always runs first. That export is not optional and is not a step the operator can skip. The restore then replaces the live ledger, audit history, and the other stored rows with the recovery snapshot. After the replace, Race Backend writes an `AuditEvent` for the restore itself, with server time, the actor, and a reason. That audit row is not part of the history the replace discarded. The pre-restore export keeps the previous history. No other operation may delete or rewrite ledger or audit rows.
+9. **Restore.** Restore only ever goes into an empty instance. The restore API refuses when the store is not empty and fails closed: it writes nothing and deletes nothing. Disaster recovery is a CLI command, in this order. First, snapshot the current database. Second, move the existing database aside to an archived file. That file is never deleted. Third, restore into a fresh, empty store. Fourth, write a restore `AuditEvent` on that store. The event's `archive_reference` points at the archived file, and the row records the actor, the server time, and a reason. Ledger rows and audit history are not overwritten and not destroyed. The history that was on the previous store stays in the archive.
 
 10. **Accounts.** User creation, login, and logout are recorded in `AuditEvent`.
 
