@@ -89,3 +89,83 @@ test('race-day users cannot change rules, users, or backups', async () => {
     assert.equal(reread.body.rules[0].lapInterval, null);
   });
 });
+
+test('the archived prototype is not served', async () => {
+  await withServer(async ({ base }) => {
+    const directory = await fetch(`${base}/archive/prototype/`);
+    const page = await fetch(`${base}/archive/prototype/index.html`);
+    assert.equal(directory.status, 404);
+    assert.equal(page.status, 404);
+  });
+});
+
+test('race-day users cannot export, create parts, kits, stock, events, vehicles, or read the audit log', async () => {
+  await withServer(async ({ base }) => {
+    const adminToken = await login(base, 'admin');
+    const crewToken = await login(base, 'crew');
+    const vehicles = await api(base, adminToken, 'GET', '/api/vehicles');
+    const vehicleId = vehicles.body.vehicles[0].id as string;
+    assert.equal((await api(base, crewToken, 'GET', '/api/admin/export')).status, 403);
+    assert.equal(
+      (
+        await api(base, crewToken, 'POST', '/api/parts', {
+          catalogNumber: 'CREW-PART',
+          description: 'no',
+          unitOfMeasure: 'each',
+          kitKind: 'none',
+        })
+      ).status,
+      403,
+    );
+    assert.equal((await api(base, crewToken, 'POST', '/api/kits', { partId: 'none', humanLabel: 'nope' })).status, 403);
+    assert.equal(
+      (
+        await api(base, crewToken, 'POST', '/api/stock-movements', {
+          partId: 'none',
+          movementType: 'adjust',
+          quantityDelta: 1,
+        })
+      ).status,
+      403,
+    );
+    assert.equal((await api(base, crewToken, 'POST', '/api/events', { vehicleId, name: 'nope' })).status, 403);
+    assert.equal((await api(base, crewToken, 'POST', '/api/vehicles', { name: 'nope' })).status, 403);
+    assert.equal((await api(base, crewToken, 'GET', '/api/audit-records')).status, 403);
+    const parts = await api(base, adminToken, 'GET', '/api/parts');
+    assert.equal(parts.body.parts.length, 0);
+  });
+});
+
+test('only an administrator can close a critical defect', async () => {
+  await withServer(async ({ base }) => {
+    const adminToken = await login(base, 'admin');
+    const crewToken = await login(base, 'crew');
+    const vehicleId = (await api(base, adminToken, 'GET', '/api/vehicles')).body.vehicles[0].id as string;
+    const defect = await api(base, crewToken, 'POST', '/api/defects', {
+      vehicleId,
+      locationNote: 'LF wheel',
+      severity: 'critical',
+      notes: 'Play at the wheel',
+    });
+    assert.equal(defect.status, 201);
+    const blocked = await api(base, crewToken, 'GET', `/api/vehicles/${vehicleId}/assessment`);
+    assert.equal(blocked.body.readiness.blocksReady, true);
+    const denied = await api(base, crewToken, 'POST', `/api/defects/${defect.body.defect.id}/resolve`, {
+      resolutionNotes: 'crew tried to close it',
+    });
+    assert.equal(denied.status, 403);
+    const stillBlocked = await api(base, adminToken, 'GET', `/api/vehicles/${vehicleId}/assessment`);
+    assert.equal(stillBlocked.body.readiness.blocksReady, true);
+    assert.equal(stillBlocked.body.readiness.reasons.some((reason: string) => /critical defect/i.test(reason)), true);
+    const closed = await api(base, adminToken, 'POST', `/api/defects/${defect.body.defect.id}/resolve`, {
+      resolutionNotes: 'Administrator closed it',
+    });
+    assert.equal(closed.status, 200);
+    assert.equal(closed.body.defect.status, 'resolved');
+    const audit = await api(base, adminToken, 'GET', '/api/audit-records');
+    assert.equal(
+      audit.body.auditRecords.some((row: { action: string; entityId: string }) => row.action === 'defect_resolved' && row.entityId === defect.body.defect.id),
+      true,
+    );
+  });
+});

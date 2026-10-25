@@ -4,7 +4,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import type { DatabaseSync } from 'node:sqlite';
 import { assessVehicle } from './assessment.ts';
-import { createUser, listUsers, login, logout, requireUser, userFromToken, type User } from './auth.ts';
+import { changePassword, createUser, listUsers, login, logout, requireUser, userFromToken, type User } from './auth.ts';
 import { exportSnapshot, restoreSnapshot, type Snapshot } from './backup.ts';
 import { SCHEMA_VERSION } from './db.ts';
 import { AppError, isAppError } from './errors.ts';
@@ -58,7 +58,6 @@ import {
 
 const rootDir = path.resolve(fileURLToPath(new URL('..', import.meta.url)));
 const publicDir = path.join(rootDir, 'public');
-const archiveDir = path.join(rootDir, 'archive', 'prototype');
 
 type Handler = (ctx: {
   db: DatabaseSync;
@@ -120,6 +119,12 @@ function buildRoutes(): Route[] {
     route('DELETE', '/api/session', ({ db, req, res }) => {
       const token = bearer(req);
       if (token) logout(db, token);
+      send(res, 200, { ok: true });
+    }),
+    route('POST', '/api/me/password', ({ db, res, user, body }) => {
+      const actor = requireUser(user);
+      const obj = asObject(body);
+      changePassword(db, actor, reqString(obj, 'currentPassword'), reqString(obj, 'newPassword'));
       send(res, 200, { ok: true });
     }),
     route('GET', '/api/me', ({ res, user }) => {
@@ -564,9 +569,8 @@ function camelize(value: unknown): unknown {
 }
 
 function serveStatic(pathname: string, res: http.ServerResponse): void {
-  const archiveRequest = pathname === '/archive/prototype' || pathname.startsWith('/archive/prototype/');
-  const base = archiveRequest ? archiveDir : publicDir;
-  const relative = archiveRequest ? pathname.replace(/^\/archive\/prototype\/?/, '') : pathname.replace(/^\//, '');
+  const base = publicDir;
+  const relative = pathname.replace(/^\//, '');
   const requested = relative === '' ? 'index.html' : relative;
   const full = path.normalize(path.join(base, requested));
   if (full !== base && !full.startsWith(`${base}${path.sep}`)) {

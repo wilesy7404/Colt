@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import { assessVehicle } from '../src/assessment.ts';
-import { onHand } from '../src/inventory.ts';
+import { createKit, onHand, openKit } from '../src/inventory.ts';
 import { commitTransaction, createDraftTransaction, createRule, effectCounts, listBaselines, recordInspection, recordSession } from '../src/maintenance.ts';
 import { combineStatus, evaluateMetric } from '../src/status.ts';
 import { actor, studFixture, studPayload, tempDb } from './helpers.ts';
@@ -83,10 +83,16 @@ test('a rule without a baseline or current reading stays unknown', () => {
     notes: '',
   });
   const known = assessVehicle(db, vehicle.id);
-  assert.equal(known.items[0].metrics.laps, 'not_due');
-  assert.equal(known.items[0].metrics.engineHours, 'not_due');
-  assert.equal(known.items[0].status, 'not_due');
-  assert.equal(known.readiness.blocksReady, false);
+  const byCorner = Object.fromEntries(known.items.map((item) => [item.corner, item]));
+  assert.equal(byCorner.LF.metrics.laps, 'not_due');
+  assert.equal(byCorner.LF.metrics.engineHours, 'not_due');
+  assert.equal(byCorner.LF.status, 'not_due');
+  assert.equal(byCorner.RF.status, 'unknown');
+  assert.equal(byCorner.LR.status, 'unknown');
+  assert.equal(byCorner.RR.status, 'unknown');
+  assert.equal(byCorner.RF.kitId, null);
+  assert.equal(known.readiness.status, 'unknown');
+  assert.equal(known.readiness.blocksReady, true);
   assert.match(known.readiness.disclaimer, /not a certification/i);
   recordInspection(db, admin, {
     vehicleId: vehicle.id,
@@ -106,6 +112,50 @@ test('a rule without a baseline or current reading stays unknown', () => {
   assert.equal(failed.readiness.blocksReady, true);
   assert.equal(effectCounts(db).baselines, 1);
   assert.equal(onHand(db, kit.partId), 0);
+  db.close();
+});
+
+test('one serviced corner does not hide an overdue corner', () => {
+  const db = tempDb();
+  const { admin, vehicle, rule, kit, part } = studFixture(db, 'corners');
+  const leftFront = createDraftTransaction(db, admin, {
+    idempotencyKey: 'lf-serviced',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(kit, admin.id, { lapReading: 110, engineHoursReading: 0 }),
+  });
+  commitTransaction(db, admin, leftFront.id);
+  const rightFrontKit = openKit(
+    db,
+    admin,
+    createKit(db, admin, { partId: part.id, humanLabel: 'SET-corners-rf', location: 'cabinet', notes: '' }).id,
+  );
+  const rightFront = createDraftTransaction(db, admin, {
+    idempotencyKey: 'rf-overdue',
+    vehicleId: vehicle.id,
+    ruleId: rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(rightFrontKit, admin.id, { wheel: 'RF', lapReading: 0, engineHoursReading: 0 }),
+  });
+  commitTransaction(db, admin, rightFront.id);
+  recordSession(db, admin, {
+    vehicleId: vehicle.id,
+    eventId: null,
+    name: 'Long practice',
+    lapsCompleted: 120,
+    engineHoursAdded: 1,
+    meterNote: '',
+    notes: '',
+  });
+  const assessment = assessVehicle(db, vehicle.id);
+  const byCorner = Object.fromEntries(assessment.items.map((item) => [item.corner, item]));
+  assert.equal(byCorner.LF.status, 'not_due');
+  assert.equal(byCorner.RF.status, 'overdue');
+  assert.equal(byCorner.LR.status, 'unknown');
+  assert.equal(byCorner.RR.status, 'unknown');
+  assert.equal(assessment.readiness.status, 'overdue');
+  assert.equal(assessment.readiness.blocksReady, true);
   db.close();
 });
 

@@ -1,12 +1,20 @@
 import { createHash, randomBytes, scryptSync, timingSafeEqual } from 'node:crypto';
 import type { DatabaseSync } from 'node:sqlite';
-import { many, newId, nowIso, one } from './db.ts';
+import { audit } from './audit.ts';
+import { many, newId, nowIso, one, withTransaction } from './db.ts';
 import { AppError } from './errors.ts';
 
 export const LOCAL_DEV_ADMIN_USERNAME = 'admin';
 export const LOCAL_DEV_CREW_USERNAME = 'crew';
+// DEV ONLY - not for real data or networks
 export const LOCAL_DEV_ADMIN_PASSWORD = 'local-dev-admin';
+// DEV ONLY - not for real data or networks
 export const LOCAL_DEV_CREW_PASSWORD = 'local-dev-crew';
+export const DEV_ONLY_PASSWORD_LABEL = 'DEV ONLY - not for real data or networks';
+
+const LOGIN_WINDOW_MS = 15 * 60 * 1000;
+const LOGIN_MAX_FAILURES = 5;
+const loginFailures = new Map<string, { count: number; resetAt: number }>();
 
 const SESSION_MS = 7 * 24 * 60 * 60 * 1000;
 
@@ -47,15 +55,21 @@ export function verifyPassword(password: string, stored: string): boolean {
   return timingSafeEqual(actual, expected);
 }
 
-export function seedUsersAndVehicle(db: DatabaseSync): { usedDefaultPasswords: boolean } {
+export type SeedResult = {
+  seededDefaultAdminPassword: boolean;
+  seededDefaultCrewPassword: boolean;
+};
+
+export function seedUsersAndVehicle(db: DatabaseSync): SeedResult {
   const userCount = one<{ c: number }>(db, 'SELECT COUNT(*) AS c FROM users');
-  let usedDefaultPasswords = false;
+  let seededDefaultAdminPassword = false;
+  let seededDefaultCrewPassword = false;
   if (!userCount || userCount.c === 0) {
     const adminPassword = process.env.ADMIN_PASSWORD || LOCAL_DEV_ADMIN_PASSWORD;
     const crewPassword = process.env.CREW_PASSWORD || LOCAL_DEV_CREW_PASSWORD;
-    usedDefaultPasswords =
-      adminPassword === LOCAL_DEV_ADMIN_PASSWORD || crewPassword === LOCAL_DEV_CREW_PASSWORD;
-    if (process.env.NODE_ENV === 'production' && usedDefaultPasswords) {
+    seededDefaultAdminPassword = adminPassword === LOCAL_DEV_ADMIN_PASSWORD;
+    seededDefaultCrewPassword = crewPassword === LOCAL_DEV_CREW_PASSWORD;
+    if (process.env.NODE_ENV === 'production' && (seededDefaultAdminPassword || seededDefaultCrewPassword)) {
       throw new Error(
         'Refusing to create default local passwords when NODE_ENV=production. Set ADMIN_PASSWORD and CREW_PASSWORD.',
       );
@@ -95,7 +109,61 @@ export function seedUsersAndVehicle(db: DatabaseSync): { usedDefaultPasswords: b
       createdAt,
     );
   }
-  return { usedDefaultPasswords };
+  return { seededDefaultAdminPassword, seededDefaultCrewPassword };
+}
+
+export function isLoopbackHost(host: string): boolean {
+  const normalized = host.trim().toLowerCase().replace(/^\[|\]$/g, '');
+  return normalized === '127.0.0.1' || normalized === '::1' || normalized === 'localhost' || normalized.startsWith('127.');
+}
+
+export function defaultPasswordsStillInUse(db: DatabaseSync): { admin: boolean; crew: boolean } {
+  const admin = findUserByUsername(db, LOCAL_DEV_ADMIN_USERNAME);
+  const crew = findUserByUsername(db, LOCAL_DEV_CREW_USERNAME);
+  return {
+    admin: Boolean(admin && verifyPassword(LOCAL_DEV_ADMIN_PASSWORD, admin.passwordHash)),
+    crew: Boolean(crew && verifyPassword(LOCAL_DEV_CREW_PASSWORD, crew.passwordHash)),
+  };
+}
+
+export function assertBindAllowed(db: DatabaseSync, host: string): void {
+  if (isLoopbackHost(host)) return;
+  const inUse = defaultPasswordsStillInUse(db);
+  if (inUse.admin || inUse.crew) {
+    throw new Error(
+      `Refusing to listen on ${host} while a default password is still in use. Change both passwords, then set HOST. ${DEV_ONLY_PASSWORD_LABEL}`,
+    );
+  }
+}
+
+export function startupLogLines(input: {
+  host: string;
+  port: number;
+  dbPath: string;
+  seededDefaultAdminPassword: boolean;
+  seededDefaultCrewPassword: boolean;
+}): string[] {
+  const lines = [
+    `Race Team Maintenance API listening on http://${input.host}:${input.port}`,
+    `SQLite database: ${input.dbPath}`,
+    'Phase 1 foundation. Offline sync, cross-device sync, and a native iPhone app are not implemented.',
+  ];
+  if (input.seededDefaultAdminPassword || input.seededDefaultCrewPassword) {
+    lines.push(DEV_ONLY_PASSWORD_LABEL);
+    if (input.seededDefaultAdminPassword) {
+      lines.push(`  administrator  ${LOCAL_DEV_ADMIN_USERNAME} / ${LOCAL_DEV_ADMIN_PASSWORD}`);
+    }
+    if (input.seededDefaultCrewPassword) {
+      lines.push(`  race-day       ${LOCAL_DEV_CREW_USERNAME} / ${LOCAL_DEV_CREW_PASSWORD}`);
+    }
+    lines.push('Set ADMIN_PASSWORD and CREW_PASSWORD before first launch to choose different passwords.');
+    lines.push('NODE_ENV=production refuses these defaults.');
+  }
+  return lines;
+}
+
+export function resetLoginRateLimit(): void {
+  loginFailures.clear();
 }
 
 function insertUser(
@@ -159,11 +227,22 @@ export function createUser(
   }
   const createdAt = nowIso();
   const id = newId();
+  const username = input.username.trim();
+  const displayName = input.displayName.trim();
   try {
-    db.prepare(
-      `INSERT INTO users (id, username, display_name, role, password_hash, active, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
-    ).run(id, input.username.trim(), input.displayName.trim(), input.role, hashPassword(input.password), createdAt, createdAt);
+    withTransaction(db, () => {
+      db.prepare(
+        `INSERT INTO users (id, username, display_name, role, password_hash, active, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, 1, ?, ?)`,
+      ).run(id, username, displayName, input.role, hashPassword(input.password), createdAt, createdAt);
+      audit(db, {
+        actorUserId: actor.id,
+        action: 'user_created',
+        entityType: 'user',
+        entityId: id,
+        after: { username, displayName, role: input.role },
+      });
+    });
   } catch (error) {
     const message = error instanceof Error ? error.message : '';
     if (/UNIQUE/.test(message)) throw new AppError(409, 'That username already exists.', 'conflict');
@@ -174,19 +253,82 @@ export function createUser(
   return created;
 }
 
-export function login(db: DatabaseSync, username: string, password: string): { token: string; user: User; expiresAt: string } {
+export function changePassword(db: DatabaseSync, actor: User, currentPassword: string, newPassword: string): void {
+  if (newPassword.length < 8) throw new AppError(400, 'Password must be at least 8 characters.', 'validation');
+  const found = findUserByUsername(db, actor.username);
+  if (!found || !found.active || !verifyPassword(currentPassword, found.passwordHash)) {
+    throw new AppError(401, 'Current password is incorrect.', 'unauthorized');
+  }
+  writePassword(db, found.id, found.username, newPassword, found.id, 'session');
+}
+
+export function setPasswordAsOperator(db: DatabaseSync, username: string, newPassword: string): void {
+  if (newPassword.length < 8) throw new AppError(400, 'Password must be at least 8 characters.', 'validation');
   const found = findUserByUsername(db, username.trim());
+  if (!found) throw new AppError(404, 'User was not found.', 'not_found');
+  writePassword(db, found.id, found.username, newPassword, found.id, 'cli');
+}
+
+function writePassword(
+  db: DatabaseSync,
+  userId: string,
+  username: string,
+  newPassword: string,
+  actorUserId: string,
+  via: 'session' | 'cli',
+): void {
+  const updatedAt = nowIso();
+  withTransaction(db, () => {
+    const result = db.prepare('UPDATE users SET password_hash = ?, updated_at = ? WHERE id = ?').run(
+      hashPassword(newPassword),
+      updatedAt,
+      userId,
+    );
+    if (Number(result.changes) !== 1) throw new AppError(409, 'Password was not changed.', 'conflict');
+    audit(db, {
+      actorUserId,
+      action: 'password_changed',
+      entityType: 'user',
+      entityId: userId,
+      after: { username, via },
+    });
+  });
+}
+
+export function login(db: DatabaseSync, username: string, password: string): { token: string; user: User; expiresAt: string } {
+  const key = username.trim();
+  assertWithinLoginLimit(key);
+  const found = findUserByUsername(db, key);
   if (!found || !found.active || !verifyPassword(password, found.passwordHash)) {
+    audit(db, {
+      actorUserId: found?.id ?? null,
+      action: 'login_failed',
+      entityType: 'user',
+      entityId: found?.id ?? 'unknown',
+      after: { username: key },
+    });
+    recordLoginFailure(key);
     throw new AppError(401, 'Username or password is incorrect.', 'unauthorized');
   }
   const token = randomBytes(32).toString('base64url');
   const tokenHash = hashToken(token);
   const createdAt = nowIso();
   const expiresAt = new Date(Date.now() + SESSION_MS).toISOString();
-  db.prepare(
-    `INSERT INTO auth_sessions (id, user_id, token_hash, created_at, expires_at, revoked_at)
-     VALUES (?, ?, ?, ?, ?, NULL)`,
-  ).run(newId(), found.id, tokenHash, createdAt, expiresAt);
+  const sessionId = newId();
+  withTransaction(db, () => {
+    db.prepare(
+      `INSERT INTO auth_sessions (id, user_id, token_hash, created_at, expires_at, revoked_at)
+       VALUES (?, ?, ?, ?, ?, NULL)`,
+    ).run(sessionId, found.id, tokenHash, createdAt, expiresAt);
+    audit(db, {
+      actorUserId: found.id,
+      action: 'login',
+      entityType: 'auth_session',
+      entityId: sessionId,
+      after: { username: found.username },
+    });
+  });
+  clearLoginFailures(key);
   return {
     token,
     expiresAt,
@@ -195,7 +337,59 @@ export function login(db: DatabaseSync, username: string, password: string): { t
 }
 
 export function logout(db: DatabaseSync, token: string): void {
-  db.prepare(`UPDATE auth_sessions SET revoked_at = ? WHERE token_hash = ? AND revoked_at IS NULL`).run(nowIso(), hashToken(token));
+  const tokenHash = hashToken(token);
+  const session = one<{ id: string; user_id: string }>(
+    db,
+    'SELECT id, user_id FROM auth_sessions WHERE token_hash = ? AND revoked_at IS NULL',
+    [tokenHash],
+  );
+  if (!session) return;
+  const revokedAt = nowIso();
+  withTransaction(db, () => {
+    db.prepare('UPDATE auth_sessions SET revoked_at = ? WHERE id = ? AND revoked_at IS NULL').run(revokedAt, session.id);
+    audit(db, {
+      actorUserId: session.user_id,
+      action: 'logout',
+      entityType: 'auth_session',
+      entityId: session.id,
+    });
+  });
+}
+
+function assertWithinLoginLimit(username: string): void {
+  const entry = currentLoginFailures(username);
+  if (entry && entry.count >= LOGIN_MAX_FAILURES) {
+    throw new AppError(429, 'Too many sign-in attempts. Try again later.', 'rate_limited');
+  }
+}
+
+function recordLoginFailure(username: string): void {
+  const key = loginKey(username);
+  const entry = currentLoginFailures(username);
+  if (!entry) {
+    loginFailures.set(key, { count: 1, resetAt: Date.now() + LOGIN_WINDOW_MS });
+    return;
+  }
+  entry.count += 1;
+}
+
+function clearLoginFailures(username: string): void {
+  loginFailures.delete(loginKey(username));
+}
+
+function currentLoginFailures(username: string): { count: number; resetAt: number } | undefined {
+  const key = loginKey(username);
+  const entry = loginFailures.get(key);
+  if (!entry) return undefined;
+  if (Date.now() >= entry.resetAt) {
+    loginFailures.delete(key);
+    return undefined;
+  }
+  return entry;
+}
+
+function loginKey(username: string): string {
+  return username.trim().toLowerCase();
 }
 
 export function userFromToken(db: DatabaseSync, token: string | null): User | null {

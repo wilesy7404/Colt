@@ -1,10 +1,19 @@
 import assert from 'node:assert/strict';
+import { randomUUID } from 'node:crypto';
 import { test } from 'node:test';
-import { restoreSnapshot } from '../src/backup.ts';
+import { BACKUP_TABLES, checksumTables, exportSnapshot, restoreSnapshot, type Snapshot } from '../src/backup.ts';
 import { AppError } from '../src/errors.ts';
-import { createPart } from '../src/inventory.ts';
-import { api, actor, login, studFixture, tempDb, withServer } from './helpers.ts';
-import { exportSnapshot } from '../src/backup.ts';
+import { createUser, login as loginUser, LOCAL_DEV_CREW_PASSWORD } from '../src/auth.ts';
+import { createKit, createPart, openKit } from '../src/inventory.ts';
+import {
+  commitTransaction,
+  createDraftTransaction,
+  createEvent,
+  recordInspection,
+  recordSession,
+  reportDefect,
+} from '../src/maintenance.ts';
+import { api, actor, login, studFixture, studPayload, tempDb, withServer } from './helpers.ts';
 
 test('restore puts back the same records and a bad checksum changes nothing', () => {
   const db = tempDb();
@@ -86,3 +95,196 @@ test('the HTTP restore path is administrator-only and round-trips', async () => 
     assert.equal(vehicles.body.vehicles[0].lapsTotal, null);
   });
 });
+
+test('export and restore round-trip every table except the new restore audit row', () => {
+  const db = tempDb();
+  const admin = actor(db, 'admin');
+  const fixture = studFixture(db, 'full');
+  createUser(db, admin, {
+    username: 'extra',
+    displayName: 'Extra admin',
+    role: 'administrator',
+    password: 'long-enough',
+  });
+  loginUser(db, 'admin', 'local-dev-admin');
+  const first = createDraftTransaction(db, admin, {
+    idempotencyKey: 'full-install',
+    vehicleId: fixture.vehicle.id,
+    ruleId: fixture.rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(fixture.kit, admin.id),
+  });
+  commitTransaction(db, admin, first.id);
+  const secondKit = openKit(
+    db,
+    admin,
+    createKit(db, admin, { partId: fixture.part.id, humanLabel: 'SET-full-2', location: 'cabinet', notes: '' }).id,
+  );
+  const replacement = createDraftTransaction(db, admin, {
+    idempotencyKey: 'full-replace',
+    vehicleId: fixture.vehicle.id,
+    ruleId: fixture.rule.id,
+    kind: 'replacement',
+    payload: {
+      ...studPayload(secondKit, admin.id, { lapReading: 5, engineHoursReading: 1 }),
+      studs: secondKit.components.map((component, index) => ({
+        index: index + 1,
+        componentId: component.id,
+        oldComponentId: fixture.kit.components[index].id,
+      })),
+      removalReason: 'Round trip',
+      disposition: 'retained_as_evidence',
+    },
+  });
+  commitTransaction(db, admin, replacement.id);
+  createEvent(db, admin, {
+    vehicleId: fixture.vehicle.id,
+    name: 'Test event',
+    series: '',
+    location: '',
+    startsOn: null,
+    endsOn: null,
+    expectedLaps: null,
+    expectedEngineHours: null,
+    notes: '',
+  });
+  recordSession(db, admin, {
+    vehicleId: fixture.vehicle.id,
+    eventId: null,
+    name: 'Session',
+    lapsCompleted: 3,
+    engineHoursAdded: 0.2,
+    meterNote: '',
+    notes: '',
+  });
+  recordInspection(db, admin, {
+    vehicleId: fixture.vehicle.id,
+    eventId: null,
+    sessionId: null,
+    ruleId: fixture.rule.id,
+    componentId: null,
+    inspectionKind: 'pre_session',
+    result: 'pass',
+    measurements: {},
+    notes: '',
+    performedAt: new Date().toISOString(),
+    maintenanceTransactionId: null,
+  });
+  reportDefect(db, admin, {
+    vehicleId: fixture.vehicle.id,
+    componentId: null,
+    locationNote: 'RF',
+    severity: 'needs_review',
+    notes: 'Noted during the round trip.',
+  });
+  const before = exportSnapshot(db);
+  for (const name of BACKUP_TABLES) {
+    assert.ok(before.tables[name].length > 0, `${name} should contain a row`);
+  }
+  loginUser(db, 'crew', LOCAL_DEV_CREW_PASSWORD);
+  db.prepare('UPDATE vehicles SET name = ? WHERE id = ?').run('Mutated after export', fixture.vehicle.id);
+  restoreSnapshot(db, before, { actorUserId: admin.id, note: 'round trip' });
+  const after = exportSnapshot(db);
+  for (const name of BACKUP_TABLES) {
+    if (name === 'audit_records') {
+      const extra = after.tables.audit_records.filter((row) => row.action === 'backup_restored');
+      assert.equal(extra.length, 1);
+      assert.deepEqual(tableRows(after, name).filter((row) => !row.includes('"backup_restored"')), tableRows(before, name));
+      continue;
+    }
+    assert.deepEqual(tableRows(after, name), tableRows(before, name), name);
+  }
+  const restoredName = db.prepare('SELECT name FROM vehicles WHERE id = ?').get(fixture.vehicle.id) as { name: string };
+  assert.equal(restoredName.name, '350Z');
+  db.close();
+});
+
+test('a restore audit can name an administrator who is not in the backup', () => {
+  const db = tempDb();
+  const admin = actor(db, 'admin');
+  studFixture(db, 'actor');
+  const snapshot = exportSnapshot(db);
+  const missingActor = randomUUID();
+  restoreSnapshot(db, snapshot, { actorUserId: missingActor, note: 'actor not in snapshot' });
+  const row = db.prepare(
+    `SELECT actor_user_id, after_json FROM audit_records WHERE action = 'backup_restored'`,
+  ).get() as { actor_user_id: string | null; after_json: string };
+  assert.equal(row.actor_user_id, null);
+  assert.equal(JSON.parse(row.after_json).restoringActorId, missingActor);
+  assert.equal(db.prepare('PRAGMA foreign_key_check').all().length, 0);
+  assert.equal(admin.id === missingActor, false);
+  db.close();
+});
+
+test('a failed restore leaves the current database unchanged', async () => {
+  const db = tempDb();
+  const admin = actor(db, 'admin');
+  const fixture = studFixture(db, 'reject');
+  const draft = createDraftTransaction(db, admin, {
+    idempotencyKey: 'reject-install',
+    vehicleId: fixture.vehicle.id,
+    ruleId: fixture.rule.id,
+    kind: 'initial_installation',
+    payload: studPayload(fixture.kit, admin.id),
+  });
+  commitTransaction(db, admin, draft.id);
+  const snapshot = exportSnapshot(db);
+  db.prepare('UPDATE vehicles SET name = ? WHERE id = ?').run('Keep me', fixture.vehicle.id);
+  const marker = () => (db.prepare('SELECT name FROM vehicles WHERE id = ?').get(fixture.vehicle.id) as { name: string }).name;
+  const baselineCount = () => (db.prepare('SELECT COUNT(*) AS c FROM service_baselines').get() as { c: number }).c;
+  const baselinesBefore = baselineCount();
+
+  const integrity = structuredClone(snapshot);
+  integrity.tables.service_baselines.push({
+    id: 'baseline-without-transaction',
+    rule_id: fixture.rule.id,
+    vehicle_id: fixture.vehicle.id,
+    position: 'RF',
+    baseline_laps: 0,
+    baseline_engine_hours: 0,
+    baseline_date: new Date().toISOString(),
+    established_by_transaction_id: 'missing-transaction',
+    created_at: new Date().toISOString(),
+  });
+  integrity.checksum = checksumTables(integrity.tables);
+  assert.throws(() => restoreSnapshot(db, integrity, { actorUserId: admin.id, note: 'integrity' }), (error: unknown) => {
+    assert.ok(error instanceof AppError);
+    assert.equal(error.code, 'backup_integrity');
+    return true;
+  });
+  assert.equal(marker(), 'Keep me');
+  assert.equal(baselineCount(), baselinesBefore);
+
+  const missing = structuredClone(snapshot);
+  delete (missing.tables as Partial<Snapshot['tables']>).events;
+  assert.throws(() => restoreSnapshot(db, missing, { actorUserId: admin.id, note: 'missing' }), /missing table events/);
+  assert.equal(marker(), 'Keep me');
+
+  const wrongVersion = structuredClone(snapshot);
+  wrongVersion.schemaVersion = '999';
+  assert.throws(() => restoreSnapshot(db, wrongVersion, { actorUserId: admin.id, note: 'version' }), /schema 999/);
+  assert.equal(marker(), 'Keep me');
+
+  assert.throws(() => restoreSnapshot(db, JSON.parse('{}'), { actorUserId: admin.id, note: 'malformed' }), /not recognized/);
+  assert.equal(marker(), 'Keep me');
+  assert.equal(baselineCount(), baselinesBefore);
+  db.close();
+
+  await withServer(async ({ base }) => {
+    const adminToken = await login(base, 'admin');
+    const response = await fetch(`${base}/api/admin/restore`, {
+      method: 'POST',
+      headers: { authorization: `Bearer ${adminToken}`, 'content-type': 'application/json' },
+      body: '{',
+    });
+    assert.equal(response.status, 400);
+    const vehicles = await api(base, adminToken, 'GET', '/api/vehicles');
+    assert.equal(vehicles.body.vehicles[0].name, '350Z');
+  });
+});
+
+function tableRows(snapshot: Snapshot, name: (typeof BACKUP_TABLES)[number]): string[] {
+  return snapshot.tables[name]
+    .map((row) => JSON.stringify(Object.fromEntries(Object.entries(row).sort(([a], [b]) => a.localeCompare(b)))))
+    .sort();
+}

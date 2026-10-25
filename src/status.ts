@@ -86,6 +86,8 @@ export function combineStatus(input: {
 export type AssessmentItem = {
   ruleId: string;
   name: string;
+  corner: 'LF' | 'RF' | 'LR' | 'RR' | null;
+  kitId: string | null;
   safetyCritical: boolean;
   illustrativeDraft: boolean;
   ruleStatus: string;
@@ -95,11 +97,26 @@ export type AssessmentItem = {
   label: string | null;
 };
 
+const STATUS_RANK: Record<OverallStatus, number> = {
+  failed_inspection: 6,
+  overdue: 5,
+  due: 4,
+  unknown: 3,
+  approaching: 2,
+  not_due: 1,
+};
+
+export function worstStatus(statuses: OverallStatus[]): OverallStatus {
+  if (statuses.length === 0) return 'unknown';
+  return statuses.reduce((worst, status) => (STATUS_RANK[status] > STATUS_RANK[worst] ? status : worst));
+}
+
 export function summarizeReadiness(input: {
   items: AssessmentItem[];
   openCriticalDefects: number;
 }): {
   state: 'blocked' | 'no_known_blockers';
+  status: OverallStatus;
   blocksReady: boolean;
   reasons: string[];
   notes: string[];
@@ -130,6 +147,7 @@ export function summarizeReadiness(input: {
   const blocksReady = reasons.length > 0;
   return {
     state: blocksReady ? 'blocked' : 'no_known_blockers',
+    status: worstStatus(input.items.map((item) => item.status)),
     blocksReady,
     reasons,
     notes,

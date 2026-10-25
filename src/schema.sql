@@ -116,6 +116,7 @@ CREATE TABLE maintenance_transactions (
   kind TEXT NOT NULL CHECK (kind IN ('initial_installation', 'replacement', 'inspection_only')),
   status TEXT NOT NULL CHECK (status IN ('draft', 'committed', 'aborted')),
   payload_json TEXT NOT NULL,
+  recorded_signoffs_json TEXT NOT NULL DEFAULT '[]',
   validation_error TEXT,
   created_by_user_id TEXT NOT NULL REFERENCES users(id),
   created_at TEXT NOT NULL,
@@ -188,6 +189,11 @@ CREATE TABLE installations (
   maintenance_transaction_id TEXT NOT NULL REFERENCES maintenance_transactions(id),
   created_at TEXT NOT NULL
 );
+
+-- One active component per vehicle position. A second stud set at the same corner cannot stay active.
+CREATE UNIQUE INDEX idx_installations_one_active_per_position
+ON installations(vehicle_id, position)
+WHERE status = 'active';
 
 CREATE TABLE removals (
   id TEXT PRIMARY KEY,
@@ -285,4 +291,4 @@ CREATE INDEX idx_baselines_rule_vehicle ON service_baselines(rule_id, vehicle_id
 CREATE INDEX idx_audit_entity ON audit_records(entity_type, entity_id);
 CREATE INDEX idx_inspections_rule ON inspections(rule_id, vehicle_id);
 
-INSERT INTO schema_meta (key, value) VALUES ('schema_version', '1');
+INSERT INTO schema_meta (key, value) VALUES ('schema_version', '2');

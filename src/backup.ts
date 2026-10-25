@@ -111,18 +111,26 @@ export function restoreSnapshot(
         for (const row of rows) insertRow(db, name, row);
       }
       createTriggers(db);
+      const actorPresent = actor.actorUserId
+        ? one(db, 'SELECT id FROM users WHERE id = ?', [actor.actorUserId])
+        : undefined;
+      audit(db, {
+        actorUserId: actorPresent ? actor.actorUserId : null,
+        action: 'backup_restored',
+        entityType: 'database',
+        entityId: 'schema',
+        after: {
+          schemaVersion: snapshot.schemaVersion,
+          note: actor.note,
+          counts,
+          restoringActorId: actor.actorUserId,
+        },
+      });
       assertIntegrity(db);
     });
   } finally {
     db.exec('PRAGMA foreign_keys = ON');
   }
-  audit(db, {
-    actorUserId: actor.actorUserId,
-    action: 'backup_restored',
-    entityType: 'database',
-    entityId: 'schema',
-    after: { schemaVersion: snapshot.schemaVersion, note: actor.note, counts },
-  });
   return { restoredCounts: counts };
 }
 

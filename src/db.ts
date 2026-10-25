@@ -2,7 +2,7 @@ import fs from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
 import { AppError } from './errors.ts';
 
-export const SCHEMA_VERSION = '1';
+export const SCHEMA_VERSION = '2';
 
 export const TRIGGER_NAMES = [
   'components_no_delete',
@@ -119,6 +119,9 @@ export function rethrowSqlite(error: unknown): never {
   }
   if (/cannot be deleted|append-only|are immutable/i.test(message)) {
     throw new AppError(409, message, 'append_only');
+  }
+  if (/idx_installations_one_active_per_position/i.test(message)) {
+    throw new AppError(409, 'This corner already has an active stud set.', 'conflict');
   }
   if (/UNIQUE constraint failed/i.test(message)) {
     throw new AppError(409, 'A record with that identity already exists.', 'conflict');

@@ -59,6 +59,8 @@ export type StudLine = {
   oldComponentId?: string;
 };
 
+export type SignoffInput = string | { label: string; userId: string; signedAt?: string };
+
 export type StudWorkPayload = {
   kitId: string;
   wheel: 'LF' | 'RF' | 'LR' | 'RR';
@@ -67,13 +69,20 @@ export type StudWorkPayload = {
   engineHoursReading: number | null;
   performedAt: string;
   measurements: Record<string, number | string>;
-  signoffs: string[];
+  signoffs: SignoffInput[];
   technicianUserId: string;
   notes: string;
   removalReason?: string;
   disposition?: string;
   failureEvidenceNotes?: string;
 };
+
+const commitTestHooks = new Map<string, (db: DatabaseSync) => void>();
+
+export function setCommitTestHook(transactionId: string, hook: ((db: DatabaseSync) => void) | null): void {
+  if (hook) commitTestHooks.set(transactionId, hook);
+  else commitTestHooks.delete(transactionId);
+}
 
 type RuleWrite = {
   name: string;
@@ -144,46 +153,53 @@ export function createRule(db: DatabaseSync, actor: User, input: RuleWrite) {
   const id = newId();
   const createdAt = nowIso();
   try {
-    db.prepare(
-      `INSERT INTO maintenance_rules (
-        id, name, part_id, category, action, lap_interval, engine_hour_interval, calendar_interval_days,
-        warning_threshold_laps, warning_threshold_hours, warning_threshold_days,
-        critical_threshold_laps, critical_threshold_hours, critical_threshold_days,
-        required_measurements_json, required_signoffs_json, procedure_source, procedure_revision,
-        safety_critical, rule_status, illustrative_draft, created_by_user_id, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      id,
-      input.name,
-      input.partId,
-      input.category,
-      input.action,
-      input.lapInterval,
-      input.engineHourInterval,
-      input.calendarIntervalDays,
-      input.warningThresholdLaps,
-      input.warningThresholdHours,
-      input.warningThresholdDays,
-      input.criticalThresholdLaps,
-      input.criticalThresholdHours,
-      input.criticalThresholdDays,
-      JSON.stringify(input.requiredMeasurements),
-      JSON.stringify(input.requiredSignoffs),
-      input.procedureSource,
-      input.procedureRevision,
-      input.safetyCritical ? 1 : 0,
-      input.ruleStatus,
-      input.illustrativeDraft ? 1 : 0,
-      actor.id,
-      createdAt,
-      createdAt,
-    );
+    withTransaction(db, () => {
+      db.prepare(
+        `INSERT INTO maintenance_rules (
+          id, name, part_id, category, action, lap_interval, engine_hour_interval, calendar_interval_days,
+          warning_threshold_laps, warning_threshold_hours, warning_threshold_days,
+          critical_threshold_laps, critical_threshold_hours, critical_threshold_days,
+          required_measurements_json, required_signoffs_json, procedure_source, procedure_revision,
+          safety_critical, rule_status, illustrative_draft, created_by_user_id, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
+        id,
+        input.name,
+        input.partId,
+        input.category,
+        input.action,
+        input.lapInterval,
+        input.engineHourInterval,
+        input.calendarIntervalDays,
+        input.warningThresholdLaps,
+        input.warningThresholdHours,
+        input.warningThresholdDays,
+        input.criticalThresholdLaps,
+        input.criticalThresholdHours,
+        input.criticalThresholdDays,
+        JSON.stringify(input.requiredMeasurements),
+        JSON.stringify(input.requiredSignoffs),
+        input.procedureSource,
+        input.procedureRevision,
+        input.safetyCritical ? 1 : 0,
+        input.ruleStatus,
+        input.illustrativeDraft ? 1 : 0,
+        actor.id,
+        createdAt,
+        createdAt,
+      );
+      audit(db, {
+        actorUserId: actor.id,
+        action: 'rule_created',
+        entityType: 'maintenance_rule',
+        entityId: id,
+        after: mapRule(getRule(db, id)),
+      });
+    });
   } catch (error) {
     rethrowSqlite(error);
   }
-  const rule = getRule(db, id);
-  audit(db, { actorUserId: actor.id, action: 'rule_created', entityType: 'maintenance_rule', entityId: id, after: mapRule(rule) });
-  return mapRule(rule);
+  return mapRule(getRule(db, id));
 }
 
 export function updateRule(db: DatabaseSync, actor: User, id: string, input: RuleWrite) {
@@ -192,51 +208,52 @@ export function updateRule(db: DatabaseSync, actor: User, id: string, input: Rul
   validateRuleWrite(db, input);
   const updatedAt = nowIso();
   try {
-    db.prepare(
-      `UPDATE maintenance_rules SET
-        name = ?, part_id = ?, category = ?, action = ?, lap_interval = ?, engine_hour_interval = ?,
-        calendar_interval_days = ?, warning_threshold_laps = ?, warning_threshold_hours = ?, warning_threshold_days = ?,
-        critical_threshold_laps = ?, critical_threshold_hours = ?, critical_threshold_days = ?,
-        required_measurements_json = ?, required_signoffs_json = ?, procedure_source = ?, procedure_revision = ?,
-        safety_critical = ?, rule_status = ?, illustrative_draft = ?, updated_at = ?
-       WHERE id = ?`,
-    ).run(
-      input.name,
-      input.partId,
-      input.category,
-      input.action,
-      input.lapInterval,
-      input.engineHourInterval,
-      input.calendarIntervalDays,
-      input.warningThresholdLaps,
-      input.warningThresholdHours,
-      input.warningThresholdDays,
-      input.criticalThresholdLaps,
-      input.criticalThresholdHours,
-      input.criticalThresholdDays,
-      JSON.stringify(input.requiredMeasurements),
-      JSON.stringify(input.requiredSignoffs),
-      input.procedureSource,
-      input.procedureRevision,
-      input.safetyCritical ? 1 : 0,
-      input.ruleStatus,
-      input.illustrativeDraft ? 1 : 0,
-      updatedAt,
-      id,
-    );
+    withTransaction(db, () => {
+      db.prepare(
+        `UPDATE maintenance_rules SET
+          name = ?, part_id = ?, category = ?, action = ?, lap_interval = ?, engine_hour_interval = ?,
+          calendar_interval_days = ?, warning_threshold_laps = ?, warning_threshold_hours = ?, warning_threshold_days = ?,
+          critical_threshold_laps = ?, critical_threshold_hours = ?, critical_threshold_days = ?,
+          required_measurements_json = ?, required_signoffs_json = ?, procedure_source = ?, procedure_revision = ?,
+          safety_critical = ?, rule_status = ?, illustrative_draft = ?, updated_at = ?
+         WHERE id = ?`,
+      ).run(
+        input.name,
+        input.partId,
+        input.category,
+        input.action,
+        input.lapInterval,
+        input.engineHourInterval,
+        input.calendarIntervalDays,
+        input.warningThresholdLaps,
+        input.warningThresholdHours,
+        input.warningThresholdDays,
+        input.criticalThresholdLaps,
+        input.criticalThresholdHours,
+        input.criticalThresholdDays,
+        JSON.stringify(input.requiredMeasurements),
+        JSON.stringify(input.requiredSignoffs),
+        input.procedureSource,
+        input.procedureRevision,
+        input.safetyCritical ? 1 : 0,
+        input.ruleStatus,
+        input.illustrativeDraft ? 1 : 0,
+        updatedAt,
+        id,
+      );
+      audit(db, {
+        actorUserId: actor.id,
+        action: 'rule_updated',
+        entityType: 'maintenance_rule',
+        entityId: id,
+        before: mapRule(before),
+        after: mapRule(getRule(db, id)),
+      });
+    });
   } catch (error) {
     rethrowSqlite(error);
   }
-  const after = getRule(db, id);
-  audit(db, {
-    actorUserId: actor.id,
-    action: 'rule_updated',
-    entityType: 'maintenance_rule',
-    entityId: id,
-    before: mapRule(before),
-    after: mapRule(after),
-  });
-  return mapRule(after);
+  return mapRule(getRule(db, id));
 }
 
 function validateRuleWrite(db: DatabaseSync, input: RuleWrite): void {
@@ -302,18 +319,20 @@ export function createDraftTransaction(
   }
   const id = newId();
   const createdAt = nowIso();
-  db.prepare(
-    `INSERT INTO maintenance_transactions (
-      id, idempotency_key, vehicle_id, rule_id, kind, status, payload_json, validation_error,
-      created_by_user_id, created_at, committed_at, committed_by_user_id
-    ) VALUES (?, ?, ?, ?, ?, 'draft', ?, NULL, ?, ?, NULL, NULL)`,
-  ).run(id, input.idempotencyKey, input.vehicleId, input.ruleId, input.kind, JSON.stringify(input.payload), actor.id, createdAt);
-  audit(db, {
-    actorUserId: actor.id,
-    action: 'transaction_drafted',
-    entityType: 'maintenance_transaction',
-    entityId: id,
-    after: { kind: input.kind, status: 'draft' },
+  withTransaction(db, () => {
+    db.prepare(
+      `INSERT INTO maintenance_transactions (
+        id, idempotency_key, vehicle_id, rule_id, kind, status, payload_json, validation_error,
+        created_by_user_id, created_at, committed_at, committed_by_user_id
+      ) VALUES (?, ?, ?, ?, ?, 'draft', ?, NULL, ?, ?, NULL, NULL)`,
+    ).run(id, input.idempotencyKey, input.vehicleId, input.ruleId, input.kind, JSON.stringify(input.payload), actor.id, createdAt);
+    audit(db, {
+      actorUserId: actor.id,
+      action: 'transaction_drafted',
+      entityType: 'maintenance_transaction',
+      entityId: id,
+      after: { kind: input.kind, status: 'draft' },
+    });
   });
   return getTransaction(db, id);
 }
@@ -329,6 +348,7 @@ export function getTransaction(db: DatabaseSync, id: string) {
     kind: String(row.kind),
     status: String(row.status),
     payload: parseJson(String(row.payload_json), null),
+    recordedSignoffs: parseJson<unknown[]>(String(row.recorded_signoffs_json ?? '[]'), []),
     validationError: row.validation_error ? String(row.validation_error) : null,
     createdByUserId: String(row.created_by_user_id),
     createdAt: String(row.created_at),
@@ -341,8 +361,10 @@ export function abortTransaction(db: DatabaseSync, actor: User, id: string) {
   const current = getTransaction(db, id);
   if (current.status === 'aborted') return current;
   if (current.status !== 'draft') throw new AppError(409, 'Only a draft transaction can be aborted.', 'conflict');
-  db.prepare(`UPDATE maintenance_transactions SET status = 'aborted', validation_error = NULL WHERE id = ?`).run(id);
-  audit(db, { actorUserId: actor.id, action: 'transaction_aborted', entityType: 'maintenance_transaction', entityId: id });
+  withTransaction(db, () => {
+    db.prepare(`UPDATE maintenance_transactions SET status = 'aborted', validation_error = NULL WHERE id = ?`).run(id);
+    audit(db, { actorUserId: actor.id, action: 'transaction_aborted', entityType: 'maintenance_transaction', entityId: id });
+  });
   return getTransaction(db, id);
 }
 
@@ -350,36 +372,47 @@ export function commitTransaction(db: DatabaseSync, actor: User, id: string) {
   const current = getTransaction(db, id);
   if (current.status === 'committed') return { transaction: current, alreadyCommitted: true };
   if (current.status !== 'draft') throw new AppError(409, 'Only a draft transaction can be committed.', 'conflict');
-  const rule = getRule(db, String(current.ruleId));
-  const validationError = validateCommit(db, current.kind, current.payload, rule, current.vehicleId);
-  if (validationError) {
-    db.prepare('UPDATE maintenance_transactions SET validation_error = ? WHERE id = ? AND status = ?').run(validationError, id, 'draft');
-    throw new AppError(422, validationError, 'incomplete_transaction');
-  }
   const countsBefore = effectCounts(db);
+  let validationMessage: string | null = null;
   try {
     withTransaction(db, () => {
-      const fresh = one<{ status: string }>(db, 'SELECT status FROM maintenance_transactions WHERE id = ?', [id]);
+      const fresh = one<{ status: string; kind: string; payload_json: string; rule_id: string | null; vehicle_id: string }>(
+        db,
+        'SELECT status, kind, payload_json, rule_id, vehicle_id FROM maintenance_transactions WHERE id = ?',
+        [id],
+      );
       if (!fresh) throw new AppError(404, 'Maintenance transaction was not found.', 'not_found');
       if (fresh.status === 'committed') return;
       if (fresh.status !== 'draft') throw new AppError(409, 'Only a draft transaction can be committed.', 'conflict');
+      const rule = getRule(db, String(fresh.rule_id));
+      const payload = parseJson(fresh.payload_json, null);
+      const reject = (message: string): never => {
+        validationMessage = message;
+        throw new AppError(422, message, 'incomplete_transaction');
+      };
+      const firstError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id);
+      if (firstError) reject(firstError);
+      commitTestHooks.get(id)?.(db);
+      const secondError = validateCommit(db, fresh.kind, payload, rule, fresh.vehicle_id);
+      if (secondError) reject(secondError);
       const committedAt = nowIso();
+      const signoffs = fresh.kind === 'inspection_only' ? [] : recordedSignoffs(db, payload, actor, committedAt);
       db.prepare(
         `UPDATE maintenance_transactions
-         SET status = 'committed', committed_at = ?, committed_by_user_id = ?, validation_error = NULL
-         WHERE id = ?`,
-      ).run(committedAt, actor.id, id);
-      if (current.kind === 'inspection_only') {
-        insertInspection(db, actor, inspectionFromPayload(current.payload, current.vehicleId, String(current.ruleId), id));
+         SET status = 'committed', committed_at = ?, committed_by_user_id = ?, validation_error = NULL, recorded_signoffs_json = ?
+         WHERE id = ? AND status = 'draft'`,
+      ).run(committedAt, actor.id, JSON.stringify(signoffs), id);
+      if (fresh.kind === 'inspection_only') {
+        insertInspection(db, actor, inspectionFromPayload(payload, fresh.vehicle_id, String(fresh.rule_id), id));
       } else {
-        applyStudWork(db, actor, id, current.kind, current.payload as StudWorkPayload, rule, current.vehicleId);
+        applyStudWork(db, actor, id, fresh.kind, payload as StudWorkPayload, rule, fresh.vehicle_id);
       }
       audit(db, {
         actorUserId: actor.id,
         action: 'transaction_committed',
         entityType: 'maintenance_transaction',
         entityId: id,
-        after: { kind: current.kind, status: 'committed' },
+        after: { kind: fresh.kind, status: 'committed' },
       });
     });
   } catch (error) {
@@ -387,7 +420,16 @@ export function commitTransaction(db: DatabaseSync, actor: User, id: string) {
     if (countsAfter.baselines !== countsBefore.baselines || countsAfter.consumes !== countsBefore.consumes) {
       throw new Error('Rolled-back transaction changed stock or baselines.');
     }
+    if (error instanceof AppError && error.status === 422) {
+      db.prepare('UPDATE maintenance_transactions SET validation_error = ? WHERE id = ? AND status = ?').run(
+        validationMessage ?? error.message,
+        id,
+        'draft',
+      );
+    }
     rethrowSqlite(error);
+  } finally {
+    commitTestHooks.delete(id);
   }
   return { transaction: getTransaction(db, id), alreadyCommitted: false };
 }
@@ -430,15 +472,18 @@ function validateStudPayload(db: DatabaseSync, kind: string, payload: unknown, r
   if (!WHEELS.has(String(body.wheel))) return 'wheel must be LF, RF, LR, or RR.';
   if (!Array.isArray(body.studs) || body.studs.length !== 5) return 'A sealed stud set transaction must include exactly five studs.';
   if (!isTimestamp(body.performedAt)) return 'performedAt is required and cannot be in the future.';
-  if (!Array.isArray(body.signoffs) || body.signoffs.length === 0 || body.signoffs.some((item) => typeof item !== 'string' || !item.trim())) {
-    return 'At least one sign-off is required. An empty or missing sign-off does not complete the transaction.';
-  }
-  const requiredSignoffs = parseJson<string[]>(rule.required_signoffs_json, []);
-  for (const required of requiredSignoffs) {
-    if (!body.signoffs.includes(required)) return `Missing required sign-off: ${required}.`;
-  }
+  const signoffError = signoffProblems(db, body.signoffs, rule);
+  if (signoffError) return signoffError;
   if (typeof body.technicianUserId !== 'string' || !findUserById(db, body.technicianUserId)?.active) {
     return 'technicianUserId must be an active user.';
+  }
+  const occupied = one(
+    db,
+    `SELECT id FROM installations WHERE vehicle_id = ? AND status = 'active' AND position LIKE ?`,
+    [vehicleId, `${String(body.wheel)}-%`],
+  );
+  if (kind === 'initial_installation' && occupied) {
+    return 'This corner already has an active stud set. Installing another set requires a replacement that records the removal in the same transaction.';
   }
   if (rule.lap_interval !== null && !isNonNegativeNumber(body.lapReading)) return 'A lap reading is required because the rule has a lap interval.';
   if (rule.engine_hour_interval !== null && !isNonNegativeNumber(body.engineHoursReading)) {
@@ -599,9 +644,12 @@ function applyStudWork(
   if (!remaining || remaining.c !== 0) {
     throw new AppError(422, 'The sealed set still has in-stock studs, so it was not consumed.', 'incomplete_transaction');
   }
-  db.prepare(
+  const consumed = db.prepare(
     `UPDATE kits SET status = 'consumed', consumed_at = ?, consumed_by_transaction_id = ?, updated_at = ? WHERE id = ? AND status = 'opened'`,
   ).run(payload.performedAt, transactionId, createdAt, payload.kitId);
+  if (Number(consumed.changes) !== 1) {
+    throw new AppError(422, 'The sealed set could not be consumed because it was no longer opened.', 'incomplete_transaction');
+  }
   const kit = getKit(db, payload.kitId);
   db.prepare(
     `INSERT INTO stock_movements (
@@ -654,7 +702,7 @@ export function recordInspection(
   }
   if (!isTimestamp(input.performedAt)) throw new AppError(400, 'performedAt is required and cannot be in the future.', 'validation');
   const before = effectCounts(db);
-  const id = insertInspection(db, actor, input);
+  const id = withTransaction(db, () => insertInspection(db, actor, input));
   const after = effectCounts(db);
   if (before.baselines !== after.baselines || before.consumes !== after.consumes) {
     throw new Error('Inspection changed stock or a service baseline.');
@@ -815,25 +863,27 @@ export function createEvent(
   if (!input.name.trim()) throw new AppError(400, 'Event name is required.', 'validation');
   const id = newId();
   const createdAt = nowIso();
-  db.prepare(
-    `INSERT INTO events (
-      id, vehicle_id, name, series, location, starts_on, ends_on, expected_laps, expected_engine_hours, notes, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-  ).run(
-    id,
-    input.vehicleId,
-    input.name.trim(),
-    input.series,
-    input.location,
-    input.startsOn,
-    input.endsOn,
-    input.expectedLaps,
-    input.expectedEngineHours,
-    input.notes,
-    createdAt,
-    createdAt,
-  );
-  audit(db, { actorUserId: actor.id, action: 'event_created', entityType: 'event', entityId: id });
+  withTransaction(db, () => {
+    db.prepare(
+      `INSERT INTO events (
+        id, vehicle_id, name, series, location, starts_on, ends_on, expected_laps, expected_engine_hours, notes, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    ).run(
+      id,
+      input.vehicleId,
+      input.name.trim(),
+      input.series,
+      input.location,
+      input.startsOn,
+      input.endsOn,
+      input.expectedLaps,
+      input.expectedEngineHours,
+      input.notes,
+      createdAt,
+      createdAt,
+    );
+    audit(db, { actorUserId: actor.id, action: 'event_created', entityType: 'event', entityId: id });
+  });
   return one(db, 'SELECT * FROM events WHERE id = ?', [id]);
 }
 
@@ -853,25 +903,49 @@ export function reportDefect(
   }
   const id = newId();
   const reportedAt = nowIso();
-  db.prepare(
-    `INSERT INTO defects (
-      id, vehicle_id, component_id, location_note, severity, notes, status, reported_by_user_id, reported_at, resolved_at, resolution_notes
-    ) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, NULL, '')`,
-  ).run(id, input.vehicleId, input.componentId, input.locationNote.trim(), input.severity, input.notes.trim(), actor.id, reportedAt);
-  audit(db, { actorUserId: actor.id, action: 'defect_reported', entityType: 'defect', entityId: id, after: { severity: input.severity } });
+  withTransaction(db, () => {
+    db.prepare(
+      `INSERT INTO defects (
+        id, vehicle_id, component_id, location_note, severity, notes, status, reported_by_user_id, reported_at, resolved_at, resolution_notes
+      ) VALUES (?, ?, ?, ?, ?, ?, 'open', ?, ?, NULL, '')`,
+    ).run(id, input.vehicleId, input.componentId, input.locationNote.trim(), input.severity, input.notes.trim(), actor.id, reportedAt);
+    audit(db, {
+      actorUserId: actor.id,
+      action: 'defect_reported',
+      entityType: 'defect',
+      entityId: id,
+      after: { severity: input.severity },
+    });
+  });
   return one(db, 'SELECT * FROM defects WHERE id = ?', [id]);
 }
 
 export function resolveDefect(db: DatabaseSync, actor: User, id: string, resolutionNotes: string) {
-  const defect = one<{ id: string; status: string }>(db, 'SELECT id, status FROM defects WHERE id = ?', [id]);
+  const defect = one<{ id: string; status: string; severity: string }>(
+    db,
+    'SELECT id, status, severity FROM defects WHERE id = ?',
+    [id],
+  );
   if (!defect) throw new AppError(404, 'Defect was not found.', 'not_found');
   if (!resolutionNotes.trim()) throw new AppError(400, 'resolutionNotes are required.', 'validation');
-  db.prepare(`UPDATE defects SET status = 'resolved', resolved_at = ?, resolution_notes = ? WHERE id = ?`).run(
-    nowIso(),
-    resolutionNotes.trim(),
-    id,
-  );
-  audit(db, { actorUserId: actor.id, action: 'defect_resolved', entityType: 'defect', entityId: id });
+  if (defect.severity === 'critical') {
+    assertAdmin(actor, 'Only an administrator can close a critical defect.');
+  }
+  const resolvedAt = nowIso();
+  withTransaction(db, () => {
+    db.prepare(`UPDATE defects SET status = 'resolved', resolved_at = ?, resolution_notes = ? WHERE id = ?`).run(
+      resolvedAt,
+      resolutionNotes.trim(),
+      id,
+    );
+    audit(db, {
+      actorUserId: actor.id,
+      action: 'defect_resolved',
+      entityType: 'defect',
+      entityId: id,
+      after: { severity: defect.severity, status: 'resolved' },
+    });
+  });
   return one(db, 'SELECT * FROM defects WHERE id = ?', [id]);
 }
 
@@ -929,12 +1003,14 @@ export function createVehicle(
   if (!input.name.trim()) throw new AppError(400, 'Vehicle name is required.', 'validation');
   const id = newId();
   const createdAt = nowIso();
-  db.prepare(
-    `INSERT INTO vehicles (
-      id, name, year, make, model, notes, laps_total, engine_hours_total, usage_tracking_started_at, created_at, updated_at
-    ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, ?, ?)`,
-  ).run(id, input.name.trim(), input.year, input.make, input.model, input.notes, createdAt, createdAt);
-  audit(db, { actorUserId: actor.id, action: 'vehicle_created', entityType: 'vehicle', entityId: id });
+  withTransaction(db, () => {
+    db.prepare(
+      `INSERT INTO vehicles (
+        id, name, year, make, model, notes, laps_total, engine_hours_total, usage_tracking_started_at, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, NULL, NULL, NULL, ?, ?)`,
+    ).run(id, input.name.trim(), input.year, input.make, input.model, input.notes, createdAt, createdAt);
+    audit(db, { actorUserId: actor.id, action: 'vehicle_created', entityType: 'vehicle', entityId: id });
+  });
   return mapVehicle(getVehicle(db, id));
 }
 
@@ -961,6 +1037,60 @@ export function listBaselines(db: DatabaseSync) {
 export function listAudit(db: DatabaseSync, actor: User) {
   assertAdmin(actor, 'Only an administrator can read the audit log.');
   return many(db, 'SELECT * FROM audit_records ORDER BY created_at');
+}
+
+function signoffProblems(db: DatabaseSync, signoffs: unknown, rule: RuleRow): string | null {
+  const parsed = parseSignoffs(signoffs);
+  if (typeof parsed === 'string') return parsed;
+  const requiredSignoffs = parseJson<string[]>(rule.required_signoffs_json, []);
+  for (const required of requiredSignoffs) {
+    if (!parsed.labels.includes(required)) return `Missing required sign-off: ${required}.`;
+  }
+  for (const entry of parsed.entries) {
+    if (!entry.userId) continue;
+    if (!findUserById(db, entry.userId)?.active) return 'An inactive user cannot sign off this work.';
+  }
+  return null;
+}
+
+function recordedSignoffs(
+  db: DatabaseSync,
+  payload: unknown,
+  actor: User,
+  signedAt: string,
+): { userId: string; label: string; signedAt: string }[] {
+  const body = asRecord(payload);
+  const parsed = parseSignoffs(body?.signoffs);
+  if (typeof parsed === 'string') throw new AppError(422, parsed, 'incomplete_transaction');
+  return parsed.entries.map((entry) => {
+    const userId = entry.userId ?? actor.id;
+    if (!findUserById(db, userId)?.active) {
+      throw new AppError(422, 'An inactive user cannot sign off this work.', 'incomplete_transaction');
+    }
+    return { userId, label: entry.label, signedAt };
+  });
+}
+
+function parseSignoffs(
+  signoffs: unknown,
+): { labels: string[]; entries: { label: string; userId: string | null }[] } | string {
+  if (!Array.isArray(signoffs) || signoffs.length === 0) {
+    return 'At least one sign-off is required. An empty or missing sign-off does not complete the transaction.';
+  }
+  const entries: { label: string; userId: string | null }[] = [];
+  for (const item of signoffs) {
+    if (typeof item === 'string') {
+      if (!item.trim()) return 'At least one sign-off is required. An empty or missing sign-off does not complete the transaction.';
+      entries.push({ label: item.trim(), userId: null });
+      continue;
+    }
+    const row = asRecord(item);
+    if (!row || typeof row.label !== 'string' || !row.label.trim() || typeof row.userId !== 'string' || !row.userId.trim()) {
+      return 'Each sign-off needs a label and the signer user id. The server records the time.';
+    }
+    entries.push({ label: row.label.trim(), userId: row.userId.trim() });
+  }
+  return { labels: entries.map((entry) => entry.label), entries };
 }
 
 function parseJson<T>(text: string, fallback: T): T {

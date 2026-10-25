@@ -1,4 +1,6 @@
-data/*.sqlite
-data/*.sqlite-wal
-data/*.sqlite-shm
+.env*
+*.db
+*.sqlite*
+backups/
+*.backup.json
 node_modules/

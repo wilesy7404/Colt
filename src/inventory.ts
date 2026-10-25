@@ -117,33 +117,40 @@ export function createPart(
   const createdAt = nowIso();
   const sealedSetSize = input.kitKind === 'sealed_stud_set' ? 5 : null;
   try {
-    db.prepare(
-      `INSERT INTO parts (
-        id, catalog_number, description, unit_of_measure, category, reorder_threshold, minimum_quantity,
-        desired_quantity, supplier_name, purchasing_notes, kit_kind, sealed_set_size, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-    ).run(
-      id,
-      input.catalogNumber,
-      input.description,
-      input.unitOfMeasure,
-      input.category,
-      input.reorderThreshold,
-      input.minimumQuantity,
-      input.desiredQuantity,
-      input.supplierName,
-      input.purchasingNotes,
-      input.kitKind,
-      sealedSetSize,
-      createdAt,
-      createdAt,
-    );
+    withTransaction(db, () => {
+      db.prepare(
+        `INSERT INTO parts (
+          id, catalog_number, description, unit_of_measure, category, reorder_threshold, minimum_quantity,
+          desired_quantity, supplier_name, purchasing_notes, kit_kind, sealed_set_size, created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      ).run(
+        id,
+        input.catalogNumber,
+        input.description,
+        input.unitOfMeasure,
+        input.category,
+        input.reorderThreshold,
+        input.minimumQuantity,
+        input.desiredQuantity,
+        input.supplierName,
+        input.purchasingNotes,
+        input.kitKind,
+        sealedSetSize,
+        createdAt,
+        createdAt,
+      );
+      audit(db, {
+        actorUserId: actor.id,
+        action: 'part_created',
+        entityType: 'part',
+        entityId: id,
+        after: mapPart(db, getPart(db, id)),
+      });
+    });
   } catch (error) {
     rethrowSqlite(error);
   }
-  const part = getPart(db, id);
-  audit(db, { actorUserId: actor.id, action: 'part_created', entityType: 'part', entityId: id, after: mapPart(db, part) });
-  return mapPart(db, part);
+  return mapPart(db, getPart(db, id));
 }
 
 export function listKits(db: DatabaseSync) {
